@@ -1,0 +1,257 @@
+---
+/**
+ * Season Recap — the team's first (and only) season: 2026-2027 BIOBUZZ.
+ * The season hasn't started yet, so every block is a clearly-marked slot
+ * that fills in as the season happens (see <Placeholder> wrappers).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Placeholder from '../components/Placeholder.astro';
+import Reveal from '../components/Reveal.astro';
+
+const timeline = [
+  {
+    date: 'TBD',
+    stage: 'Kickoff',
+    body: 'Game reveal day. Our read on the BIOBUZZ challenge and the first strategy decisions land here.',
+  },
+  {
+    date: 'TBD',
+    stage: 'Build season',
+    body: 'The robot takes shape. Design choices, prototypes, and what survived testing.',
+  },
+  {
+    date: 'TBD',
+    stage: 'Programming and testing',
+    body: 'Autonomous routines, driver practice, and the tuning that makes the machine dependable.',
+  },
+  {
+    date: 'TBD',
+    stage: 'First qualifier',
+    body: 'Our first matches as GNCE Onyx. Results and takeaways get logged here.',
+  },
+  {
+    date: 'TBD',
+    stage: 'League championship',
+    body: 'Where the season points. How far the robot and the team get.',
+  },
+  {
+    date: 'TBD',
+    stage: 'Season wrap',
+    body: 'The final tally: what worked, what broke, and what carries into next year.',
+  },
+];
+
+const matches = Array.from({ length: 5 }, () => ({
+  id: 'TBD',
+  alliance: 'TBD',
+  score: 'TBD',
+  result: 'TBD',
+}));
+---
+
+<BaseLayout
+  title="Season Recap"
+  description="GNCE Onyx's rookie season recap: the 2026-2027 BIOBUZZ season, presented by RTX, part of the FIRST CANOPY season. Build log, matches, and awards as they happen."
+>
+  <!-- PAGE HEADER -->
+  <header class="bp-grid bg-bg pt-36 pb-20 sm:pt-44">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal>
+        <p class="type-callout text-muted">
+          <span class="text-accent" aria-hidden="true">[</span>
+          Season 01 / 2026-2027
+          <span class="text-accent" aria-hidden="true">]</span>
+        </p>
+      </Reveal>
+
+      <Reveal variant="clip" delay={80}>
+        <h1 class="type-display mt-8 text-[clamp(2.75rem,9vw,8rem)]">Biobuzz</h1>
+      </Reveal>
+
+      <Reveal delay={160}>
+        <p class="type-callout mt-4 text-muted">
+          Presented by RTX / part of the FIRST CANOPY season
+        </p>
+      </Reveal>
+
+      <Reveal delay={240} class="mt-10 max-w-prose">
+        <p class="text-base/relaxed text-muted">
+          Our first FTC season, and the only one on the books. This page is
+          the running recap: the build log, every match, and whatever hardware
+          comes home with us. It fills in as the season happens.
+        </p>
+      </Reveal>
+    </div>
+  </header>
+
+  <!-- BUILD LOG -->
+  <section class="bg-bg py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Build log</h2>
+      </Reveal>
+
+      <Placeholder name="season-timeline" class="mt-14 p-6 sm:p-10">
+        <div class="ml-2 border-l hairline" data-reveal-group>
+          {
+            timeline.map((entry, i) => (
+              <Reveal class="relative pb-12 pl-8 last:pb-0">
+                <span
+                  class:list={[
+                    'absolute top-1.5 left-[-4.5px] h-2 w-2',
+                    i === 0 ? 'bg-accent' : 'bg-line',
+                  ]}
+                  aria-hidden="true"
+                ></span>
+                <p class="type-callout text-muted">
+                  {String(i + 1).padStart(2, '0')} / date {entry.date}
+                </p>
+                <h3 class="type-display mt-3 text-xl sm:text-2xl">
+                  {entry.stage}
+                </h3>
+                <p class="mt-3 max-w-prose text-base/relaxed text-muted">
+                  {entry.body}
+                </p>
+              </Reveal>
+            ))
+          }
+        </div>
+      </Placeholder>
+    </div>
+  </section>
+
+  <!-- MATCH LOG -->
+  <section class="border-y hairline bg-surface py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Match log</h2>
+      </Reveal>
+
+      <Placeholder name="season-match-log" class="mt-14 p-4 sm:p-6">
+        <div class="overflow-x-auto">
+          <div class="min-w-[34rem]" data-reveal-group>
+            <div
+              class="type-callout grid grid-cols-[auto_1fr_auto_auto] gap-x-8 border-b hairline pb-3 text-muted"
+            >
+              <span>Match</span>
+              <span>Alliance</span>
+              <span>Score</span>
+              <span>Result</span>
+            </div>
+            {
+              matches.map((m) => (
+                <Reveal class="grid grid-cols-[auto_1fr_auto_auto] items-baseline gap-x-8 border-b hairline py-3 font-mono text-sm">
+                  <span class="text-ink">{m.id}</span>
+                  <span class="text-muted">{m.alliance}</span>
+                  <span class="text-ink">{m.score}</span>
+                  <span class="text-muted">{m.result}</span>
+                </Reveal>
+              ))
+            }
+          </div>
+        </div>
+      </Placeholder>
+    </div>
+  </section>
+
+  <!-- AWARDS -->
+  <section class="bg-bg py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Awards</h2>
+      </Reveal>
+
+      <Reveal delay={80} class="mt-6 max-w-prose">
+        <p class="text-base/relaxed text-muted">
+          Anything the judges hand us this season gets logged here, next to
+          what it recognized.
+        </p>
+      </Reveal>
+
+      <Placeholder name="season-awards" class="mt-12 p-4 sm:p-6">
+        <div class="grid gap-4 sm:grid-cols-3" data-reveal-group>
+          {
+            Array.from({ length: 3 }).map(() => (
+              <Reveal class="h-full">
+                <article class="bp-corners flex h-full flex-col gap-4 bg-panel p-6">
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    class="text-muted"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="9" r="5.25"></circle>
+                    <path d="M8.5 13.5 7 21l5-2.5L17 21l-1.5-7.5"></path>
+                  </svg>
+                  <p class="type-callout text-ink">Award: TBD</p>
+                  <p class="text-sm/relaxed text-muted">
+                    Event, division, and what the award was for.
+                  </p>
+                </article>
+              </Reveal>
+            ))
+          }
+        </div>
+      </Placeholder>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="border-y hairline bg-surface py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Gallery</h2>
+      </Reveal>
+
+      <Placeholder name="season-gallery" class="mt-14 p-3 sm:p-4">
+        <div class="grid grid-cols-2 gap-3 md:grid-cols-3" data-reveal-group>
+          {
+            Array.from({ length: 6 }).map(() => (
+              <Reveal variant="scale">
+                <div class="bp-hatch bp-corners flex aspect-square items-center justify-center border hairline">
+                  <span class="type-callout text-muted">Photo: TBD</span>
+                </div>
+              </Reveal>
+            ))
+          }
+        </div>
+      </Placeholder>
+    </div>
+  </section>
+
+  <!-- DEBRIEF -->
+  <section class="bg-bg py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Debrief</h2>
+      </Reveal>
+
+      <div class="mt-14 grid gap-10 md:grid-cols-2">
+        <Reveal variant="left" class="h-full">
+          <Placeholder name="season-lessons" class="h-full p-6 sm:p-8">
+            <h3 class="type-display text-xl sm:text-2xl">What we learned</h3>
+            <p class="mt-6 text-base/relaxed text-muted">
+              The honest engineering retrospective goes here after the season:
+              which proven designs earned their keep, what we would build
+              differently, and what the rookies picked up from the veterans.
+            </p>
+          </Placeholder>
+        </Reveal>
+
+        <Reveal variant="right" class="h-full">
+          <Placeholder name="season-thanks" class="h-full p-6 sm:p-8">
+            <h3 class="type-display text-xl sm:text-2xl">Thank you</h3>
+            <p class="mt-6 text-base/relaxed text-muted">
+              Mentors, sponsors, families, and Weston High School. Everyone who
+              made the season possible gets named here at the end of it.
+            </p>
+          </Placeholder>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

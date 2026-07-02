@@ -18,9 +18,15 @@ This file is the source of truth for visual decisions. Read it (and
 3. **Motion is mechanical and earned.** Entrances use strong ease-out;
    interactive UI stays under 300ms; the gear hub is the only playful
    (springy) element. Everything respects `prefers-reduced-motion`.
-4. **Placeholders are loud.** Anything with Lorem Ipsum is wrapped in
-   `<Placeholder name="...">` so it's impossible to miss during the content
-   pass.
+4. **Placeholders are loud.** Blocks awaiting content are wrapped in
+   `<Placeholder name="...">`; inline unknowns use a `.stub` span. Both are
+   impossible to miss in the browser.
+5. **Eyebrow restraint.** `SectionLabel` callouts appear on at most a couple
+   of sections per page, and get an `index` only when the order itself is
+   content (e.g. the season timeline). Most sections open with a display
+   headline instead (see the `taste` skill's eyebrow rules).
+6. **No em-dashes in visible copy** (see the `taste` skill). Use periods,
+   commas, colons, or hyphens.
 
 ## Tokens (defined in `src/styles/global.css` `@theme`)
 
@@ -57,10 +63,10 @@ Tailwind maps these automatically: `bg-bg`, `bg-surface`, `bg-panel`,
 - `.bp-grid` — faint blueprint grid background (heroes, section bands).
 - `.bp-hatch` — diagonal hatching (image/frame placeholders, "unbuilt" areas).
 - `.bp-corners` — corner registration marks on panels and frames.
-- `SectionLabel` — `[ 01 / MISSION ]` callout with a trailing rule; every
-  major section starts with one and a two-digit index.
-- Mono metadata everywhere: `dwg no.`, `rev A`, `T+042D` style annotations
-  used sparingly as garnish.
+- `SectionLabel` — `[ THE ROBOT ]` callout with a trailing rule; used on at
+  most a couple of sections per page (see Principles 5).
+- Mono metadata as garnish only where it states something real (dates,
+  team numbers, match IDs); never decorative version stamps.
 
 ## Motion rules (from the emil-design-eng skill)
 
@@ -80,7 +86,7 @@ Tailwind maps these automatically: `bg-bg`, `bg-surface`, `bg-panel`,
 | `components/GearNav.astro` | Orbital gear hub navigation (bottom-right). Update `links` there when pages change. |
 | `components/Reveal.astro` | Scroll entrance wrapper. `variant`: `up` (default) / `left` / `right` / `scale` / `clip`; optional `delay` ms. Put `data-reveal-group` on a parent to auto-stagger children. |
 | `components/Placeholder.astro` | Dashed frame + tag marking Lorem Ipsum slots. Required `name`. |
-| `components/SectionLabel.astro` | `[ index / title ]` section callout. |
+| `components/SectionLabel.astro` | `[ title ]` section callout; optional `index` only for real sequences. |
 | `components/Footer.astro` | Plain-link nav fallback + placeholder identity. |
 
 ## Page conventions

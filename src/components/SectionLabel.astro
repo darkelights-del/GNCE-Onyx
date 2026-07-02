@@ -1,11 +1,15 @@
 ---
 /**
- * SectionLabel — engineering-drawing callout that opens every section:
- * [ 02 / THE ROBOT ] ————————————————
+ * SectionLabel — engineering-drawing callout that opens a section:
+ * [ THE ROBOT ] ———————————————— or, where order is real content
+ * (e.g. a timeline), [ 01 / KICKOFF ] ————————————————
+ *
+ * Use sparingly (not on every section) and only pass `index` when the
+ * sequence itself carries information.
  */
 interface Props {
-  index: string;
   title: string;
+  index?: string;
   class?: string;
 }
 const { index, title, class: cls } = Astro.props;
@@ -13,7 +17,7 @@ const { index, title, class: cls } = Astro.props;
 
 <p class:list={['section-label type-callout', cls]}>
   <span class="text-accent" aria-hidden="true">[</span>
-  <span>{index} / {title}</span>
+  <span>{index ? `${index} / ${title}` : title}</span>
   <span class="text-accent" aria-hidden="true">]</span>
   <span class="section-label-rule" aria-hidden="true"></span>
 </p>

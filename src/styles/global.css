@@ -33,6 +33,7 @@
 html {
   background: var(--color-bg);
   color-scheme: dark;
+  overflow-x: clip;
   /* Fallback smoothness when Lenis is not driving the scroll */
   scroll-behavior: smooth;
 }
@@ -180,27 +181,44 @@ html.js [data-reveal='scale'] {
   transform: scale(0.96);
 }
 
+/* Clip variant: the clip lives on an inner wrapper because a fully
+   clipped target never intersects in Chromium's IntersectionObserver. */
 html.js [data-reveal='clip'] {
-  clip-path: inset(0 0 100% 0);
   transform: none;
-  transition:
-    clip-path 820ms var(--ease-in-out-strong),
-    opacity 420ms var(--ease-out-strong);
+  transition: opacity 420ms var(--ease-out-strong);
   transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal-clip-inner {
+  display: block;
+}
+
+html.js [data-reveal='clip'] .reveal-clip-inner {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 820ms var(--ease-in-out-strong);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+html.js [data-reveal='clip'].is-revealed .reveal-clip-inner {
+  clip-path: inset(0 0 0 0);
 }
 
 html.js [data-reveal].is-revealed {
   opacity: 1;
   transform: none;
-  clip-path: inset(0 0 0 0);
 }
 
 @media (prefers-reduced-motion: reduce) {
   html.js [data-reveal],
   html.js [data-reveal='clip'] {
     transform: none;
-    clip-path: none;
     transition: opacity 240ms ease;
+  }
+
+  html.js [data-reveal='clip'] .reveal-clip-inner,
+  html.js [data-reveal='clip'].is-revealed .reveal-clip-inner {
+    clip-path: none;
+    transition: none;
   }
 }
 
@@ -253,6 +271,13 @@ html.js [data-reveal].is-revealed {
 
 .hairline {
   border-color: var(--color-line);
+}
+
+/* Inline placeholder mark for small unknowns (team number, handles,
+   dates). Bigger unresolved blocks use <Placeholder> instead. */
+.stub {
+  border-bottom: 1px dashed color-mix(in srgb, var(--color-accent) 60%, transparent);
+  cursor: help;
 }
 
 .sr-only {

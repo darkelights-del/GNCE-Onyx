@@ -1,10 +1,8 @@
 ---
 /**
  * Footer — plain-text navigation (the no-JS fallback for the gear hub)
- * plus placeholder team identity and contact lines.
+ * plus team identity and contact lines.
  */
-import Placeholder from './Placeholder.astro';
-
 const links = [
   { href: '/', label: 'Home' },
   { href: '/season/', label: 'Season Recap' },
@@ -16,12 +14,11 @@ const links = [
   <div class="mx-auto max-w-6xl px-5 py-14 sm:px-8">
     <div class="grid gap-10 sm:grid-cols-3">
       <div>
-        <Placeholder name="footer-team-identity" class="p-4">
-          <p class="type-display text-2xl">Team XXXXX</p>
-          <p class="type-callout mt-3 text-muted">
-            Lorem ipsum dolor — rookie team, FIRST® Tech Challenge
-          </p>
-        </Placeholder>
+        <p class="type-display text-2xl">GNCE Onyx</p>
+        <p class="type-callout mt-3 text-muted">
+          FIRST Tech Challenge team <span class="stub" title="Team number pending">#XXXXX</span>
+        </p>
+        <p class="type-callout mt-1 text-muted">Weston High School, Weston, MA</p>
       </div>
 
       <nav aria-label="Footer">
@@ -44,18 +41,22 @@ const links = [
 
       <div>
         <p class="type-callout text-muted">Reach us</p>
-        <Placeholder name="footer-contact" class="mt-4 p-4">
-          <p class="font-mono text-sm text-muted">lorem@ipsum.example</p>
-          <p class="font-mono text-sm text-muted">@loremipsum</p>
-        </Placeholder>
+        <ul class="mt-4 space-y-2 font-mono text-sm text-muted">
+          <li>
+            <span class="stub" title="Email pending">[placeholder]@gmail.com</span>
+          </li>
+          <li>
+            <span class="stub" title="Instagram handle pending">@placeholder</span>
+          </li>
+        </ul>
       </div>
     </div>
 
     <div
       class="type-callout mt-12 flex flex-wrap items-center justify-between gap-3 border-t hairline pt-6 text-muted"
     >
-      <p>© 20XX Team XXXXX — rookie season</p>
-      <p aria-hidden="true">dwg no. 001 / rev A</p>
+      <p>© 2026 GNCE Onyx</p>
+      <p>Rookie season: 2026-2027 BIOBUZZ</p>
     </div>
   </div>
 </footer>

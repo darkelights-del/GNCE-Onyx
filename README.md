@@ -1,8 +1,9 @@
-# Team XXXXX — FTC Team Website
+# GNCE Onyx — FTC Team Website
 
-Website skeleton for a rookie [FIRST Tech Challenge](https://www.firstinspires.org/robotics/ftc)
-team. **Everything textual is placeholder Lorem Ipsum** — structure, design
-system, and navigation are real; copy is not (yet).
+Website for GNCE Onyx, a rookie [FIRST Tech Challenge](https://www.firstinspires.org/robotics/ftc)
+team at Weston High School competing in the 2026-2027 BIOBUZZ season.
+Design system, navigation, and core content are in; season content, photos,
+the team number, and contact handles are still marked placeholders.
 
 ## Stack
 
@@ -40,19 +41,24 @@ src/
     └── global.css         # Design tokens, textures, reveal system
 ```
 
-## Dropping in real content
+## Dropping in remaining content
 
-Every block that still holds Lorem Ipsum is wrapped in
-`<Placeholder name="...">` — a dashed orange frame with a visible tag in the
-browser. To find every remaining slot:
+Two kinds of placeholder marks:
+
+- **Blocks** still waiting on content (robot photo/specs, season log, match
+  results, gallery, sponsorship tiers) are wrapped in `<Placeholder name="...">`,
+  a dashed orange frame with a visible tag. Replace the contents, then remove
+  the wrapper (keep its children).
+- **Inline stubs** (team `#XXXXX`, `[placeholder]@gmail.com`, `@placeholder`,
+  TBD dates) carry a dashed-underline `.stub` span. Replace text, drop the span.
+
+Find every remaining slot:
 
 ```sh
-grep -rn "data-placeholder\|<Placeholder" src/
+grep -rn "data-placeholder\|<Placeholder\|class=\"stub\"\|stub\"" src/
 ```
 
-Replace the Lorem Ipsum inside, then remove the `<Placeholder>` wrapper
-(keep its children). The contact form and donate buttons are intentionally
-not functional yet.
+The contact form is intentionally not wired to anything yet.
 
 ## Design system
 

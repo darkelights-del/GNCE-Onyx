@@ -21,9 +21,11 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 1. Read `DESIGN.md` — visual direction ("Pit Bay Blueprint"), tokens, type,
    motion rules, component inventory. Follow it; don't invent new colors,
    easings, or patterns ad hoc.
-2. Use the animation skills in `.claude/skills/` (`emil-design-eng`,
-   `animation-vocabulary`, `review-animations`) for any animation work or
-   review.
+2. Use the skills in `.claude/skills/` for any UI work: `emil-design-eng` +
+   `animation-vocabulary` + `review-animations` (animation), `taste`
+   (anti-generic frontend rules; note its em-dash ban and eyebrow-restraint
+   rules), `frontend-design` (visual direction), and
+   `redesign-existing-projects` (audit-first elevation).
 
 ## Architecture notes
 
@@ -39,10 +41,11 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 
 ## Placeholder convention (important)
 
-Every Lorem Ipsum block is wrapped in `components/Placeholder.astro` with a
-unique kebab-case `name`. When adding real content, remove the wrapper and
-keep the children. Find all remaining slots:
-`grep -rn "data-placeholder\|<Placeholder" src/`
+Blocks awaiting real content are wrapped in `components/Placeholder.astro`
+with a unique kebab-case `name`; small inline unknowns (team number, email,
+handles, TBD dates) use a `.stub` span instead. When adding real content,
+remove the wrapper/span and keep the children. Find all remaining slots:
+`grep -rn "data-placeholder\|<Placeholder\|stub" src/`
 
 ## Documentation
 

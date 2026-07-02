@@ -18,7 +18,7 @@ interface Props {
 }
 const {
   title,
-  description = 'PLACEHOLDER — rookie FIRST Tech Challenge team. Real description coming with the content pass.',
+  description = 'GNCE Onyx: a rookie FIRST Tech Challenge team at Weston High School, built by veterans of four GNCE squads, competing in the 2026-2027 BIOBUZZ season.',
 } = Astro.props;
 ---
 
@@ -30,7 +30,7 @@ const {
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title} — Team XXXXX</title>
+    <title>{title} · GNCE Onyx</title>
     <script is:inline>
       document.documentElement.classList.replace('no-js', 'js');
     </script>
@@ -69,6 +69,9 @@ const {
         });
       });
 
+      // Huge top margin: anything at or above the viewport counts as seen,
+      // so fast scrolls (scrollbar drags, anchor jumps) can't strand
+      // skipped elements in their hidden state above the reader.
       const io = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
@@ -78,7 +81,7 @@ const {
             }
           }
         },
-        { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+        { threshold: 0.12, rootMargin: '2000% 0px -8% 0px' }
       );
       document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
     </script>

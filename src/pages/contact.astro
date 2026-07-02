@@ -1,0 +1,220 @@
+---
+/**
+ * Contact + Donate — contact form (not wired up yet) and sponsorship.
+ * Header → Contact (form + direct channels) → Sponsor us.
+ * Email/Instagram/tiers are pending: marked with .stub or <Placeholder>.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Placeholder from '../components/Placeholder.astro';
+import Reveal from '../components/Reveal.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+
+const sponsorGets = [
+  'Your name on the robot',
+  'Your name on our shirts',
+  'Your name on this site',
+  'Visibility at every event we attend',
+];
+---
+
+<BaseLayout
+  title="Contact + Donate"
+  description="Contact GNCE Onyx or sponsor our 2026-2027 BIOBUZZ season. Sponsorship covers parts, tools, registration, and travel for a rookie FTC team built from championship veterans."
+>
+  <!-- =================================================== PAGE HEADER -->
+  <header class="bp-grid bg-bg pt-36 pb-20 sm:pt-44">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h1 class="type-display text-[clamp(2.75rem,9vw,8rem)]">
+          Get in <span class="text-accent">touch</span>
+        </h1>
+      </Reveal>
+
+      <Reveal variant="up" delay={160} class="mt-8 max-w-prose">
+        <p class="text-base/relaxed text-muted">
+          Sponsorship, questions, or joining the team: email is the fastest
+          way to reach us while this form gets wired up.
+        </p>
+      </Reveal>
+    </div>
+  </header>
+
+  <!-- ======================================================= CONTACT -->
+  <section class="bg-bg py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <div class="grid gap-12 md:grid-cols-[3fr_2fr]">
+        <!-- Form (placeholder, not wired to anything) -->
+        <Reveal variant="left">
+          <Placeholder name="contact-form" class="p-6 sm:p-8">
+            <p
+              class="hairline inline-block border bg-surface px-3 py-1.5 font-mono text-[11px] tracking-wide text-accent"
+            >
+              // Form not wired up yet: submissions go nowhere
+            </p>
+
+            <form id="contact-form-el" class="mt-8 grid gap-6 sm:grid-cols-2">
+              <div>
+                <label for="contact-name" class="type-callout text-muted">Name</label>
+                <input
+                  type="text"
+                  id="contact-name"
+                  name="name"
+                  autocomplete="name"
+                  placeholder="Your name"
+                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="contact-email" class="type-callout text-muted">Email</label>
+                <input
+                  type="email"
+                  id="contact-email"
+                  name="email"
+                  autocomplete="email"
+                  placeholder="you@example.com"
+                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
+                />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="contact-topic" class="type-callout text-muted">Topic</label>
+                <select
+                  id="contact-topic"
+                  name="topic"
+                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
+                >
+                  <option>Sponsorship</option>
+                  <option>Joining the team</option>
+                  <option>Outreach and events</option>
+                  <option>Something else</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="contact-message" class="type-callout text-muted">Message</label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  rows="5"
+                  placeholder="What can we help with?"
+                  class="field hairline mt-2 block w-full resize-y border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"></textarea>
+              </div>
+
+              <div class="sm:col-span-2">
+                <button type="submit" class="btn btn-solid">Send message</button>
+              </div>
+            </form>
+          </Placeholder>
+        </Reveal>
+
+        <!-- Direct channels panel -->
+        <Reveal variant="right" delay={120}>
+          <Placeholder name="contact-channels" class="bg-panel p-6">
+            <h2 class="type-callout text-muted">Direct channels</h2>
+            <dl class="hairline mt-5 border-t">
+              <div class="hairline flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b py-3">
+                <dt class="type-callout text-muted">Email</dt>
+                <dd class="font-mono text-sm text-ink">
+                  <span class="stub" title="Email pending">[placeholder]@gmail.com</span>
+                </dd>
+              </div>
+              <div class="hairline flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b py-3">
+                <dt class="type-callout text-muted">Instagram</dt>
+                <dd class="font-mono text-sm text-ink">
+                  <span class="stub" title="Instagram handle pending">@placeholder</span>
+                </dd>
+              </div>
+              <div class="hairline flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b py-3">
+                <dt class="type-callout text-muted">Find us</dt>
+                <dd class="font-mono text-sm text-ink">Weston High School, Weston, MA</dd>
+              </div>
+            </dl>
+          </Placeholder>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================== SPONSOR US -->
+  <section class="hairline border-t bg-surface py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <SectionLabel title="Sponsor us" class="mb-12 sm:mb-16" />
+
+      <Reveal variant="clip">
+        <h2 class="type-display max-w-5xl text-[clamp(2.5rem,7vw,6rem)]">
+          Every dollar builds robots
+        </h2>
+      </Reveal>
+
+      <Reveal variant="up" delay={120} class="mt-10 max-w-2xl">
+        <p class="text-base/relaxed text-muted">
+          GNCE Onyx is a rookie FTC team built from championship-level
+          veterans, competing in the 2026-2027 BIOBUZZ season out of Weston
+          High School. Sponsorship covers the real costs of a season: parts,
+          tools, registration, and travel to regional and championship events.
+        </p>
+        <p class="mt-4 text-base/relaxed text-muted">
+          Every dollar goes straight into building robots and running outreach
+          that pulls younger students into STEM.
+        </p>
+      </Reveal>
+
+      <div class="mt-14 grid gap-10 md:grid-cols-[3fr_2fr]">
+        <Reveal variant="left">
+          <h3 class="type-callout text-muted">Every sponsor gets</h3>
+          <ul class="mt-5" data-reveal-group>
+            {
+              sponsorGets.map((item, i) => (
+                <Reveal as="li" class="hairline flex items-baseline gap-5 border-b py-4">
+                  <span class="font-mono text-sm font-bold text-accent">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span class="font-display text-lg text-ink">{item}</span>
+                </Reveal>
+              ))
+            }
+          </ul>
+        </Reveal>
+
+        <Reveal variant="right" delay={120}>
+          <Placeholder name="contact-donate-tiers" class="p-6">
+            <h3 class="type-callout text-muted">Sponsorship tiers</h3>
+            <ul class="hairline mt-5 border-t">
+              {
+                ['Tier 01', 'Tier 02', 'Tier 03'].map((tier) => (
+                  <li class="hairline flex items-baseline justify-between gap-6 border-b py-3 font-mono text-sm">
+                    <span class="text-ink">{tier}</span>
+                    <span class="text-muted">$TBD</span>
+                  </li>
+                ))
+              }
+            </ul>
+            <p class="mt-5 text-sm/relaxed text-muted">
+              Tiers are being finalized. Email us to talk sponsorship:
+              <span class="stub" title="Email pending">[placeholder]@gmail.com</span>
+            </p>
+          </Placeholder>
+
+          <Placeholder name="contact-sponsor-packet" class="mt-6 px-4 py-3">
+            <p class="font-mono text-xs text-muted">// Sponsor packet: PDF TBD</p>
+          </Placeholder>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Placeholder form: swallow submits so nothing navigates or posts.
+  document
+    .getElementById('contact-form-el')
+    ?.addEventListener('submit', (event) => event.preventDefault());
+</script>
+
+<style>
+  /* Form fields: border-color only (never 'all'); color change → plain ease. */
+  .field {
+    transition: border-color 200ms ease;
+  }
+</style>

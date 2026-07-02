@@ -1,0 +1,332 @@
+---
+/**
+ * Home — scroll-driven landing page.
+ * Hero (convergence story) → Legacy → Mission → The Robot → Roster → Sponsor.
+ * Remaining placeholders carry <Placeholder> wrappers or .stub marks.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Placeholder from '../components/Placeholder.astro';
+import Reveal from '../components/Reveal.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+
+/** Tick angles for the decorative hero ring (every 6°, long tick every 30°) */
+const ringTicks = Array.from({ length: 60 }, (_, i) => i * 6);
+
+/** The four GNCE squads whose veterans formed Onyx. */
+const legacyTeams = [
+  {
+    num: '22489',
+    name: 'GNCE Diamond',
+    honors: [
+      '2025 States: Winning Alliance Captain',
+      '2025 FIRST World Championship, Jemison Division: Motivate Award 2nd Place',
+      '2025 MTI: Hardware Honorable Mention',
+      '2026 States: Innovate Award',
+      '2026 Michiana, Croft Division: Finalist Alliance, Control Award 1st Place',
+      '2026 MTI: Mechatronics Synergy Winner',
+    ],
+  },
+  {
+    num: '26112',
+    name: 'GNCE Organized Anarchy',
+    honors: [
+      '2025 States: Finalist Alliance Captain',
+      '2025 New England Premier Event, Courville Division',
+      '2026 States: Finalist Alliance Captain',
+      '2026 FIRST World Championship, Jackson Division: Playoff Semifinalist',
+      '2026 Multinational Tech Invitational qualification',
+    ],
+  },
+  { num: '26413', name: 'GNCE Mercury', honors: [] },
+  { num: '26111', name: 'GNCE Electrified Chickens', honors: [] },
+];
+
+const chips = [
+  { num: '22489', label: 'Diamond', variant: 'left', delay: 0 },
+  { num: '26112', label: 'Organized Anarchy', variant: 'left', delay: 70 },
+  { num: '26413', label: 'Mercury', variant: 'right', delay: 140 },
+  { num: '26111', label: 'Electrified Chickens', variant: 'right', delay: 210 },
+] as const;
+
+const roster = [
+  { monogram: 'E.Z.', name: 'Ethan Zhang', role: 'Captain' },
+  { monogram: 'E.Z.', name: 'Ethan Zhuang', role: 'Captain' },
+  { monogram: 'A.S.', name: 'Anson Su', role: '' },
+  { monogram: 'A.C.', name: 'Adrian Chang', role: '' },
+  { monogram: 'L.L.', name: 'Leo Li', role: '' },
+  { monogram: 'N.C.', name: 'Nicholas Colli', role: '' },
+  { monogram: 'R.L.', name: 'Raymond Liu', role: '' },
+];
+
+const specs = [
+  { key: 'Drivetrain', value: 'TBD' },
+  { key: 'Reach', value: 'TBD' },
+  { key: 'Mass', value: 'TBD' },
+  { key: 'Autonomous', value: 'TBD' },
+];
+---
+
+<BaseLayout
+  title="Home"
+  description="GNCE Onyx is a rookie FIRST Tech Challenge team at Weston High School, built by championship veterans of four GNCE squads for the 2026-2027 BIOBUZZ season."
+>
+  <!-- ============================================================ HERO -->
+  <section class="bp-grid relative flex min-h-svh flex-col overflow-clip bg-bg">
+    <!-- Decorative drawing ring, overflowing the right edge -->
+    <div
+      class="pointer-events-none absolute top-1/2 right-[-24vmin] -translate-y-1/2 text-line"
+      aria-hidden="true"
+    >
+      <svg
+        class="hero-ring-svg size-[70vmin] opacity-60"
+        viewBox="0 0 200 200"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="0.75"
+      >
+        <circle cx="100" cy="100" r="86"></circle>
+        <circle cx="100" cy="100" r="60" stroke-dasharray="2 6"></circle>
+        {ringTicks.map((deg) => (
+          <line
+            x1="100"
+            y1="14"
+            x2="100"
+            y2={deg % 30 === 0 ? '24' : '19'}
+            transform={`rotate(${deg} 100 100)`}
+          />
+        ))}
+      </svg>
+    </div>
+
+    <div class="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 sm:px-8">
+      <!-- Top chrome row -->
+      <Reveal variant="up" class="flex items-baseline justify-between gap-4 pt-7 sm:pt-9">
+        <p class="type-callout text-muted">[ FIRST Tech Challenge / Weston High School ]</p>
+        <p class="type-callout text-muted">
+          Team <span class="stub" title="Team number pending">#XXXXX</span>
+        </p>
+      </Reveal>
+
+      <!-- Center: four numbers converge into one team -->
+      <div class="flex flex-1 flex-col justify-center py-16">
+        <ul class="flex flex-wrap gap-2 sm:gap-3" data-nosnippet>
+          {chips.map((chip) => (
+            <li>
+              <Reveal variant={chip.variant} delay={chip.delay} class="hairline flex items-baseline gap-2 border bg-panel px-3 py-1.5">
+                <span class="font-mono text-xs font-bold text-accent">{chip.num}</span>
+                <span class="type-callout text-muted">{chip.label}</span>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+
+        <h1 class="type-display mt-6 text-[clamp(2.75rem,8.5vw,7.5rem)]">
+          <Reveal as="span" variant="clip" delay={200} class="block">Four teams.</Reveal>
+          <Reveal as="span" variant="clip" delay={340} class="block text-accent">One Onyx.</Reveal>
+        </h1>
+
+        <Reveal variant="up" delay={480} class="mt-8 max-w-xl">
+          <p class="text-base/relaxed text-muted">
+            Championship veterans from four GNCE squads, starting fresh as one rookie
+            FTC team for the 2026-2027 BIOBUZZ season.
+          </p>
+        </Reveal>
+
+        <Reveal variant="up" delay={560} class="mt-10 flex flex-wrap items-center gap-4">
+          <a href="/contact/" class="btn btn-solid">Sponsor the team</a>
+          <a href="/season/" class="btn">Our first season</a>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== LEGACY -->
+  <section class="hairline border-y bg-surface py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h2 class="type-display max-w-4xl text-[clamp(2rem,5.5vw,4.5rem)]">
+          Where we come from
+        </h2>
+      </Reveal>
+
+      <Reveal variant="up" delay={100} class="mt-8 max-w-2xl">
+        <p class="text-base/relaxed text-muted">
+          Four of our seven current members are returning veterans with world
+          championship and international invitational experience, drawn from four
+          GNCE teams. Their record travels with them.
+        </p>
+      </Reveal>
+
+      <div class="mt-14 grid gap-4 md:grid-cols-2" data-reveal-group>
+        {legacyTeams.slice(0, 2).map((team) => (
+          <Reveal variant="up" class="bp-corners hairline flex h-full flex-col border bg-panel p-6 sm:p-8">
+            <p class="font-mono text-3xl font-bold text-accent">{team.num}</p>
+            <p class="type-display mt-2 text-xl">{team.name}</p>
+            <ul class="hairline mt-6 border-t">
+              {team.honors.map((honor) => (
+                <li class="hairline border-b py-2.5 font-mono text-xs/relaxed text-muted">
+                  {honor}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        ))}
+      </div>
+
+      <div class="mt-4 grid gap-4 sm:grid-cols-2" data-reveal-group>
+        {legacyTeams.slice(2).map((team) => (
+          <Reveal variant="up" class="hairline flex items-baseline gap-4 border bg-panel px-6 py-5">
+            <p class="font-mono text-xl font-bold text-accent">{team.num}</p>
+            <p class="type-display text-base">{team.name}</p>
+          </Reveal>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== MISSION -->
+  <section class="bg-bg py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <p class="type-display max-w-4xl text-[clamp(1.75rem,4vw,3.5rem)]">
+          Consistent, reliable robots we can maintain and trust on the field.
+        </p>
+      </Reveal>
+
+      <div class="mt-10 grid gap-8 md:grid-cols-2" data-reveal-group>
+        <Reveal variant="up">
+          <p class="max-w-prose text-base/relaxed text-muted">
+            GNCE Onyx favors proven designs over complex ones with more ways to
+            fail. We build machines we understand end to end, so we can fix them
+            in the pit and count on them in a match.
+          </p>
+        </Reveal>
+        <Reveal variant="up">
+          <p class="max-w-prose text-base/relaxed text-muted">
+            Beyond competition, we run outreach across our community, getting
+            younger students into robotics and growing FIRST and STEM in and
+            around Weston, Massachusetts.
+          </p>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================== THE ROBOT -->
+  <section class="hairline border-y bg-surface py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <SectionLabel title="The robot" class="mb-12 sm:mb-16" />
+
+      <div class="grid gap-10 md:grid-cols-2">
+        <Reveal variant="left">
+          <Placeholder name="home-robot-photo">
+            <div class="bp-hatch flex aspect-[4/3] items-center justify-center">
+              <span class="type-callout text-muted">Robot photo, coming at kickoff</span>
+            </div>
+          </Placeholder>
+        </Reveal>
+
+        <Reveal variant="right" delay={120}>
+          <div class="flex h-full flex-col">
+            <p class="max-w-prose text-base/relaxed text-muted">
+              The BIOBUZZ build starts at kickoff. This space will follow the
+              machine from first sketch to competition-ready, with the design
+              decisions that got it there.
+            </p>
+            <Placeholder name="home-robot-specs" class="mt-8 px-5 py-4">
+              <dl>
+                {specs.map((spec) => (
+                  <div class="hairline flex items-baseline justify-between gap-6 border-b py-3 last:border-b-0">
+                    <dt class="type-callout text-muted">{spec.key}</dt>
+                    <dd class="font-mono text-sm text-ink">{spec.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Placeholder>
+          </div>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= ROSTER -->
+  <section class="bg-bg py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <SectionLabel title="Roster" class="mb-12 sm:mb-16" />
+
+      <Reveal variant="up">
+        <p class="max-w-prose text-lg text-muted">
+          Seven members and counting, led by two captains. Four of us competed
+          through world championship and international invitational events on
+          our previous teams.
+        </p>
+      </Reveal>
+
+      <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group>
+        {roster.map((member) => (
+          <Reveal variant="up" class="bp-corners hairline border bg-panel p-5">
+            <div class="hairline flex size-14 items-center justify-center border bg-surface font-mono text-sm text-muted">
+              {member.monogram}
+            </div>
+            <p class="mt-5 font-display text-lg font-semibold text-ink">{member.name}</p>
+            {member.role && <p class="type-callout mt-1 text-accent">{member.role}</p>}
+          </Reveal>
+        ))}
+        <Reveal
+          variant="up"
+          class="flex min-h-40 flex-col items-start justify-center border border-dashed border-line p-5"
+        >
+          <p class="font-mono text-sm text-muted">2-3 spots</p>
+          <p class="type-callout mt-1 text-muted">New members joining soon</p>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== SPONSOR -->
+  <section class="hairline border-t bg-surface py-28 sm:py-40">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h2 class="type-display max-w-5xl text-[clamp(2.5rem,7vw,6rem)]">
+          Put your name on the robot
+        </h2>
+      </Reveal>
+
+      <Reveal variant="up" delay={120} class="mt-10 max-w-2xl">
+        <p class="text-base/relaxed text-muted">
+          Sponsorship covers the real costs of a season: parts, tools,
+          registration, and travel to regional and championship events. In
+          return, your name rides on our robot, our shirts, and this site, in
+          front of students, families, and STEM professionals at every event we
+          attend.
+        </p>
+      </Reveal>
+
+      <Reveal variant="up" delay={200} class="mt-10">
+        <a href="/contact/" class="btn btn-solid">Sponsor the team</a>
+      </Reveal>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Decorative hero ring — very slow constant rotation (transform-only). */
+  .hero-ring-svg {
+    animation: ring-rotate 120s linear infinite;
+  }
+
+  @keyframes ring-rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-ring-svg {
+      animation: none;
+    }
+  }
+</style>
