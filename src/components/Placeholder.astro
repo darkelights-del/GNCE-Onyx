@@ -1,0 +1,42 @@
+---
+/**
+ * Placeholder — wraps any block that still holds Lorem Ipsum.
+ *
+ * Every placeholder gets a visible dashed frame plus a mono tag naming
+ * the slot, and a `data-placeholder` attribute so remaining slots can
+ * be found in one search:  grep -r "data-placeholder" src/
+ *
+ * When dropping in real content, remove this wrapper (keep its children).
+ */
+interface Props {
+  /** Short slot name shown in the tag, e.g. "team-mission" */
+  name: string;
+  class?: string;
+}
+const { name, class: cls } = Astro.props;
+---
+
+<div class:list={['placeholder bp-corners', cls]} data-placeholder={name}>
+  <span class="placeholder-tag type-callout">◌ placeholder / {name}</span>
+  <slot />
+</div>
+
+<style>
+  .placeholder {
+    position: relative;
+    border: 1px dashed color-mix(in srgb, var(--color-accent) 45%, var(--color-line));
+  }
+
+  .placeholder-tag {
+    position: absolute;
+    top: 0;
+    right: 0.75rem;
+    translate: 0 -50%;
+    z-index: 1;
+    padding: 0.1875rem 0.5rem;
+    background: var(--color-bg);
+    border: 1px dashed color-mix(in srgb, var(--color-accent) 45%, var(--color-line));
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+</style>

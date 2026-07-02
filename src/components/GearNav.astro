@@ -1,0 +1,397 @@
+---
+/**
+ * GearNav — the "Orbital Gear Hub".
+ *
+ * The site's only persistent chrome: a gear pinned to the bottom-right
+ * corner. The gear rotates with scroll (like it's driving the page).
+ * Tapping it spins the gear and fans out one node per page along a
+ * quarter-arc. Nodes stagger in with a springy overshoot; labels extend
+ * along each spoke just after the node lands.
+ *
+ * Footer carries plain-text links, so navigation still works without JS.
+ */
+const links = [
+  { href: '/', label: 'Home', num: '01' },
+  { href: '/season/', label: 'Season Recap', num: '02' },
+  { href: '/contact/', label: 'Contact + Donate', num: '03' },
+];
+
+// Fan the nodes across the upper-left quadrant (button sits bottom-right).
+// Unit vectors are precomputed at build time; CSS multiplies by --dist.
+const arcStart = 96;
+const arcEnd = 176;
+const nodes = links.map((link, i) => {
+  const angle =
+    links.length === 1
+      ? (arcStart + arcEnd) / 2
+      : arcStart + (i * (arcEnd - arcStart)) / (links.length - 1);
+  const rad = (angle * Math.PI) / 180;
+  return {
+    ...link,
+    ux: Math.cos(rad).toFixed(4),
+    uy: (-Math.sin(rad)).toFixed(4),
+  };
+});
+
+// Square-toothed gear outline with a center bore, built as one evenodd path.
+function gearPath(teeth: number, rOut: number, rIn: number, rHole: number) {
+  const step = (Math.PI * 2) / teeth;
+  const pt = (a: number, r: number) =>
+    `${(Math.cos(a) * r).toFixed(2)},${(Math.sin(a) * r).toFixed(2)}`;
+  let d = '';
+  for (let i = 0; i < teeth; i++) {
+    const a = i * step;
+    const corners: Array<[number, number]> = [
+      [a, rIn],
+      [a + step * 0.42, rIn],
+      [a + step * 0.5, rOut],
+      [a + step * 0.92, rOut],
+    ];
+    for (const [ang, r] of corners) {
+      d += (d ? ' L ' : 'M ') + pt(ang, r);
+    }
+  }
+  d += ` Z M ${rHole},0 A ${rHole},${rHole} 0 1 0 ${-rHole},0 A ${rHole},${rHole} 0 1 0 ${rHole},0 Z`;
+  return d;
+}
+const gear = gearPath(8, 30, 23, 9);
+
+const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === current;
+---
+
+<nav class="gear-nav" id="gear-nav" data-open="false" aria-label="Site">
+  <div class="gear-backdrop" data-gear-backdrop></div>
+
+  <ul class="gear-ring" id="gear-ring" inert>
+    {
+      nodes.map((node, i) => (
+        <li style={`--ux:${node.ux};--uy:${node.uy};--i:${i}`}>
+          <a
+            class="gear-node"
+            href={node.href}
+            aria-current={isCurrent(node.href) ? 'page' : undefined}
+          >
+            <span class="gear-node-num" aria-hidden="true">
+              {node.num}
+            </span>
+            <span class="gear-node-label">{node.label}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <span class="gear-hint type-callout" aria-hidden="true">[ nav ]</span>
+
+  <button
+    class="gear-toggle"
+    type="button"
+    aria-expanded="false"
+    aria-controls="gear-ring"
+    data-gear-toggle
+  >
+    <span class="gear-spin">
+      <svg
+        viewBox="-32 -32 64 64"
+        width="34"
+        height="34"
+        aria-hidden="true"
+        data-gear-svg
+      >
+        <path d={gear} fill="currentColor" fill-rule="evenodd"></path>
+      </svg>
+    </span>
+    <span class="sr-only">Open navigation</span>
+  </button>
+</nav>
+
+<style>
+  .gear-nav {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 50;
+    --dist: 128px;
+  }
+
+  @media (max-width: 640px) {
+    .gear-nav {
+      right: 1rem;
+      bottom: 1rem;
+      --dist: 104px;
+    }
+  }
+
+  .gear-backdrop {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, var(--color-bg) 60%, transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 240ms ease,
+      visibility 0s linear 240ms;
+  }
+
+  .gear-nav[data-open='true'] .gear-backdrop {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 240ms ease;
+  }
+
+  /* ---- Toggle ---------------------------------------------------- */
+  .gear-toggle {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 1px solid var(--color-line);
+    background: var(--color-panel);
+    color: var(--color-ink);
+    cursor: pointer;
+    transition:
+      transform 160ms var(--ease-out-strong),
+      border-color 200ms ease,
+      color 200ms ease;
+  }
+
+  .gear-toggle:active {
+    transform: scale(0.94);
+  }
+
+  .gear-nav[data-open='true'] .gear-toggle {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .gear-spin {
+    display: grid;
+    place-items: center;
+    transition: transform 300ms var(--ease-spring);
+  }
+
+  .gear-nav[data-open='true'] .gear-spin {
+    transform: rotate(58deg);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .gear-toggle:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .gear-nav[data-open='false'] .gear-toggle:hover .gear-spin {
+      transform: rotate(16deg);
+    }
+  }
+
+  .gear-hint {
+    position: absolute;
+    right: calc(100% + 0.75rem);
+    top: 50%;
+    translate: 0 -50%;
+    color: var(--color-muted);
+    white-space: nowrap;
+    transition: opacity 200ms ease;
+  }
+
+  .gear-nav[data-open='true'] .gear-hint {
+    opacity: 0;
+  }
+
+  /* ---- Orbit nodes ------------------------------------------------ */
+  .gear-ring {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gear-ring li {
+    /* Anchor each node's center on the toggle's center */
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .gear-node {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1px solid var(--color-line);
+    background: var(--color-panel);
+    color: var(--color-ink);
+    text-decoration: none;
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+    transition:
+      transform 170ms var(--ease-out-strong),
+      opacity 140ms ease,
+      border-color 200ms ease;
+  }
+
+  .gear-nav[data-open='true'] .gear-node {
+    opacity: 1;
+    transform: translate(calc(var(--ux) * var(--dist)), calc(var(--uy) * var(--dist))) scale(1);
+    transition:
+      transform 300ms var(--ease-spring),
+      opacity 160ms ease,
+      border-color 200ms ease;
+    transition-delay: calc(var(--i) * 45ms);
+  }
+
+  .gear-node:active {
+    scale: 0.95;
+  }
+
+  .gear-node[aria-current='page'] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  .gear-node-num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  /* Label extends along the spoke once the node lands */
+  .gear-node-label {
+    position: absolute;
+    right: calc(100% + 0.625rem);
+    top: 50%;
+    padding: 0.375rem 0.625rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(6px, -50%);
+    transition:
+      opacity 120ms ease,
+      transform 120ms var(--ease-out-strong);
+  }
+
+  .gear-nav[data-open='true'] .gear-node-label {
+    opacity: 1;
+    transform: translate(0, -50%);
+    transition:
+      opacity 200ms ease,
+      transform 200ms var(--ease-out-strong);
+    transition-delay: calc(140ms + var(--i) * 45ms);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .gear-node:hover {
+      border-color: var(--color-accent);
+    }
+
+    .gear-node:hover .gear-node-label {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gear-spin,
+    .gear-node,
+    .gear-nav[data-open='true'] .gear-node,
+    .gear-node-label,
+    .gear-nav[data-open='true'] .gear-node-label {
+      transition: opacity 180ms ease;
+      transition-delay: 0ms;
+    }
+
+    .gear-nav[data-open='true'] .gear-node {
+      transform: translate(
+        calc(var(--ux) * var(--dist)),
+        calc(var(--uy) * var(--dist))
+      );
+    }
+
+    .gear-node {
+      transform: translate(calc(var(--ux) * var(--dist)), calc(var(--uy) * var(--dist)));
+    }
+
+    .gear-node-label,
+    .gear-nav[data-open='true'] .gear-node-label {
+      transform: translate(0, -50%);
+    }
+  }
+</style>
+
+<script>
+  function initGearNav() {
+    const nav = document.getElementById('gear-nav');
+    if (!nav) return;
+    const toggle = nav.querySelector<HTMLButtonElement>('[data-gear-toggle]');
+    const backdrop = nav.querySelector<HTMLElement>('[data-gear-backdrop]');
+    const ring = nav.querySelector<HTMLUListElement>('#gear-ring');
+    const gearSvg = nav.querySelector<SVGElement>('[data-gear-svg]');
+    const srLabel = toggle?.querySelector<HTMLElement>('.sr-only');
+    if (!toggle || !ring) return;
+
+    const setOpen = (open: boolean) => {
+      nav.dataset.open = String(open);
+      toggle.setAttribute('aria-expanded', String(open));
+      if (srLabel) srLabel.textContent = open ? 'Close navigation' : 'Open navigation';
+      if (open) {
+        ring.removeAttribute('inert');
+        ring.querySelector<HTMLAnchorElement>('a')?.focus({ preventScroll: true });
+      } else {
+        ring.setAttribute('inert', '');
+      }
+    };
+
+    toggle.addEventListener('click', () => setOpen(nav.dataset.open !== 'true'));
+    backdrop?.addEventListener('click', () => setOpen(false));
+    ring.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && nav.dataset.open === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+
+    // Gear rotates with scroll — transform only, applied inside rAF.
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    if (gearSvg && !reduced.matches) {
+      let queued = false;
+      const spin = () => {
+        queued = false;
+        gearSvg.style.transform = `rotate(${(window.scrollY * 0.22).toFixed(2)}deg)`;
+      };
+      window.addEventListener(
+        'scroll',
+        () => {
+          if (!queued) {
+            queued = true;
+            requestAnimationFrame(spin);
+          }
+        },
+        { passive: true }
+      );
+      spin();
+    }
+  }
+
+  initGearNav();
+</script>

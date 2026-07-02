@@ -1,0 +1,268 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------
+   DESIGN TOKENS — "Pit Bay Blueprint"
+   Graphite workshop dark + safety orange. See DESIGN.md for the full
+   visual direction and usage rules.
+   ------------------------------------------------------------------ */
+@theme {
+  /* Type */
+  --font-display: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Color */
+  --color-bg: #0b0c0f;
+  --color-surface: #12141a;
+  --color-panel: #171a21;
+  --color-line: #272b35;
+  --color-ink: #edebe3;
+  --color-muted: #9ca0ab;
+  --color-accent: #ff4d00;
+  --color-accent-bright: #ff6a2b;
+
+  /* Motion — custom curves per the emil-design-eng skill.
+     Built-in CSS easings are too weak; never use ease-in on UI. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ------------------------------------------------------------------
+   BASE
+   ------------------------------------------------------------------ */
+html {
+  background: var(--color-bg);
+  color-scheme: dark;
+  /* Fallback smoothness when Lenis is not driving the scroll */
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Display type: Archivo pushed wide, like machine-cut lettering */
+.type-display {
+  font-family: var(--font-display);
+  font-stretch: 118%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 0.92;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/* Mono micro-labels: [ 01 / SECTION ] engineering callouts */
+.type-callout {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.5rem 0.875rem;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: translateY(-200%);
+  transition: transform 160ms var(--ease-out-strong);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ------------------------------------------------------------------
+   BLUEPRINT TEXTURES
+   ------------------------------------------------------------------ */
+.bp-grid {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+.bp-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--color-ink) 5%, transparent) 0 1px,
+    transparent 1px 8px
+  );
+}
+
+/* Corner registration marks, like a technical drawing frame */
+.bp-corners {
+  position: relative;
+}
+
+.bp-corners::before,
+.bp-corners::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--color-muted);
+  border-style: solid;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.bp-corners::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.bp-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+/* ------------------------------------------------------------------
+   SCROLL REVEALS
+   Driven by the IntersectionObserver in BaseLayout. Hidden states are
+   gated behind html.js so content is never invisible without JS.
+   Durations here are entrance/marketing reveals (may exceed the 300ms
+   UI budget by design); interactive UI stays fast.
+   ------------------------------------------------------------------ */
+html.js [data-reveal] {
+  opacity: 0;
+  transition:
+    opacity 640ms var(--ease-out-strong),
+    transform 640ms var(--ease-out-strong);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+html.js [data-reveal='up'] {
+  transform: translateY(26px);
+}
+
+html.js [data-reveal='left'] {
+  transform: translateX(-26px);
+}
+
+html.js [data-reveal='right'] {
+  transform: translateX(26px);
+}
+
+html.js [data-reveal='scale'] {
+  transform: scale(0.96);
+}
+
+html.js [data-reveal='clip'] {
+  clip-path: inset(0 0 100% 0);
+  transform: none;
+  transition:
+    clip-path 820ms var(--ease-in-out-strong),
+    opacity 420ms var(--ease-out-strong);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+html.js [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-reveal],
+  html.js [data-reveal='clip'] {
+    transform: none;
+    clip-path: none;
+    transition: opacity 240ms ease;
+  }
+}
+
+/* ------------------------------------------------------------------
+   SHARED PRIMITIVES
+   ------------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.5rem;
+  border: 1px solid var(--color-line);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    transform 160ms var(--ease-out-strong),
+    border-color 200ms ease,
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-solid {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-bg);
+  font-weight: 700;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .btn-solid:hover {
+    background: var(--color-accent-bright);
+    border-color: var(--color-accent-bright);
+    color: var(--color-bg);
+  }
+}
+
+.hairline {
+  border-color: var(--color-line);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

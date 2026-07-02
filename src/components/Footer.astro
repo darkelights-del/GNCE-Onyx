@@ -1,0 +1,78 @@
+---
+/**
+ * Footer — plain-text navigation (the no-JS fallback for the gear hub)
+ * plus placeholder team identity and contact lines.
+ */
+import Placeholder from './Placeholder.astro';
+
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/season/', label: 'Season Recap' },
+  { href: '/contact/', label: 'Contact + Donate' },
+];
+---
+
+<footer class="border-t hairline bg-surface">
+  <div class="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+    <div class="grid gap-10 sm:grid-cols-3">
+      <div>
+        <Placeholder name="footer-team-identity" class="p-4">
+          <p class="type-display text-2xl">Team XXXXX</p>
+          <p class="type-callout mt-3 text-muted">
+            Lorem ipsum dolor — rookie team, FIRST® Tech Challenge
+          </p>
+        </Placeholder>
+      </div>
+
+      <nav aria-label="Footer">
+        <p class="type-callout text-muted">Index</p>
+        <ul class="mt-4 space-y-2">
+          {
+            links.map((link) => (
+              <li>
+                <a
+                  class="footer-link font-mono text-sm text-ink"
+                  href={link.href}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div>
+        <p class="type-callout text-muted">Reach us</p>
+        <Placeholder name="footer-contact" class="mt-4 p-4">
+          <p class="font-mono text-sm text-muted">lorem@ipsum.example</p>
+          <p class="font-mono text-sm text-muted">@loremipsum</p>
+        </Placeholder>
+      </div>
+    </div>
+
+    <div
+      class="type-callout mt-12 flex flex-wrap items-center justify-between gap-3 border-t hairline pt-6 text-muted"
+    >
+      <p>© 20XX Team XXXXX — rookie season</p>
+      <p aria-hidden="true">dwg no. 001 / rev A</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer-link {
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition:
+      color 200ms ease,
+      border-color 200ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .footer-link:hover {
+      color: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+  }
+</style>

@@ -1,0 +1,29 @@
+---
+/**
+ * Reveal — scroll-driven entrance wrapper.
+ *
+ * Elements start hidden (JS-gated, so no-JS users see everything) and
+ * animate in when they enter the viewport. Variants and timing live in
+ * global.css; the IntersectionObserver lives in BaseLayout.
+ *
+ * Put `data-reveal-group` on any parent to auto-stagger its child
+ * reveals (60ms apart) without setting delays by hand.
+ */
+interface Props {
+  as?: string;
+  variant?: 'up' | 'left' | 'right' | 'scale' | 'clip';
+  /** Manual delay in ms (skip when inside a data-reveal-group) */
+  delay?: number;
+  class?: string;
+}
+const { as = 'div', variant = 'up', delay = 0, class: cls } = Astro.props;
+const Tag = as as 'div';
+---
+
+<Tag
+  class={cls}
+  data-reveal={variant}
+  style={delay ? `--reveal-delay:${delay}ms` : undefined}
+>
+  <slot />
+</Tag>
