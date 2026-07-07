@@ -1,7 +1,7 @@
 # Design System — "Pit Bay Blueprint"
 
 The visual direction for the team site: a robotics pit bay crossed with an
-engineering drawing. Near-black and dark #2B1B2F surfaces, one deep crimson
+engineering drawing. Near-black and dark-purple #1A0F20 surfaces, one deep crimson
 accent, machine-cut display type, and mono "callout" micro-labels everywhere
 — the site should feel like a technical document that moves.
 
@@ -11,7 +11,7 @@ This file is the source of truth for visual decisions. Read it (and
 ## Principles
 
 1. **Four colors, nothing else.** The whole site uses only `#0A0908`,
-   `#2B1B2F`, `#6E0D25`, `#E8E2DC`, plus transparencies of the ink for
+   `#1A0F20`, `#6E0D25`, `#E8E2DC`, plus transparencies of the ink for
    hairlines and muted text. No derived hues.
 2. **One accent.** Deep crimson (`--color-accent`, `#6E0D25`) is the accent
    everywhere: as a fill (solid buttons, the current nav bubble, the timeline
@@ -39,8 +39,8 @@ This file is the source of truth for visual decisions. Read it (and
 | Token | Value | Use |
 | --- | --- | --- |
 | `--color-bg` | `#0a0908` | Page background (near-black) |
-| `--color-surface` | `#2b1b2f` | Cards, alternate bands, footer, nav bubbles, form inputs |
-| `--color-panel` | `#2b1b2f` | Same as surface (cards are set apart by their border) |
+| `--color-surface` | `#1a0f20` | Cards, alternate bands, footer, nav bubbles, form inputs |
+| `--color-panel` | `#1a0f20` | Same as surface (cards are set apart by their border) |
 | `--color-line` | `#e8e2dc` @ 15% | All hairline borders (ink at low opacity) |
 | `--color-ink` | `#e8e2dc` | Primary text (warm off-white) |
 | `--color-muted` | `#e8e2dc` @ 62% | Secondary text, labels (ink at low opacity) |

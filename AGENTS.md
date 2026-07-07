@@ -47,6 +47,14 @@ handles, TBD dates) use a `.stub` span instead. When adding real content,
 remove the wrapper/span and keep the children. Find all remaining slots:
 `grep -rn "data-placeholder\|<Placeholder\|stub" src/`
 
+## Writing copy (important)
+
+Any prose that ships on the site (headlines, body, labels, captions, form
+copy, alt text) goes through the `no-slop-writing` skill in
+`.claude/skills/no-slop-writing/`. Run it every time you add or edit visible
+copy: concrete over abstract, natural voice, no AI clichés, no em dashes
+anywhere in visible text.
+
 ## Documentation
 
 Full documentation: https://docs.astro.build
