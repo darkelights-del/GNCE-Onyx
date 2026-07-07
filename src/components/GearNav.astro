@@ -10,10 +10,11 @@
  *
  * Footer carries plain-text links, so navigation still works without JS.
  */
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 const links = [
-  { href: '/', label: 'Home', num: '01' },
-  { href: '/season/', label: 'Season Recap', num: '02' },
-  { href: '/contact/', label: 'Contact + Donate', num: '03' },
+  { href: `${base}/`, label: 'Home', num: '01' },
+  { href: `${base}/season/`, label: 'Season Recap', num: '02' },
+  { href: `${base}/contact/`, label: 'Contact + Donate', num: '03' },
 ];
 
 // Fan the nodes across the upper-left quadrant (button sits bottom-right).

@@ -64,6 +64,8 @@ const specs = [
   { key: 'Mass', value: 'TBD' },
   { key: 'Autonomous', value: 'TBD' },
 ];
+
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 ---
 
 <BaseLayout
@@ -133,8 +135,8 @@ const specs = [
         </Reveal>
 
         <Reveal variant="up" delay={560} class="mt-10 flex flex-wrap items-center gap-4">
-          <a href="/contact/" class="btn btn-solid">Sponsor the team</a>
-          <a href="/season/" class="btn">Our first season</a>
+          <a href={`${base}/contact/`} class="btn btn-solid">Sponsor the team</a>
+          <a href={`${base}/season/`} class="btn">Our first season</a>
         </Reveal>
       </div>
     </div>
@@ -303,7 +305,7 @@ const specs = [
       </Reveal>
 
       <Reveal variant="up" delay={200} class="mt-10">
-        <a href="/contact/" class="btn btn-solid">Sponsor the team</a>
+        <a href={`${base}/contact/`} class="btn btn-solid">Sponsor the team</a>
       </Reveal>
     </div>
   </section>

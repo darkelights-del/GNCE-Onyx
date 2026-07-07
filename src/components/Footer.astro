@@ -3,10 +3,11 @@
  * Footer — plain-text navigation (the no-JS fallback for the gear hub)
  * plus team identity and contact lines.
  */
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 const links = [
-  { href: '/', label: 'Home' },
-  { href: '/season/', label: 'Season Recap' },
-  { href: '/contact/', label: 'Contact + Donate' },
+  { href: `${base}/`, label: 'Home' },
+  { href: `${base}/season/`, label: 'Season Recap' },
+  { href: `${base}/contact/`, label: 'Contact + Donate' },
 ];
 ---
 
