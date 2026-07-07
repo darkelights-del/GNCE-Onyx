@@ -115,7 +115,7 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
           {chips.map((chip) => (
             <li>
               <Reveal variant={chip.variant} delay={chip.delay} class="hairline flex items-baseline gap-2 border bg-panel px-3 py-1.5">
-                <span class="font-mono text-xs font-bold text-accent">{chip.num}</span>
+                <span class="font-mono text-xs font-bold text-accent-bright">{chip.num}</span>
                 <span class="type-callout text-muted">{chip.label}</span>
               </Reveal>
             </li>
@@ -124,7 +124,7 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
         <h1 class="type-display mt-6 text-[clamp(2.75rem,8.5vw,7.5rem)]">
           <Reveal as="span" variant="clip" delay={200} class="block">Four teams.</Reveal>
-          <Reveal as="span" variant="clip" delay={340} class="block text-accent">One Onyx.</Reveal>
+          <Reveal as="span" variant="clip" delay={340} class="block text-accent-bright">One Onyx.</Reveal>
         </h1>
 
         <Reveal variant="up" delay={480} class="mt-8 max-w-xl">
@@ -162,7 +162,7 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
       <div class="mt-14 grid gap-4 md:grid-cols-2" data-reveal-group>
         {legacyTeams.slice(0, 2).map((team) => (
           <Reveal variant="up" class="bp-corners hairline flex h-full flex-col border bg-panel p-6 sm:p-8">
-            <p class="font-mono text-3xl font-bold text-accent">{team.num}</p>
+            <p class="font-mono text-3xl font-bold text-accent-bright">{team.num}</p>
             <p class="type-display mt-2 text-xl">{team.name}</p>
             <ul class="hairline mt-6 border-t">
               {team.honors.map((honor) => (
@@ -178,7 +178,7 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
       <div class="mt-4 grid gap-4 sm:grid-cols-2" data-reveal-group>
         {legacyTeams.slice(2).map((team) => (
           <Reveal variant="up" class="hairline flex items-baseline gap-4 border bg-panel px-6 py-5">
-            <p class="font-mono text-xl font-bold text-accent">{team.num}</p>
+            <p class="font-mono text-xl font-bold text-accent-bright">{team.num}</p>
             <p class="type-display text-base">{team.name}</p>
           </Reveal>
         ))}
@@ -271,7 +271,7 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
               {member.monogram}
             </div>
             <p class="mt-5 font-display text-lg font-semibold text-ink">{member.name}</p>
-            {member.role && <p class="type-callout mt-1 text-accent">{member.role}</p>}
+            {member.role && <p class="type-callout mt-1 text-accent-bright">{member.role}</p>}
           </Reveal>
         ))}
         <Reveal

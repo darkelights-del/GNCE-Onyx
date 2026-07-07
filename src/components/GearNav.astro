@@ -4,23 +4,22 @@
  *
  * The site's only persistent chrome: a gear pinned to the bottom-right
  * corner. The gear rotates with scroll (like it's driving the page).
- * Tapping it spins the gear and fans out one node per page along a
- * quarter-arc. Nodes stagger in with a springy overshoot; labels extend
- * along each spoke just after the node lands.
+ * Tapping it spins the gear and fans out one label bubble per page along
+ * an arc; the bubbles stagger in with a springy overshoot.
  *
  * Footer carries plain-text links, so navigation still works without JS.
  */
 const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 const links = [
-  { href: `${base}/`, label: 'Home', num: '01' },
-  { href: `${base}/season/`, label: 'Season Recap', num: '02' },
-  { href: `${base}/contact/`, label: 'Contact + Donate', num: '03' },
+  { href: `${base}/`, short: 'Home', label: 'Home' },
+  { href: `${base}/season/`, short: 'Season', label: 'Season Recap' },
+  { href: `${base}/contact/`, short: 'Contact', label: 'Contact + Donate' },
 ];
 
-// Fan the nodes across the upper-left quadrant (button sits bottom-right).
+// Fan the bubbles up the left side (button sits bottom-right).
 // Unit vectors are precomputed at build time; CSS multiplies by --dist.
-const arcStart = 96;
-const arcEnd = 176;
+const arcStart = 108;
+const arcEnd = 172;
 const nodes = links.map((link, i) => {
   const angle =
     links.length === 1
@@ -34,28 +33,24 @@ const nodes = links.map((link, i) => {
   };
 });
 
-// Square-toothed gear outline with a center bore, built as one evenodd path.
-function gearPath(teeth: number, rOut: number, rIn: number, rHole: number) {
-  const step = (Math.PI * 2) / teeth;
-  const pt = (a: number, r: number) =>
-    `${(Math.cos(a) * r).toFixed(2)},${(Math.sin(a) * r).toFixed(2)}`;
-  let d = '';
-  for (let i = 0; i < teeth; i++) {
+// A uniform cog: a solid disc with evenly-spaced scallops cut into the
+// rim (knurled edge, circular silhouette — no teeth sticking out) plus a
+// center bore. Built as one evenodd path.
+function gearPath(notches: number, r: number, notchR: number, boreR: number) {
+  const circle = (cx: number, cy: number, rad: number) =>
+    `M ${(cx + rad).toFixed(2)},${cy.toFixed(2)} ` +
+    `A ${rad},${rad} 0 1 0 ${(cx - rad).toFixed(2)},${cy.toFixed(2)} ` +
+    `A ${rad},${rad} 0 1 0 ${(cx + rad).toFixed(2)},${cy.toFixed(2)} Z`;
+  let d = circle(0, 0, r);
+  const step = (Math.PI * 2) / notches;
+  for (let i = 0; i < notches; i++) {
     const a = i * step;
-    const corners: Array<[number, number]> = [
-      [a, rIn],
-      [a + step * 0.42, rIn],
-      [a + step * 0.5, rOut],
-      [a + step * 0.92, rOut],
-    ];
-    for (const [ang, r] of corners) {
-      d += (d ? ' L ' : 'M ') + pt(ang, r);
-    }
+    d += ' ' + circle(Math.cos(a) * r, Math.sin(a) * r, notchR);
   }
-  d += ` Z M ${rHole},0 A ${rHole},${rHole} 0 1 0 ${-rHole},0 A ${rHole},${rHole} 0 1 0 ${rHole},0 Z`;
+  d += ' ' + circle(0, 0, boreR);
   return d;
 }
-const gear = gearPath(8, 30, 23, 9);
+const gear = gearPath(12, 27, 3.6, 8.5);
 
 const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === current;
@@ -69,14 +64,12 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
       nodes.map((node, i) => (
         <li style={`--ux:${node.ux};--uy:${node.uy};--i:${i}`}>
           <a
-            class="gear-node"
+            class="gear-bubble"
             href={node.href}
+            aria-label={node.label}
             aria-current={isCurrent(node.href) ? 'page' : undefined}
           >
-            <span class="gear-node-num" aria-hidden="true">
-              {node.num}
-            </span>
-            <span class="gear-node-label">{node.label}</span>
+            {node.short}
           </a>
         </li>
       ))
@@ -113,21 +106,21 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
     right: 1.5rem;
     bottom: 1.5rem;
     z-index: 50;
-    --dist: 128px;
+    --dist: 118px;
   }
 
   @media (max-width: 640px) {
     .gear-nav {
       right: 1rem;
       bottom: 1rem;
-      --dist: 104px;
+      --dist: 100px;
     }
   }
 
   .gear-backdrop {
     position: fixed;
     inset: 0;
-    background: color-mix(in srgb, var(--color-bg) 60%, transparent);
+    background: color-mix(in srgb, var(--color-bg) 62%, transparent);
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
     opacity: 0;
@@ -167,7 +160,7 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
 
   .gear-nav[data-open='true'] .gear-toggle {
     border-color: var(--color-accent);
-    color: var(--color-accent);
+    color: var(--color-accent-bright);
   }
 
   .gear-spin {
@@ -177,17 +170,17 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
   }
 
   .gear-nav[data-open='true'] .gear-spin {
-    transform: rotate(58deg);
+    transform: rotate(45deg);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .gear-toggle:hover {
       border-color: var(--color-accent);
-      color: var(--color-accent);
+      color: var(--color-accent-bright);
     }
 
     .gear-nav[data-open='false'] .gear-toggle:hover .gear-spin {
-      transform: rotate(16deg);
+      transform: rotate(15deg);
     }
   }
 
@@ -205,7 +198,7 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
     opacity: 0;
   }
 
-  /* ---- Orbit nodes ------------------------------------------------ */
+  /* ---- Fan of label bubbles -------------------------------------- */
   .gear-ring {
     margin: 0;
     padding: 0;
@@ -213,125 +206,103 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
   }
 
   .gear-ring li {
-    /* Anchor each node's center on the toggle's center */
+    /* Zero-size anchor pinned on the toggle's center; translates out
+       along its spoke when the menu opens. */
     position: absolute;
-    right: 4px;
-    bottom: 4px;
-    width: 52px;
-    height: 52px;
+    right: 30px;
+    bottom: 30px;
+    width: 0;
+    height: 0;
+    transform: translate(0, 0);
+    transition: transform 260ms var(--ease-out-strong);
   }
 
-  .gear-node {
-    position: relative;
-    display: grid;
-    place-items: center;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 1px solid var(--color-line);
-    background: var(--color-panel);
-    color: var(--color-ink);
-    text-decoration: none;
-    opacity: 0;
-    transform: translate(0, 0) scale(0.6);
-    transition:
-      transform 170ms var(--ease-out-strong),
-      opacity 140ms ease,
-      border-color 200ms ease;
-  }
-
-  .gear-nav[data-open='true'] .gear-node {
-    opacity: 1;
-    transform: translate(calc(var(--ux) * var(--dist)), calc(var(--uy) * var(--dist))) scale(1);
-    transition:
-      transform 300ms var(--ease-spring),
-      opacity 160ms ease,
-      border-color 200ms ease;
+  .gear-nav[data-open='true'] .gear-ring li {
+    transform: translate(calc(var(--ux) * var(--dist)), calc(var(--uy) * var(--dist)));
+    transition: transform 320ms var(--ease-spring);
     transition-delay: calc(var(--i) * 45ms);
   }
 
-  .gear-node:active {
-    scale: 0.95;
-  }
-
-  .gear-node[aria-current='page'] {
-    border-color: var(--color-accent);
-    background: var(--color-accent);
-    color: var(--color-bg);
-  }
-
-  .gear-node-num {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-  }
-
-  /* Label extends along the spoke once the node lands */
-  .gear-node-label {
+  .gear-bubble {
     position: absolute;
-    right: calc(100% + 0.625rem);
-    top: 50%;
-    padding: 0.375rem 0.625rem;
+    right: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.9rem;
     border: 1px solid var(--color-line);
-    background: var(--color-surface);
+    border-radius: 999px;
+    background: var(--color-panel);
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+    text-decoration: none;
     white-space: nowrap;
     opacity: 0;
-    transform: translate(6px, -50%);
+    transform: translate(10px, -50%) scale(0.9);
+    transform-origin: right center;
     transition:
-      opacity 120ms ease,
-      transform 120ms var(--ease-out-strong);
+      opacity 140ms ease,
+      transform 180ms var(--ease-out-strong),
+      border-color 200ms ease,
+      background-color 200ms ease,
+      color 200ms ease;
   }
 
-  .gear-nav[data-open='true'] .gear-node-label {
+  .gear-nav[data-open='true'] .gear-bubble {
     opacity: 1;
-    transform: translate(0, -50%);
+    transform: translate(0, -50%) scale(1);
     transition:
       opacity 200ms ease,
-      transform 200ms var(--ease-out-strong);
-    transition-delay: calc(140ms + var(--i) * 45ms);
+      transform 300ms var(--ease-spring),
+      border-color 200ms ease,
+      background-color 200ms ease,
+      color 200ms ease;
+    transition-delay: calc(var(--i) * 45ms);
+  }
+
+  .gear-bubble:active {
+    scale: 0.96;
+  }
+
+  .gear-bubble[aria-current='page'] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-ink);
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .gear-node:hover {
+    .gear-bubble:hover {
       border-color: var(--color-accent);
-    }
-
-    .gear-node:hover .gear-node-label {
-      border-color: var(--color-accent);
-      color: var(--color-accent);
+      background: var(--color-accent);
+      color: var(--color-ink);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .gear-spin,
-    .gear-node,
-    .gear-nav[data-open='true'] .gear-node,
-    .gear-node-label,
-    .gear-nav[data-open='true'] .gear-node-label {
-      transition: opacity 180ms ease;
+    .gear-ring li,
+    .gear-nav[data-open='true'] .gear-ring li,
+    .gear-bubble,
+    .gear-nav[data-open='true'] .gear-bubble {
+      transition:
+        opacity 180ms ease,
+        border-color 200ms ease,
+        background-color 200ms ease,
+        color 200ms ease;
       transition-delay: 0ms;
     }
 
-    .gear-nav[data-open='true'] .gear-node {
-      transform: translate(
-        calc(var(--ux) * var(--dist)),
-        calc(var(--uy) * var(--dist))
-      );
-    }
-
-    .gear-node {
+    .gear-ring li,
+    .gear-nav[data-open='true'] .gear-ring li {
       transform: translate(calc(var(--ux) * var(--dist)), calc(var(--uy) * var(--dist)));
     }
 
-    .gear-node-label,
-    .gear-nav[data-open='true'] .gear-node-label {
+    .gear-bubble,
+    .gear-nav[data-open='true'] .gear-bubble {
       transform: translate(0, -50%);
     }
   }

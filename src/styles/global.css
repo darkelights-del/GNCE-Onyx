@@ -2,8 +2,13 @@
 
 /* ------------------------------------------------------------------
    DESIGN TOKENS — "Pit Bay Blueprint"
-   Graphite workshop dark + safety orange. See DESIGN.md for the full
-   visual direction and usage rules.
+   Near-black + oxblood plum, with a deep crimson accent. See DESIGN.md
+   for the full visual direction and usage rules.
+
+   The accent (#6E0D25) is dark, so accent TEXT and focus rings use the
+   brighter rose (--color-accent-bright); deep crimson is reserved for
+   fills, borders, and dots where a color area (not legibility) is what
+   matters.
    ------------------------------------------------------------------ */
 @theme {
   /* Type */
@@ -11,14 +16,14 @@
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
 
   /* Color */
-  --color-bg: #0b0c0f;
-  --color-surface: #12141a;
-  --color-panel: #171a21;
-  --color-line: #272b35;
-  --color-ink: #edebe3;
-  --color-muted: #9ca0ab;
-  --color-accent: #ff4d00;
-  --color-accent-bright: #ff6a2b;
+  --color-bg: #0a0908;
+  --color-surface: #2b1b2f;
+  --color-panel: #3a2740;
+  --color-line: #4a3a4e;
+  --color-ink: #e8e2dc;
+  --color-muted: #9e9298;
+  --color-accent: #6e0d25;
+  --color-accent-bright: #d24e66;
 
   /* Motion — custom curves per the emil-design-eng skill.
      Built-in CSS easings are too weak; never use ease-in on UI. */
@@ -54,11 +59,11 @@ body {
 
 ::selection {
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-accent-bright);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -252,20 +257,23 @@ html.js [data-reveal].is-revealed {
 .btn-solid {
   background: var(--color-accent);
   border-color: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-ink);
   font-weight: 700;
 }
 
 @media (hover: hover) and (pointer: fine) {
+  /* Outline button fills on hover (crimson text on dark is too low
+     contrast; the fill keeps the label readable). */
   .btn:hover {
+    background: var(--color-accent);
     border-color: var(--color-accent);
-    color: var(--color-accent);
+    color: var(--color-ink);
   }
 
   .btn-solid:hover {
-    background: var(--color-accent-bright);
-    border-color: var(--color-accent-bright);
-    color: var(--color-bg);
+    background: color-mix(in srgb, var(--color-accent) 82%, var(--color-ink));
+    border-color: color-mix(in srgb, var(--color-accent) 82%, var(--color-ink));
+    color: var(--color-ink);
   }
 }
 

@@ -1,17 +1,19 @@
 # Design System — "Pit Bay Blueprint"
 
 The visual direction for the team site: a robotics pit bay crossed with an
-engineering drawing. Graphite-dark surfaces, one loud safety-orange accent,
-machine-cut display type, and mono "callout" micro-labels everywhere — the
-site should feel like a technical document that moves.
+engineering drawing. Near-black and oxblood-plum surfaces, one deep crimson
+accent, machine-cut display type, and mono "callout" micro-labels everywhere
+— the site should feel like a technical document that moves.
 
 This file is the source of truth for visual decisions. Read it (and
 `.claude/skills/emil-design-eng/SKILL.md`) before touching UI.
 
 ## Principles
 
-1. **One accent.** Safety orange (`--color-accent`) is for emphasis, current
-   state, and placeholders only. If everything is orange, nothing is.
+1. **One accent.** Deep crimson (`--color-accent`) is for emphasis, current
+   state, and placeholders only. Because it is dark, accent *text* and focus
+   rings use the brighter rose (`--color-accent-bright`); reserve deep crimson
+   for fills, borders, and dots. If everything is crimson, nothing is.
 2. **Drawing, not dashboard.** Texture comes from hairlines, blueprint grids,
    hatching, corner registration marks, and mono callouts — not from cards,
    shadows, or gradients. No glassmorphism, no glow.
@@ -32,14 +34,14 @@ This file is the source of truth for visual decisions. Read it (and
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--color-bg` | `#0b0c0f` | Page background |
-| `--color-surface` | `#12141a` | Alternate section bands, footer |
-| `--color-panel` | `#171a21` | Cards, nav chips |
-| `--color-line` | `#272b35` | All hairline borders |
-| `--color-ink` | `#edebe3` | Primary text (warm off-white) |
-| `--color-muted` | `#9ca0ab` | Secondary text, labels |
-| `--color-accent` | `#ff4d00` | Safety orange — emphasis only |
-| `--color-accent-bright` | `#ff6a2b` | Accent hover state |
+| `--color-bg` | `#0a0908` | Page background (near-black) |
+| `--color-surface` | `#2b1b2f` | Alternate section bands, footer, form inputs (plum) |
+| `--color-panel` | `#3a2740` | Cards, nav bubbles (lifted plum) |
+| `--color-line` | `#4a3a4e` | All hairline borders |
+| `--color-ink` | `#e8e2dc` | Primary text (warm off-white) |
+| `--color-muted` | `#9e9298` | Secondary text, labels |
+| `--color-accent` | `#6e0d25` | Deep crimson — fills, borders, dots |
+| `--color-accent-bright` | `#d24e66` | Rose — accent text, focus rings, hover |
 | `--ease-out-strong` | `cubic-bezier(0.23,1,0.32,1)` | Entrances, UI feedback |
 | `--ease-in-out-strong` | `cubic-bezier(0.77,0,0.175,1)` | On-screen movement, clip reveals |
 | `--ease-spring` | `cubic-bezier(0.34,1.56,0.64,1)` | Gear hub fan-out only |
