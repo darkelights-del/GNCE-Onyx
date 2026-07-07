@@ -38,6 +38,9 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
   `ease-out-strong`, ...). There is no `tailwind.config.*`.
 - Scroll entrances: wrap content in `components/Reveal.astro`; stagger
   siblings by putting `data-reveal-group` on their parent.
+- Blog: posts are markdown in `src/content/blog/` (collection defined in
+  `src/content.config.ts`), rendered by `src/pages/outreach/[id].astro`.
+  Comments/views services are configured in `src/lib/services.ts`.
 
 ## Placeholder convention (important)
 

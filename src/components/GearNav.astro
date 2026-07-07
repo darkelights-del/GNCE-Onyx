@@ -62,12 +62,13 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
       nodes.map((node, i) => (
         <li style={`--ux:${node.ux};--uy:${node.uy};--i:${i}`}>
           <a
-            class="gear-bubble"
+            class="gear-node"
             href={node.href}
             aria-label={node.label}
             aria-current={isCurrent(node.href) ? 'page' : undefined}
           >
-            {node.short}
+            <span class="gear-dot" aria-hidden="true"></span>
+            <span class="gear-node-label">{node.short}</span>
           </a>
         </li>
       ))
@@ -221,59 +222,102 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
     transition-delay: calc(var(--i) * 45ms);
   }
 
-  .gear-bubble {
+  /* The link is a generous invisible hit area centered on the spoke
+     point; the visible parts are the dot and (on demand) its label. */
+  .gear-node {
     position: absolute;
-    right: 0;
     top: 0;
-    display: flex;
-    align-items: center;
-    padding: 0.5rem 0.9rem;
+    right: 0;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    translate: 50% -50%;
+    text-decoration: none;
+    opacity: 0;
+    scale: 0.6;
+    transition:
+      opacity 140ms ease,
+      scale 180ms var(--ease-out-strong);
+  }
+
+  .gear-nav[data-open='true'] .gear-node {
+    opacity: 1;
+    scale: 1;
+    transition:
+      opacity 200ms ease,
+      scale 300ms var(--ease-spring);
+    transition-delay: calc(var(--i) * 45ms);
+  }
+
+  .gear-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--color-line);
+    background: var(--color-panel);
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      scale 160ms var(--ease-out-strong);
+  }
+
+  .gear-node:active .gear-dot {
+    scale: 0.9;
+  }
+
+  .gear-node[aria-current='page'] .gear-dot {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+  }
+
+  .gear-node-label {
+    position: absolute;
+    right: calc(100% - 4px);
+    top: 50%;
+    padding: 0.3rem 0.7rem;
     border: 1px solid var(--color-line);
     border-radius: 999px;
     background: var(--color-panel);
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    text-decoration: none;
     white-space: nowrap;
-    opacity: 0;
-    transform: translate(10px, -50%) scale(0.9);
-    transform-origin: right center;
-    transition:
-      opacity 140ms ease,
-      transform 180ms var(--ease-out-strong),
-      border-color 200ms ease,
-      background-color 200ms ease,
-      color 200ms ease;
   }
 
-  .gear-nav[data-open='true'] .gear-bubble {
-    opacity: 1;
-    transform: translate(0, -50%) scale(1);
-    transition:
-      opacity 200ms ease,
-      transform 300ms var(--ease-spring),
-      border-color 200ms ease,
-      background-color 200ms ease,
-      color 200ms ease;
-    transition-delay: calc(var(--i) * 45ms);
-  }
-
-  .gear-bubble:active {
-    scale: 0.96;
-  }
-
-  .gear-bubble[aria-current='page'] {
-    border-color: var(--color-accent);
-    background: var(--color-accent);
-    color: var(--color-ink);
-  }
-
+  /* Fine pointers: labels hide until the dot is hovered or focused. */
   @media (hover: hover) and (pointer: fine) {
-    .gear-bubble:hover {
+    .gear-node-label {
+      opacity: 0;
+      transform: translate(6px, -50%);
+      transition:
+        opacity 140ms ease,
+        transform 160ms var(--ease-out-strong);
+    }
+
+    .gear-node:hover .gear-dot,
+    .gear-node:focus-visible .gear-dot {
+      border-color: var(--color-accent);
+      background: var(--color-accent);
+    }
+
+    .gear-node:hover .gear-node-label,
+    .gear-node:focus-visible .gear-node-label {
+      opacity: 1;
+      transform: translate(0, -50%);
+    }
+  }
+
+  /* Touch: no hover exists, so labels ride along with the dots. */
+  @media (hover: none) {
+    .gear-node-label {
+      transform: translate(0, -50%);
+    }
+
+    .gear-node[aria-current='page'] .gear-node-label {
       border-color: var(--color-accent);
       background: var(--color-accent);
       color: var(--color-ink);
@@ -284,8 +328,8 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
     .gear-spin,
     .gear-ring li,
     .gear-nav[data-open='true'] .gear-ring li,
-    .gear-bubble,
-    .gear-nav[data-open='true'] .gear-bubble {
+    .gear-node,
+    .gear-nav[data-open='true'] .gear-node {
       transition:
         opacity 180ms ease,
         border-color 200ms ease,
@@ -299,9 +343,9 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
       transform: translate(calc(var(--ux) * var(--dist)), calc(var(--uy) * var(--dist)));
     }
 
-    .gear-bubble,
-    .gear-nav[data-open='true'] .gear-bubble {
-      transform: translate(0, -50%);
+    .gear-node,
+    .gear-nav[data-open='true'] .gear-node {
+      scale: 1;
     }
   }
 </style>

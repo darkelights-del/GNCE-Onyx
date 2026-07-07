@@ -36,11 +36,38 @@ src/
 ├── pages/
 │   ├── index.astro        # Home / Welcome
 │   ├── season.astro       # Season Recap (first season)
-│   ├── outreach.astro     # Community outreach events
+│   ├── outreach/          # Blog: index + one page per post
 │   └── contact.astro      # Contact + Donate (link + channels)
+├── content/
+│   └── blog/              # Blog posts (one .md file per post)
 └── styles/
     └── global.css         # Design tokens, textures, reveal system
 ```
+
+## Blog
+
+The Outreach page is a blog. Each post is one markdown file in
+`src/content/blog/` with `title`, `date`, `description` (and optional
+`author`) frontmatter; the filename becomes the URL. The full walkthrough is
+the "How to post" post itself (`src/content/blog/how-to-post.md`). Delete
+that post once real ones exist.
+
+Views, likes, and comments need two free accounts (config in
+`src/lib/services.ts`; the site shows marked stubs until these are set):
+
+1. **giscus** (comments + likes). Enable Discussions on this repo
+   (Settings → General → Features), install the giscus app
+   (github.com/apps/giscus) for the repo, then open giscus.app, enter the
+   repo, pick the "Blog comments" category (create it as an Announcements
+   category in Discussions), and copy the `repoId` and `categoryId` values
+   into `src/lib/services.ts`.
+2. **GoatCounter** (view counts). Create a site at goatcounter.com, then put
+   your site code in `src/lib/services.ts`.
+
+Comment safety: commenting requires GitHub sign-in, which blocks anonymous
+spam. Everything posted lands in this repo's Discussions tab, where the team
+can delete comments, report users, or lock a thread. Check it when a post
+gets traffic.
 
 ## Dropping in remaining content
 

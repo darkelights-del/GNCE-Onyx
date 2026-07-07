@@ -134,63 +134,66 @@ const tiers = [
         </p>
       </Reveal>
 
-      <div class="mt-14 grid gap-10 md:grid-cols-2">
-        <!-- STEM partnerships -->
-        <Reveal variant="left">
-          <h3 class="type-callout text-muted">More than money</h3>
-          <p class="mt-4 max-w-prose text-base/relaxed text-muted">
-            The sponsorships we want most aren't checks. We're looking for
-            local companies to:
-          </p>
-          <ul class="mt-5" data-reveal-group>
-            {
-              stemTies.map((tie, i) => (
-                <Reveal as="li" class="hairline border-b py-4">
-                  <div class="flex items-baseline gap-5">
-                    <span class="font-mono text-sm font-bold text-accent">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <div>
-                      <p class="font-display text-lg text-ink">{tie.name}</p>
-                      <p class="mt-1 text-sm/relaxed text-muted">{tie.desc}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              ))
-            }
-          </ul>
-        </Reveal>
-
-        <!-- Recognition ladder -->
-        <Reveal variant="right" delay={120}>
-          <h3 class="type-callout text-muted">What sponsors get</h3>
-          <p class="mt-4 max-w-prose text-base/relaxed text-muted">
-            Every sponsor, at any amount, is named in the engineering
-            portfolio judges read at every event, and listed on this site.
-            From there it stacks:
-          </p>
-          <ul class="mt-5" data-reveal-group>
-            {
-              tiers.map((tier) => (
-                <Reveal as="li" class="hairline flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b py-4">
-                  <span class="w-28 shrink-0 font-mono text-sm font-bold text-accent">
-                    {tier.range}
-                  </span>
-                  <span class="flex-1 text-sm/relaxed text-muted">{tier.adds}</span>
-                </Reveal>
-              ))
-            }
-          </ul>
-          <p class="mt-5 text-sm/relaxed text-muted">
-            Ranges are guides, not gates. If you'd rather send an engineer
-            than a check, we'll take the engineer.
-          </p>
-        </Reveal>
-      </div>
+      <Reveal variant="up" delay={200} class="mt-14 max-w-2xl">
+        <h3 class="type-callout text-muted">What sponsors get</h3>
+        <p class="mt-4 max-w-prose text-base/relaxed text-muted">
+          Every sponsor, at any amount, is named in the engineering
+          portfolio judges read at every event, and listed on this site.
+          From there it stacks:
+        </p>
+        <ul class="mt-5" data-reveal-group>
+          {
+            tiers.map((tier) => (
+              <Reveal as="li" class="hairline flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b py-4">
+                <span class="w-28 shrink-0 font-mono text-sm font-bold text-accent">
+                  {tier.range}
+                </span>
+                <span class="flex-1 text-sm/relaxed text-muted">{tier.adds}</span>
+              </Reveal>
+            ))
+          }
+        </ul>
+      </Reveal>
 
       <Placeholder name="contact-sponsor-packet" class="mt-12 inline-block px-4 py-3">
         <p class="font-mono text-xs text-muted">// Sponsor packet: PDF TBD</p>
       </Placeholder>
+    </div>
+  </section>
+
+  <!-- ================================================ PARTNER WITH US -->
+  <section class="bg-bg py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h2 class="type-display max-w-5xl text-[clamp(2rem,5.5vw,4.5rem)]">
+          Partner with us
+        </h2>
+      </Reveal>
+
+      <Reveal variant="up" delay={120} class="mt-8 max-w-2xl">
+        <p class="text-base/relaxed text-muted">
+          Not every partnership starts with a check. We want local companies
+          in the room:
+        </p>
+      </Reveal>
+
+      <div class="mt-10 grid gap-x-12 gap-y-2 sm:grid-cols-2" data-reveal-group>
+        {
+          stemTies.map((tie, i) => (
+            <Reveal class="hairline border-b py-4">
+              <div class="flex items-baseline gap-5">
+                <span class="font-mono text-sm font-bold text-accent">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <p class="font-display text-lg text-ink">{tie.name}</p>
+                  <p class="mt-1 text-sm/relaxed text-muted">{tie.desc}</p>
+                </div>
+              </div>
+            </Reveal>
+          ))
+        }
+      </div>
     </div>
   </section>
 </BaseLayout>
