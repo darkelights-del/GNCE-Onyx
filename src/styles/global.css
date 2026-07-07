@@ -2,28 +2,30 @@
 
 /* ------------------------------------------------------------------
    DESIGN TOKENS — "Pit Bay Blueprint"
-   Near-black + oxblood plum, with a deep crimson accent. See DESIGN.md
-   for the full visual direction and usage rules.
+   A strict four-color palette. Every value below is one of these four
+   or a transparency of one of them (no new hues):
+     #0A0908 near-black · #2B1B2F surface · #6E0D25 crimson · #E8E2DC ink
+   See DESIGN.md for the full visual direction and usage rules.
 
-   The accent (#6E0D25) is dark, so accent TEXT and focus rings use the
-   brighter rose (--color-accent-bright); deep crimson is reserved for
-   fills, borders, and dots where a color area (not legibility) is what
-   matters.
+   Deep crimson (#6E0D25) is THE accent: used both as fills (solid
+   buttons, the current nav bubble, markers) and as accent text directly
+   on the near-black. Ink (#E8E2DC) is reserved for the copy that was
+   always light (headlines, body, labels); hairlines and muted text are
+   that ink at low opacity.
    ------------------------------------------------------------------ */
 @theme {
   /* Type */
   --font-display: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Color */
+  /* Color — only #0A0908 / #2B1B2F / #6E0D25 / #E8E2DC and their alphas */
   --color-bg: #0a0908;
   --color-surface: #2b1b2f;
-  --color-panel: #3a2740;
-  --color-line: #4a3a4e;
+  --color-panel: #2b1b2f;
+  --color-line: color-mix(in srgb, #e8e2dc 15%, transparent);
   --color-ink: #e8e2dc;
-  --color-muted: #9e9298;
+  --color-muted: color-mix(in srgb, #e8e2dc 62%, transparent);
   --color-accent: #6e0d25;
-  --color-accent-bright: #d24e66;
 
   /* Motion — custom curves per the emil-design-eng skill.
      Built-in CSS easings are too weak; never use ease-in on UI. */
@@ -63,7 +65,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent-bright);
+  outline: 2px solid var(--color-ink);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -270,10 +272,9 @@ html.js [data-reveal].is-revealed {
     color: var(--color-ink);
   }
 
+  /* Lift the crimson on hover without introducing a new palette color. */
   .btn-solid:hover {
-    background: color-mix(in srgb, var(--color-accent) 82%, var(--color-ink));
-    border-color: color-mix(in srgb, var(--color-accent) 82%, var(--color-ink));
-    color: var(--color-ink);
+    filter: brightness(1.22);
   }
 }
 

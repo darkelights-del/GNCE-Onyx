@@ -16,9 +16,9 @@ const { index, title, class: cls } = Astro.props;
 ---
 
 <p class:list={['section-label type-callout', cls]}>
-  <span class="text-accent-bright" aria-hidden="true">[</span>
+  <span class="text-accent" aria-hidden="true">[</span>
   <span>{index ? `${index} / ${title}` : title}</span>
-  <span class="text-accent-bright" aria-hidden="true">]</span>
+  <span class="text-accent" aria-hidden="true">]</span>
   <span class="section-label-rule" aria-hidden="true"></span>
 </p>
 

@@ -1,7 +1,7 @@
 # Design System — "Pit Bay Blueprint"
 
 The visual direction for the team site: a robotics pit bay crossed with an
-engineering drawing. Near-black and oxblood-plum surfaces, one deep crimson
+engineering drawing. Near-black and dark #2B1B2F surfaces, one deep crimson
 accent, machine-cut display type, and mono "callout" micro-labels everywhere
 — the site should feel like a technical document that moves.
 
@@ -10,24 +10,28 @@ This file is the source of truth for visual decisions. Read it (and
 
 ## Principles
 
-1. **One accent.** Deep crimson (`--color-accent`) is for emphasis, current
-   state, and placeholders only. Because it is dark, accent *text* and focus
-   rings use the brighter rose (`--color-accent-bright`); reserve deep crimson
-   for fills, borders, and dots. If everything is crimson, nothing is.
-2. **Drawing, not dashboard.** Texture comes from hairlines, blueprint grids,
+1. **Four colors, nothing else.** The whole site uses only `#0A0908`,
+   `#2B1B2F`, `#6E0D25`, `#E8E2DC`, plus transparencies of the ink for
+   hairlines and muted text. No derived hues.
+2. **One accent.** Deep crimson (`--color-accent`, `#6E0D25`) is the accent
+   everywhere: as a fill (solid buttons, the current nav bubble, the timeline
+   marker) and as accent text directly on the near-black (hero words, numbers,
+   labels, brackets, placeholder tags). Ink (`#E8E2DC`) is kept for text that
+   was always light (headlines, body, callout labels), not as an accent.
+3. **Drawing, not dashboard.** Texture comes from hairlines, blueprint grids,
    hatching, corner registration marks, and mono callouts — not from cards,
    shadows, or gradients. No glassmorphism, no glow.
-3. **Motion is mechanical and earned.** Entrances use strong ease-out;
+4. **Motion is mechanical and earned.** Entrances use strong ease-out;
    interactive UI stays under 300ms; the gear hub is the only playful
    (springy) element. Everything respects `prefers-reduced-motion`.
-4. **Placeholders are loud.** Blocks awaiting content are wrapped in
+5. **Placeholders are loud.** Blocks awaiting content are wrapped in
    `<Placeholder name="...">`; inline unknowns use a `.stub` span. Both are
    impossible to miss in the browser.
-5. **Eyebrow restraint.** `SectionLabel` callouts appear on at most a couple
+6. **Eyebrow restraint.** `SectionLabel` callouts appear on at most a couple
    of sections per page, and get an `index` only when the order itself is
    content (e.g. the season timeline). Most sections open with a display
    headline instead (see the `taste` skill's eyebrow rules).
-6. **No em-dashes in visible copy** (see the `taste` skill). Use periods,
+7. **No em-dashes in visible copy** (see the `taste` skill). Use periods,
    commas, colons, or hyphens.
 
 ## Tokens (defined in `src/styles/global.css` `@theme`)
@@ -35,13 +39,12 @@ This file is the source of truth for visual decisions. Read it (and
 | Token | Value | Use |
 | --- | --- | --- |
 | `--color-bg` | `#0a0908` | Page background (near-black) |
-| `--color-surface` | `#2b1b2f` | Alternate section bands, footer, form inputs (plum) |
-| `--color-panel` | `#3a2740` | Cards, nav bubbles (lifted plum) |
-| `--color-line` | `#4a3a4e` | All hairline borders |
+| `--color-surface` | `#2b1b2f` | Cards, alternate bands, footer, nav bubbles, form inputs |
+| `--color-panel` | `#2b1b2f` | Same as surface (cards are set apart by their border) |
+| `--color-line` | `#e8e2dc` @ 15% | All hairline borders (ink at low opacity) |
 | `--color-ink` | `#e8e2dc` | Primary text (warm off-white) |
-| `--color-muted` | `#9e9298` | Secondary text, labels |
-| `--color-accent` | `#6e0d25` | Deep crimson — fills, borders, dots |
-| `--color-accent-bright` | `#d24e66` | Rose — accent text, focus rings, hover |
+| `--color-muted` | `#e8e2dc` @ 62% | Secondary text, labels (ink at low opacity) |
+| `--color-accent` | `#6e0d25` | Deep crimson — the accent, as fills and as text |
 | `--ease-out-strong` | `cubic-bezier(0.23,1,0.32,1)` | Entrances, UI feedback |
 | `--ease-in-out-strong` | `cubic-bezier(0.77,0,0.175,1)` | On-screen movement, clip reveals |
 | `--ease-spring` | `cubic-bezier(0.34,1.56,0.64,1)` | Gear hub fan-out only |

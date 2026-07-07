@@ -26,7 +26,7 @@ const sponsorGets = [
     <div class="mx-auto max-w-6xl px-5 sm:px-8">
       <Reveal variant="clip">
         <h1 class="type-display text-[clamp(2.75rem,9vw,8rem)]">
-          Get in <span class="text-accent-bright">touch</span>
+          Get in <span class="text-accent">touch</span>
         </h1>
       </Reveal>
 
@@ -47,7 +47,7 @@ const sponsorGets = [
         <Reveal variant="left">
           <Placeholder name="contact-form" class="p-6 sm:p-8">
             <p
-              class="hairline inline-block border bg-surface px-3 py-1.5 font-mono text-[11px] tracking-wide text-accent-bright"
+              class="hairline inline-block border bg-surface px-3 py-1.5 font-mono text-[11px] tracking-wide text-accent"
             >
               // Form not wired up yet: submissions go nowhere
             </p>
@@ -61,7 +61,7 @@ const sponsorGets = [
                   name="name"
                   autocomplete="name"
                   placeholder="Your name"
-                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent-bright focus:outline-none"
+                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
                 />
               </div>
 
@@ -73,7 +73,7 @@ const sponsorGets = [
                   name="email"
                   autocomplete="email"
                   placeholder="you@example.com"
-                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent-bright focus:outline-none"
+                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
                 />
               </div>
 
@@ -82,7 +82,7 @@ const sponsorGets = [
                 <select
                   id="contact-topic"
                   name="topic"
-                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent-bright focus:outline-none"
+                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
                 >
                   <option>Sponsorship</option>
                   <option>Joining the team</option>
@@ -98,7 +98,7 @@ const sponsorGets = [
                   name="message"
                   rows="5"
                   placeholder="What can we help with?"
-                  class="field hairline mt-2 block w-full resize-y border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent-bright focus:outline-none"></textarea>
+                  class="field hairline mt-2 block w-full resize-y border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"></textarea>
               </div>
 
               <div class="sm:col-span-2">
@@ -167,7 +167,7 @@ const sponsorGets = [
             {
               sponsorGets.map((item, i) => (
                 <Reveal as="li" class="hairline flex items-baseline gap-5 border-b py-4">
-                  <span class="font-mono text-sm font-bold text-accent-bright">
+                  <span class="font-mono text-sm font-bold text-accent">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span class="font-display text-lg text-ink">{item}</span>
