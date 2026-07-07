@@ -1,8 +1,9 @@
 ---
 /**
  * Season Recap — the team's first (and only) season: 2026-2027 BIOBUZZ.
- * The season hasn't started yet, so every block is a clearly-marked slot
- * that fills in as the season happens (see <Placeholder> wrappers).
+ * The season hasn't started, so every block is a clearly-marked slot
+ * that fills in as it happens (see <Placeholder> wrappers).
+ * Build log → Highlight match → Awards → Gallery.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Placeholder from '../components/Placeholder.astro';
@@ -12,46 +13,17 @@ const timeline = [
   {
     date: 'TBD',
     stage: 'Kickoff',
-    body: 'Game reveal day. Our read on the BIOBUZZ challenge and the first strategy decisions land here.',
+    body: 'Game reveal day. Our read on the BIOBUZZ challenge and the first strategy calls land here.',
   },
-  {
-    date: 'TBD',
-    stage: 'Build season',
-    body: 'The robot takes shape. Design choices, prototypes, and what survived testing.',
-  },
-  {
-    date: 'TBD',
-    stage: 'Programming and testing',
-    body: 'Autonomous routines, driver practice, and the tuning that makes the machine dependable.',
-  },
-  {
-    date: 'TBD',
-    stage: 'First qualifier',
-    body: 'Our first matches as GNCE Onyx. Results and takeaways get logged here.',
-  },
-  {
-    date: 'TBD',
-    stage: 'League championship',
-    body: 'Where the season points. How far the robot and the team get.',
-  },
-  {
-    date: 'TBD',
-    stage: 'Season wrap',
-    body: 'The final tally: what worked, what broke, and what carries into next year.',
-  },
+  { date: 'TBD', stage: 'TBD', body: 'Logged when it happens.' },
+  { date: 'TBD', stage: 'TBD', body: 'Logged when it happens.' },
+  { date: 'TBD', stage: 'TBD', body: 'Logged when it happens.' },
 ];
-
-const matches = Array.from({ length: 5 }, () => ({
-  id: 'TBD',
-  alliance: 'TBD',
-  score: 'TBD',
-  result: 'TBD',
-}));
 ---
 
 <BaseLayout
   title="Season Recap"
-  description="GNCE Onyx's rookie season recap: the 2026-2027 BIOBUZZ season, presented by RTX, part of the FIRST CANOPY season. Build log, matches, and awards as they happen."
+  description="GNCE Onyx's rookie season recap: the 2026-2027 BIOBUZZ season, presented by RTX, part of the FIRST CANOPY season. Build log, highlight matches, and awards as they happen."
 >
   <!-- PAGE HEADER -->
   <header class="bp-grid bg-bg pt-36 pb-20 sm:pt-44">
@@ -77,8 +49,9 @@ const matches = Array.from({ length: 5 }, () => ({
       <Reveal delay={240} class="mt-10 max-w-prose">
         <p class="text-base/relaxed text-muted">
           Our first FTC season, and the only one on the books. This page is
-          the running recap: the build log, every match, and whatever hardware
-          comes home with us. It fills in as the season happens.
+          the running recap: the build log, the matches worth rewatching,
+          whatever hardware comes home with us, and the photos to prove it.
+          It fills in as the season happens.
         </p>
       </Reveal>
     </div>
@@ -103,9 +76,7 @@ const matches = Array.from({ length: 5 }, () => ({
                   ]}
                   aria-hidden="true"
                 ></span>
-                <p class="type-callout text-muted">
-                  {String(i + 1).padStart(2, '0')} / date {entry.date}
-                </p>
+                <p class="type-callout text-muted">Date: {entry.date}</p>
                 <h3 class="type-display mt-3 text-xl sm:text-2xl">
                   {entry.stage}
                 </h3>
@@ -120,35 +91,38 @@ const matches = Array.from({ length: 5 }, () => ({
     </div>
   </section>
 
-  <!-- MATCH LOG -->
+  <!-- HIGHLIGHT MATCH -->
   <section class="border-y hairline bg-surface py-24 sm:py-32">
     <div class="mx-auto max-w-6xl px-5 sm:px-8">
       <Reveal variant="clip">
-        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Match log</h2>
+        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">
+          Highlight match
+        </h2>
       </Reveal>
 
-      <Placeholder name="season-match-log" class="mt-14 p-4 sm:p-6">
-        <div class="overflow-x-auto">
-          <div class="min-w-[34rem]" data-reveal-group>
-            <div
-              class="type-callout grid grid-cols-[auto_1fr_auto_auto] gap-x-8 border-b hairline pb-3 text-muted"
-            >
-              <span>Match</span>
-              <span>Alliance</span>
-              <span>Score</span>
-              <span>Result</span>
-            </div>
-            {
-              matches.map((m) => (
-                <Reveal class="grid grid-cols-[auto_1fr_auto_auto] items-baseline gap-x-8 border-b hairline py-3 font-mono text-sm">
-                  <span class="text-ink">{m.id}</span>
-                  <span class="text-muted">{m.alliance}</span>
-                  <span class="text-ink">{m.score}</span>
-                  <span class="text-muted">{m.result}</span>
-                </Reveal>
-              ))
-            }
-          </div>
+      <Reveal delay={80} class="mt-6 max-w-prose">
+        <p class="text-base/relaxed text-muted">
+          One match per event earns this spot: the video, plus why we picked
+          it.
+        </p>
+      </Reveal>
+
+      <Placeholder name="season-highlight-match" class="mt-12 p-3 sm:p-4">
+        <!-- Swap this frame for the real embed when there's a video:
+        <iframe
+          class="aspect-video w-full"
+          src="https://www.youtube.com/embed/VIDEO_ID"
+          title="GNCE Onyx highlight match"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+        -->
+        <div class="bp-hatch bp-corners flex aspect-video items-center justify-center border hairline">
+          <span class="type-callout text-muted">Match video: TBD (YouTube embed)</span>
+        </div>
+        <div class="hairline mt-3 flex flex-wrap items-baseline justify-between gap-2 border-t pt-3">
+          <p class="font-mono text-sm text-ink">Match: TBD</p>
+          <p class="font-mono text-sm text-muted">Score: TBD</p>
         </div>
       </Placeholder>
     </div>
@@ -220,38 +194,6 @@ const matches = Array.from({ length: 5 }, () => ({
           }
         </div>
       </Placeholder>
-    </div>
-  </section>
-
-  <!-- DEBRIEF -->
-  <section class="bg-bg py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
-      <Reveal variant="clip">
-        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Debrief</h2>
-      </Reveal>
-
-      <div class="mt-14 grid gap-10 md:grid-cols-2">
-        <Reveal variant="left" class="h-full">
-          <Placeholder name="season-lessons" class="h-full p-6 sm:p-8">
-            <h3 class="type-display text-xl sm:text-2xl">What we learned</h3>
-            <p class="mt-6 text-base/relaxed text-muted">
-              The honest engineering retrospective goes here after the season:
-              which proven designs earned their keep, what we would build
-              differently, and what the rookies picked up from the veterans.
-            </p>
-          </Placeholder>
-        </Reveal>
-
-        <Reveal variant="right" class="h-full">
-          <Placeholder name="season-thanks" class="h-full p-6 sm:p-8">
-            <h3 class="type-display text-xl sm:text-2xl">Thank you</h3>
-            <p class="mt-6 text-base/relaxed text-muted">
-              Mentors, sponsors, families, and Weston High School. Everyone who
-              made the season possible gets named here at the end of it.
-            </p>
-          </Placeholder>
-        </Reveal>
-      </div>
     </div>
   </section>
 </BaseLayout>

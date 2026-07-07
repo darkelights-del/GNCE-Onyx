@@ -1,0 +1,119 @@
+---
+/**
+ * Outreach — community events the team runs or joins.
+ * Header → Events (featured slot + card grid, all placeholder for now)
+ * → Bring us in (CTA to contact).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Placeholder from '../components/Placeholder.astro';
+import Reveal from '../components/Reveal.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+---
+
+<BaseLayout
+  title="Outreach"
+  description="GNCE Onyx runs robot demos, workshops, and STEM events for younger students in and around Weston, Massachusetts. Every event we run or join gets logged here."
+>
+  <!-- PAGE HEADER -->
+  <header class="bp-grid bg-bg pt-36 pb-20 sm:pt-44">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h1 class="type-display text-[clamp(2.75rem,9vw,8rem)]">
+          Out<span class="text-accent">reach</span>
+        </h1>
+      </Reveal>
+
+      <Reveal variant="up" delay={160} class="mt-8 max-w-prose">
+        <p class="text-base/relaxed text-muted">
+          Competing is half the mission. The other half is getting younger
+          students in and around Weston building, coding, and hooked enough
+          to stay. Every event we run or join gets logged here.
+        </p>
+      </Reveal>
+    </div>
+  </header>
+
+  <!-- EVENTS -->
+  <section class="bg-bg py-24 sm:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <SectionLabel title="Events" class="mb-12 sm:mb-16" />
+
+      <!-- Featured / next event -->
+      <Reveal variant="up">
+        <Placeholder name="outreach-featured-event" class="p-6 sm:p-8">
+          <p class="type-callout text-accent">Next up</p>
+          <div class="mt-4 grid gap-6 md:grid-cols-[2fr_1fr]">
+            <div>
+              <h2 class="type-display text-[clamp(1.5rem,3.5vw,2.5rem)]">Event: TBD</h2>
+              <p class="mt-4 max-w-prose text-base/relaxed text-muted">
+                What it is, who it's for, and what we're bringing. One or two
+                sentences, written like a person.
+              </p>
+            </div>
+            <dl class="hairline border-t md:border-t-0 md:border-l md:pl-6">
+              <div class="hairline flex items-baseline justify-between gap-4 border-b py-3">
+                <dt class="type-callout text-muted">Date</dt>
+                <dd class="font-mono text-sm text-ink">TBD</dd>
+              </div>
+              <div class="hairline flex items-baseline justify-between gap-4 border-b py-3">
+                <dt class="type-callout text-muted">Where</dt>
+                <dd class="font-mono text-sm text-ink">TBD</dd>
+              </div>
+              <div class="hairline flex items-baseline justify-between gap-4 border-b py-3">
+                <dt class="type-callout text-muted">Ages</dt>
+                <dd class="font-mono text-sm text-ink">TBD</dd>
+              </div>
+            </dl>
+          </div>
+        </Placeholder>
+      </Reveal>
+
+      <!-- Past / planned events -->
+      <Placeholder name="outreach-events" class="mt-8 p-4 sm:p-6">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group>
+          {
+            Array.from({ length: 3 }).map(() => (
+              <Reveal variant="up" class="h-full">
+                <article class="bp-corners hairline flex h-full flex-col border bg-panel p-6">
+                  <p class="type-callout text-muted">Date: TBD</p>
+                  <h3 class="type-display mt-3 text-xl">Event: TBD</h3>
+                  <p class="mt-3 text-sm/relaxed text-muted">
+                    What happened, how many kids showed up, what they built or
+                    drove.
+                  </p>
+                  <div class="bp-hatch mt-5 flex aspect-video items-center justify-center border hairline">
+                    <span class="type-callout text-muted">Photo: TBD</span>
+                  </div>
+                </article>
+              </Reveal>
+            ))
+          }
+        </div>
+      </Placeholder>
+    </div>
+  </section>
+
+  <!-- BRING US IN -->
+  <section class="hairline border-t bg-surface py-28 sm:py-40">
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal variant="clip">
+        <h2 class="type-display max-w-5xl text-[clamp(2.5rem,7vw,6rem)]">
+          Bring us in
+        </h2>
+      </Reveal>
+
+      <Reveal variant="up" delay={120} class="mt-10 max-w-2xl">
+        <p class="text-base/relaxed text-muted">
+          Running a school event or a scout night? We'll show up with a robot
+          kids can actually drive, and the people who built it.
+        </p>
+      </Reveal>
+
+      <Reveal variant="up" delay={200} class="mt-10">
+        <a href={`${base}/contact/`} class="btn btn-solid">Get in touch</a>
+      </Reveal>
+    </div>
+  </section>
+</BaseLayout>

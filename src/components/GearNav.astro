@@ -13,19 +13,17 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 const links = [
   { href: `${base}/`, short: 'Home', label: 'Home' },
   { href: `${base}/season/`, short: 'Season', label: 'Season Recap' },
+  { href: `${base}/outreach/`, short: 'Outreach', label: 'Outreach' },
   { href: `${base}/contact/`, short: 'Contact', label: 'Contact + Donate' },
 ];
 
 // Fan the bubbles up the left side (button sits bottom-right).
-// Unit vectors are precomputed at build time; CSS multiplies by --dist.
-const arcStart = 108;
-const arcEnd = 172;
+// Angles are hand-spaced (not evenly stepped) so the pills keep even
+// vertical gaps and never overlap. Unit vectors are precomputed at
+// build time; CSS multiplies by --dist.
+const angles = [102, 135, 158, 177];
 const nodes = links.map((link, i) => {
-  const angle =
-    links.length === 1
-      ? (arcStart + arcEnd) / 2
-      : arcStart + (i * (arcEnd - arcStart)) / (links.length - 1);
-  const rad = (angle * Math.PI) / 180;
+  const rad = (angles[i] * Math.PI) / 180;
   return {
     ...link,
     ux: Math.cos(rad).toFixed(4),
@@ -106,14 +104,14 @@ const isCurrent = (href: string) => (href.replace(/\/+$/, '') || '/') === curren
     right: 1.5rem;
     bottom: 1.5rem;
     z-index: 50;
-    --dist: 118px;
+    --dist: 134px;
   }
 
   @media (max-width: 640px) {
     .gear-nav {
       right: 1rem;
       bottom: 1rem;
-      --dist: 100px;
+      --dist: 126px;
     }
   }
 

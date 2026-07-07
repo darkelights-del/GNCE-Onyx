@@ -59,10 +59,12 @@ const roster = [
 ];
 
 const specs = [
-  { key: 'Drivetrain', value: 'TBD' },
-  { key: 'Reach', value: 'TBD' },
+  { key: 'Size', value: 'TBD' },
   { key: 'Mass', value: 'TBD' },
-  { key: 'Autonomous', value: 'TBD' },
+  { key: 'Drivetrain', value: 'TBD' },
+  { key: 'TeleOp', value: 'TBD' },
+  { key: 'Auto', value: 'TBD' },
+  { key: 'Solo score', value: 'TBD' },
 ];
 
 const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
@@ -129,8 +131,8 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
         <Reveal variant="up" delay={480} class="mt-8 max-w-xl">
           <p class="text-base/relaxed text-muted">
-            Championship veterans from four GNCE squads, starting fresh as one rookie
-            FTC team for the 2026-2027 BIOBUZZ season.
+            A rookie FTC team at Weston High, built by members of four GNCE
+            teams, competing in BIOBUZZ 2026-2027.
           </p>
         </Reveal>
 
@@ -205,9 +207,9 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
         </Reveal>
         <Reveal variant="up">
           <p class="max-w-prose text-base/relaxed text-muted">
-            Beyond competition, we run outreach across our community, getting
-            younger students into robotics and growing FIRST and STEM in and
-            around Weston, Massachusetts.
+            Off the field, we run outreach to get younger students into
+            robotics and grow FIRST and STEM in and around Weston,
+            Massachusetts.
           </p>
         </Reveal>
       </div>
@@ -258,9 +260,9 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
       <Reveal variant="up">
         <p class="max-w-prose text-lg text-muted">
-          Seven members and counting, led by two captains. Four of us competed
-          through world championship and international invitational events on
-          our previous teams.
+          Seven members and counting, led by two captains. Four of us
+          competed at Worlds and international invitationals on our previous
+          teams.
         </p>
       </Reveal>
 
@@ -290,17 +292,16 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
     <div class="mx-auto max-w-6xl px-5 sm:px-8">
       <Reveal variant="clip">
         <h2 class="type-display max-w-5xl text-[clamp(2.5rem,7vw,6rem)]">
-          Put your name on the robot
+          Back the build
         </h2>
       </Reveal>
 
       <Reveal variant="up" delay={120} class="mt-10 max-w-2xl">
         <p class="text-base/relaxed text-muted">
-          Sponsorship covers the real costs of a season: parts, tools,
-          registration, and travel to regional and championship events. In
-          return, your name rides on our robot, our shirts, and this site, in
-          front of students, families, and STEM professionals at every event we
-          attend.
+          Sponsorship covers what a season actually costs: parts, tools,
+          registration, and travel to events. Cash is one way in. Mentorship,
+          shop tours, and co-hosted STEM events for Weston students count just
+          as much.
         </p>
       </Reveal>
 

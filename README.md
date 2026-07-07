@@ -36,7 +36,8 @@ src/
 ├── pages/
 │   ├── index.astro        # Home / Welcome
 │   ├── season.astro       # Season Recap (first season)
-│   └── contact.astro      # Contact + Donate (not wired up)
+│   ├── outreach.astro     # Community outreach events
+│   └── contact.astro      # Contact + Donate (link + channels)
 └── styles/
     └── global.css         # Design tokens, textures, reveal system
 ```
@@ -58,7 +59,7 @@ Find every remaining slot:
 grep -rn "data-placeholder\|<Placeholder\|class=\"stub\"\|stub\"" src/
 ```
 
-The contact form is intentionally not wired to anything yet.
+The contact-form link, email, and Instagram are stubs until the real ones exist.
 
 ## Design system
 

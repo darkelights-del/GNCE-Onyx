@@ -1,25 +1,46 @@
 ---
 /**
- * Contact + Donate — contact form (not wired up yet) and sponsorship.
- * Header → Contact (form + direct channels) → Sponsor us.
- * Email/Instagram/tiers are pending: marked with .stub or <Placeholder>.
+ * Contact + Donate — how to reach the team, and how to sponsor it.
+ * Header → Contact (form link + direct channels) → Sponsor us
+ * (pitch, STEM partnerships, recognition ladder).
+ * Form link / email / Instagram are pending: marked with .stub or <Placeholder>.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Placeholder from '../components/Placeholder.astro';
 import Reveal from '../components/Reveal.astro';
 import SectionLabel from '../components/SectionLabel.astro';
 
-const sponsorGets = [
-  'Your name on the robot',
-  'Your name on our shirts',
-  'Your name on this site',
-  'Visibility at every event we attend',
+const stemTies = [
+  {
+    name: 'Mentorship',
+    desc: 'Design reviews and career talks from working engineers.',
+  },
+  {
+    name: 'Public STEM events',
+    desc: 'Show up with us at demos and fairs around Weston.',
+  },
+  {
+    name: 'Joint outreach',
+    desc: 'Co-host workshops that get younger students building.',
+  },
+  {
+    name: 'Site visits',
+    desc: 'Open your shop, lab, or office for a team tour.',
+  },
+];
+
+const tiers = [
+  { range: 'Under $100', adds: 'Parts money. Same portfolio and site listing as everyone.' },
+  { range: '$100-500', adds: '+ a thank-you post on the team Instagram' },
+  { range: '$500-1k', adds: '+ your banner in our competition pit' },
+  { range: '$1k-2k', adds: '+ your name on the team shirts' },
+  { range: '$2k+', adds: '+ all of it, plus a seat at the events we run' },
 ];
 ---
 
 <BaseLayout
   title="Contact + Donate"
-  description="Contact GNCE Onyx or sponsor our 2026-2027 BIOBUZZ season. Sponsorship covers parts, tools, registration, and travel for a rookie FTC team built from championship veterans."
+  description="Contact GNCE Onyx or sponsor our 2026-2027 BIOBUZZ season. Sponsorship covers parts, tools, registration, and travel, and the best partnerships add mentorship and community STEM events."
 >
   <!-- =================================================== PAGE HEADER -->
   <header class="bp-grid bg-bg pt-36 pb-20 sm:pt-44">
@@ -32,8 +53,8 @@ const sponsorGets = [
 
       <Reveal variant="up" delay={160} class="mt-8 max-w-prose">
         <p class="text-base/relaxed text-muted">
-          Sponsorship, questions, or joining the team: email is the fastest
-          way to reach us while this form gets wired up.
+          Sponsorship, questions, or joining the team: email is fastest, and
+          the short form below reaches everyone at once.
         </p>
       </Reveal>
     </div>
@@ -42,75 +63,28 @@ const sponsorGets = [
   <!-- ======================================================= CONTACT -->
   <section class="bg-bg py-24 sm:py-32">
     <div class="mx-auto max-w-6xl px-5 sm:px-8">
-      <div class="grid gap-12 md:grid-cols-[3fr_2fr]">
-        <!-- Form (placeholder, not wired to anything) -->
+      <div class="grid gap-12 md:grid-cols-2">
+        <!-- Contact form link (form itself lives off-site) -->
         <Reveal variant="left">
-          <Placeholder name="contact-form" class="p-6 sm:p-8">
-            <p
-              class="hairline inline-block border bg-surface px-3 py-1.5 font-mono text-[11px] tracking-wide text-accent"
-            >
-              // Form not wired up yet: submissions go nowhere
+          <Placeholder name="contact-form-link" class="flex h-full flex-col p-6 sm:p-8">
+            <h2 class="type-callout text-muted">Contact form</h2>
+            <p class="mt-5 max-w-prose text-base/relaxed text-muted">
+              One short form for everything. It goes to the whole team.
             </p>
-
-            <form id="contact-form-el" class="mt-8 grid gap-6 sm:grid-cols-2">
-              <div>
-                <label for="contact-name" class="type-callout text-muted">Name</label>
-                <input
-                  type="text"
-                  id="contact-name"
-                  name="name"
-                  autocomplete="name"
-                  placeholder="Your name"
-                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label for="contact-email" class="type-callout text-muted">Email</label>
-                <input
-                  type="email"
-                  id="contact-email"
-                  name="email"
-                  autocomplete="email"
-                  placeholder="you@example.com"
-                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
-                />
-              </div>
-
-              <div class="sm:col-span-2">
-                <label for="contact-topic" class="type-callout text-muted">Topic</label>
-                <select
-                  id="contact-topic"
-                  name="topic"
-                  class="field hairline mt-2 block w-full border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
-                >
-                  <option>Sponsorship</option>
-                  <option>Joining the team</option>
-                  <option>Outreach and events</option>
-                  <option>Something else</option>
-                </select>
-              </div>
-
-              <div class="sm:col-span-2">
-                <label for="contact-message" class="type-callout text-muted">Message</label>
-                <textarea
-                  id="contact-message"
-                  name="message"
-                  rows="5"
-                  placeholder="What can we help with?"
-                  class="field hairline mt-2 block w-full resize-y border bg-surface px-4 py-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"></textarea>
-              </div>
-
-              <div class="sm:col-span-2">
-                <button type="submit" class="btn btn-solid">Send message</button>
-              </div>
-            </form>
+            <p
+              class="hairline mt-6 inline-block self-start border bg-surface px-3 py-1.5 font-mono text-[11px] tracking-wide text-accent"
+            >
+              // Link not wired up yet
+            </p>
+            <div class="mt-auto pt-8">
+              <a href="#" class="btn btn-solid" title="Form link pending">Open the form</a>
+            </div>
           </Placeholder>
         </Reveal>
 
         <!-- Direct channels panel -->
         <Reveal variant="right" delay={120}>
-          <Placeholder name="contact-channels" class="bg-panel p-6">
+          <Placeholder name="contact-channels" class="h-full bg-panel p-6">
             <h2 class="type-callout text-muted">Direct channels</h2>
             <dl class="hairline mt-5 border-t">
               <div class="hairline flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b py-3">
@@ -151,70 +125,72 @@ const sponsorGets = [
         <p class="text-base/relaxed text-muted">
           GNCE Onyx is a rookie FTC team built from championship-level
           veterans, competing in the 2026-2027 BIOBUZZ season out of Weston
-          High School. Sponsorship covers the real costs of a season: parts,
-          tools, registration, and travel to regional and championship events.
+          High School. Sponsorship covers what a season costs: parts, tools,
+          registration, and travel to regional and championship events.
         </p>
         <p class="mt-4 text-base/relaxed text-muted">
-          Every dollar goes straight into building robots and running outreach
-          that pulls younger students into STEM.
+          Every dollar goes into building robots and running outreach that
+          pulls younger students into STEM.
         </p>
       </Reveal>
 
-      <div class="mt-14 grid gap-10 md:grid-cols-[3fr_2fr]">
+      <div class="mt-14 grid gap-10 md:grid-cols-2">
+        <!-- STEM partnerships -->
         <Reveal variant="left">
-          <h3 class="type-callout text-muted">Every sponsor gets</h3>
+          <h3 class="type-callout text-muted">More than money</h3>
+          <p class="mt-4 max-w-prose text-base/relaxed text-muted">
+            The sponsorships we want most aren't checks. We're looking for
+            local companies to:
+          </p>
           <ul class="mt-5" data-reveal-group>
             {
-              sponsorGets.map((item, i) => (
-                <Reveal as="li" class="hairline flex items-baseline gap-5 border-b py-4">
-                  <span class="font-mono text-sm font-bold text-accent">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span class="font-display text-lg text-ink">{item}</span>
+              stemTies.map((tie, i) => (
+                <Reveal as="li" class="hairline border-b py-4">
+                  <div class="flex items-baseline gap-5">
+                    <span class="font-mono text-sm font-bold text-accent">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div>
+                      <p class="font-display text-lg text-ink">{tie.name}</p>
+                      <p class="mt-1 text-sm/relaxed text-muted">{tie.desc}</p>
+                    </div>
+                  </div>
                 </Reveal>
               ))
             }
           </ul>
         </Reveal>
 
+        <!-- Recognition ladder -->
         <Reveal variant="right" delay={120}>
-          <Placeholder name="contact-donate-tiers" class="p-6">
-            <h3 class="type-callout text-muted">Sponsorship tiers</h3>
-            <ul class="hairline mt-5 border-t">
-              {
-                ['Tier 01', 'Tier 02', 'Tier 03'].map((tier) => (
-                  <li class="hairline flex items-baseline justify-between gap-6 border-b py-3 font-mono text-sm">
-                    <span class="text-ink">{tier}</span>
-                    <span class="text-muted">$TBD</span>
-                  </li>
-                ))
-              }
-            </ul>
-            <p class="mt-5 text-sm/relaxed text-muted">
-              Tiers are being finalized. Email us to talk sponsorship:
-              <span class="stub" title="Email pending">[placeholder]@gmail.com</span>
-            </p>
-          </Placeholder>
-
-          <Placeholder name="contact-sponsor-packet" class="mt-6 px-4 py-3">
-            <p class="font-mono text-xs text-muted">// Sponsor packet: PDF TBD</p>
-          </Placeholder>
+          <h3 class="type-callout text-muted">What sponsors get</h3>
+          <p class="mt-4 max-w-prose text-base/relaxed text-muted">
+            Every sponsor, at any amount, is named in the engineering
+            portfolio judges read at every event, and listed on this site.
+            From there it stacks:
+          </p>
+          <ul class="mt-5" data-reveal-group>
+            {
+              tiers.map((tier) => (
+                <Reveal as="li" class="hairline flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b py-4">
+                  <span class="w-28 shrink-0 font-mono text-sm font-bold text-accent">
+                    {tier.range}
+                  </span>
+                  <span class="flex-1 text-sm/relaxed text-muted">{tier.adds}</span>
+                </Reveal>
+              ))
+            }
+          </ul>
+          <p class="mt-5 text-sm/relaxed text-muted">
+            Ranges are guides, not gates. If you'd rather send an engineer
+            than a check, we'll take the engineer.
+          </p>
         </Reveal>
       </div>
+
+      <Placeholder name="contact-sponsor-packet" class="mt-12 inline-block px-4 py-3">
+        <p class="font-mono text-xs text-muted">// Sponsor packet: PDF TBD</p>
+      </Placeholder>
     </div>
   </section>
 </BaseLayout>
-
-<script>
-  // Placeholder form: swallow submits so nothing navigates or posts.
-  document
-    .getElementById('contact-form-el')
-    ?.addEventListener('submit', (event) => event.preventDefault());
-</script>
-
-<style>
-  /* Form fields: border-color only (never 'all'); color change → plain ease. */
-  .field {
-    transition: border-color 200ms ease;
-  }
-</style>

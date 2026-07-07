@@ -47,6 +47,12 @@ handles, TBD dates) use a `.stub` span instead. When adding real content,
 remove the wrapper/span and keep the children. Find all remaining slots:
 `grep -rn "data-placeholder\|<Placeholder\|stub" src/`
 
+## Working with the user (important)
+
+Interview the user (AskUserQuestion) before design or content changes.
+Batch the questions, propose concrete options, and wait for answers
+before editing.
+
 ## Writing copy (important)
 
 Any prose that ships on the site (headlines, body, labels, captions, form
