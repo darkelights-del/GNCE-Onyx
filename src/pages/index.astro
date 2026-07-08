@@ -1,11 +1,10 @@
 ---
 /**
- * Home — the forge story.
- * Act 1: pinned scroll scene. Four team numbers converge and "Four
- * teams." gives way to "One Onyx." struck in ember. A single custom
- * property --p (0..1), set by JS on .forge-track, drives every value
- * through calc(), so it works in every browser and degrades to a clean
- * static hero without JS or under reduced motion.
+ * Home — four teams, one team.
+ * Act 1 is a pinned scene (see src/scripts/motion.ts, initHero): four
+ * team numbers fly in from the corners and lift like sparks while "Four
+ * teams." gives way to "One Onyx." struck in ember. Without JS or under
+ * reduced motion it degrades to a clean static hero.
  * Then: lineage ledger → mission → robot → roster → sponsor band.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -73,42 +72,42 @@ const specs = [
   title="Home"
   description="GNCE Onyx is a rookie FIRST Tech Challenge team at Weston High School, built by veterans of four GNCE teams for the 2026-2027 BIOBUZZ season."
 >
-  <!-- ============================================= ACT 1: THE FORGE -->
-  <section class="forge-track" aria-label="GNCE Onyx: four teams forged into one">
-    <div class="forge-stage">
-      <div class="fs-ember" aria-hidden="true"></div>
+  <!-- ================================================ ACT 1: THE HERO -->
+  <section class="hero-scene" aria-label="GNCE Onyx: four teams, one team">
+    <div class="hero-stage">
+      <div class="hero-ember" aria-hidden="true"></div>
 
-      <p class="fs-eyebrow type-label">
+      <p class="hero-eyebrow type-label">
         FIRST Tech Challenge · Weston High School
       </p>
 
-      <div class="fs-numbers" aria-hidden="true">
+      <div class="hero-numbers" aria-hidden="true">
         {
           lineage.map((team) => (
-            <span class="fs-number type-label" style={`left:${team.nx};top:${team.ny}`}>
+            <span class="hero-number type-label" style={`left:${team.nx};top:${team.ny}`}>
               {team.num}
             </span>
           ))
         }
       </div>
 
-      <div class="fs-heads">
-        <p class="fs-head-a type-display" aria-hidden="true">Four teams.</p>
-        <h1 class="fs-head-b type-display">One Onyx.</h1>
+      <div class="hero-heads">
+        <p class="hero-head-a type-display" aria-hidden="true">Four teams.</p>
+        <h1 class="hero-head-b type-display">One Onyx.</h1>
       </div>
 
-      <div class="fs-tail">
-        <p class="fs-sub">
+      <div class="hero-tail">
+        <p class="hero-sub">
           A rookie FTC team at Weston High, built by members of four GNCE
           teams, competing in BIOBUZZ 2026-2027.
         </p>
-        <p class="fs-cta">
+        <p class="hero-cta">
           <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
-          <a href={`${base}/season/`} class="fs-link">See our first season</a>
+          <a href={`${base}/season/`} class="hero-link">See our first season</a>
         </p>
       </div>
 
-      <span class="fs-cue type-label" aria-hidden="true">Scroll to forge</span>
+      <span class="hero-cue type-label" aria-hidden="true">Scroll</span>
     </div>
   </section>
 
@@ -213,33 +212,33 @@ const specs = [
   </section>
 
   <!-- ========================================================= ROSTER -->
-  <section class="py-28 sm:py-36">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <SectionLabel title="Roster" class="mb-12" />
+  <!-- Pinned scene: members fly in from alternating sides (motion.ts,
+       initRoster). Without JS it is a plain, fully-visible list. -->
+  <section class="roster-scene py-28 sm:py-36" data-scene="roster">
+    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
+      <SectionLabel title="Roster" class="mb-10" />
 
-      <Reveal variant="up">
-        <p class="max-w-2xl text-lg text-muted">
-          Seven members and counting, led by two captains. Four of us
-          competed at Worlds and international invitationals on our previous
-          teams.
-        </p>
-      </Reveal>
+      <p class="mb-14 max-w-2xl text-lg text-muted">
+        Seven members and counting, led by two captains. Four of us
+        competed at Worlds and international invitationals on our previous
+        teams.
+      </p>
 
-      <ol class="mt-12 grid gap-x-12 sm:grid-cols-2" data-reveal-group>
+      <ol class="grid gap-x-12 sm:grid-cols-2">
         {
           roster.map((member) => (
-            <Reveal
-              as="li"
+            <li
+              data-roster-item
               class="hairline flex items-baseline justify-between gap-6 border-b py-4"
             >
               <span class="type-display text-[1.625rem]">{member.name}</span>
               {member.role && <span class="type-label text-accent">{member.role}</span>}
-            </Reveal>
+            </li>
           ))
         }
-        <Reveal as="li" class="flex items-baseline py-4">
+        <li data-roster-item class="flex items-baseline py-4">
           <span class="text-muted italic">Two or three more joining soon.</span>
-        </Reveal>
+        </li>
       </ol>
     </div>
   </section>
@@ -268,12 +267,12 @@ const specs = [
 </BaseLayout>
 
 <style>
-  /* ---- Act 1: The Forge scene ------------------------------------ */
-  /* The motion module (forge-motion.ts) pins this stage and choreographs
-     the merge with GSAP. Everything here is the resting/static layer:
+  /* ---- Act 1: The hero scene ------------------------------------- */
+  /* The motion module (motion.ts) pins this stage and choreographs the
+     merge with GSAP. Everything here is the resting/static layer:
      without JS or under reduced motion it stands alone as a clean hero
      (only "One Onyx." shows; "Four teams." is hidden). */
-  .forge-stage {
+  .hero-stage {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -290,7 +289,7 @@ const specs = [
      lit; the module swells it as the four numbers merge. */
   /* Negative z keeps the ember behind the content without forcing
      position on the absolutely-placed layers (numbers, cue). */
-  .fs-ember {
+  .hero-ember {
     position: absolute;
     inset: 0;
     z-index: -1;
@@ -303,7 +302,7 @@ const specs = [
     );
   }
 
-  .fs-ember::after {
+  .hero-ember::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -311,11 +310,11 @@ const specs = [
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  .fs-eyebrow {
+  .hero-eyebrow {
     color: var(--color-muted);
   }
 
-  .fs-numbers {
+  .hero-numbers {
     position: absolute;
     inset: 0;
     z-index: 0;
@@ -324,7 +323,7 @@ const specs = [
 
   /* Team numbers scattered to the corners; the module flies them in and
      lifts them like sparks as the merge completes. */
-  .fs-number {
+  .hero-number {
     position: absolute;
     translate: -50% -50%;
     font-size: clamp(1.15rem, 2.4vw, 1.9rem);
@@ -332,32 +331,32 @@ const specs = [
     opacity: 0.5;
   }
 
-  .fs-heads {
+  .hero-heads {
     display: grid;
   }
 
-  .fs-head-a,
-  .fs-head-b {
+  .hero-head-a,
+  .hero-head-b {
     grid-area: 1 / 1;
     font-size: clamp(3.25rem, 12vw, 10rem);
   }
 
-  .fs-head-b {
+  .hero-head-b {
     color: var(--color-accent);
   }
 
   /* Static fallback: "Four teams." is hidden; the module shows and
      animates it only when it takes over. */
-  .fs-head-a {
+  .hero-head-a {
     display: none;
   }
 
-  .fs-sub {
+  .hero-sub {
     max-width: 34rem;
     color: var(--color-muted);
   }
 
-  .fs-cta {
+  .hero-cta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -365,7 +364,7 @@ const specs = [
     margin-top: 1.5rem;
   }
 
-  .fs-link {
+  .hero-link {
     color: var(--color-ink);
     font-family: var(--font-label);
     font-size: 0.9375rem;
@@ -376,13 +375,13 @@ const specs = [
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .fs-link:hover {
+    .hero-link:hover {
       color: var(--color-accent);
     }
   }
 
   /* Scroll cue: only meaningful once the pinned scene is live. */
-  .fs-cue {
+  .hero-cue {
     position: absolute;
     left: 50%;
     bottom: clamp(1.25rem, 4vh, 2.5rem);
@@ -394,14 +393,22 @@ const specs = [
     color: var(--color-muted);
   }
 
-  .fs-cue::after {
+  .hero-cue::after {
     content: '';
     width: 1px;
     height: 1.75rem;
     background: linear-gradient(var(--color-accent), transparent);
   }
 
-  :global(html.gsap) .fs-cue {
+  :global(html.gsap) .hero-cue {
     display: flex;
+  }
+
+  /* Roster becomes a full-height pinned stage only when the engine is
+     live; otherwise it is a normal, fully-visible list. */
+  :global(html.gsap) .roster-scene {
+    display: flex;
+    min-height: 100svh;
+    align-items: center;
   }
 </style>

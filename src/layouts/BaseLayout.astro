@@ -2,10 +2,10 @@
 /**
  * BaseLayout — the single shared shell for every page.
  *
- * Owns: fonts, global styles, the forge loader (once per session), the
- * scroll heat rail, cross-page view transitions, GearNav, footer, Lenis
- * smooth scrolling, and the IntersectionObserver that drives
- * [data-reveal] entrances (see Reveal.astro / global.css).
+ * Owns: fonts, global styles, the intro cover (once per session), the
+ * scroll heat rail, cross-page view transitions, GearNav, footer, and
+ * the motion engine that drives every scroll animation
+ * (see src/scripts/motion.ts).
  */
 import '@fontsource-variable/grenze-gotisch';
 import '@fontsource-variable/vollkorn';
@@ -45,8 +45,8 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
           setTimeout(function () {
             document.documentElement.classList.remove('will-animate');
           }, 2600);
-          // Forge loader: once per session.
-          if (!sessionStorage.getItem('forged')) {
+          // Intro cover: once per session.
+          if (!sessionStorage.getItem('intro-seen')) {
             document.documentElement.classList.add('loading');
             setTimeout(function () {
               document.documentElement.classList.remove('loading');
@@ -61,11 +61,11 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
   <body class="min-h-svh bg-bg text-ink antialiased">
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <!-- Forge loader: the wordmark is struck once, then the cover lifts
+    <!-- Intro cover: the wordmark is struck once, then the cover lifts
          into the hero's entrance. Skipped after first view. -->
-    <div class="forge-loader" data-loader aria-hidden="true">
-      <p class="forge-loader-mark type-display">
-        <span class="forge-loader-line">GNCE Onyx</span>
+    <div class="intro" data-intro aria-hidden="true">
+      <p class="intro-mark type-display">
+        <span class="intro-line">GNCE Onyx</span>
       </p>
     </div>
 
@@ -78,18 +78,18 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
     <Footer />
     <GearNav />
 
-    <!-- The motion engine: GSAP + ScrollTrigger + Lenis, the pinned hero,
-         split-text, parallax, magnetic pull, and the [data-reveal]
-         entrances. Bows out under reduced motion (static CSS stands in). -->
+    <!-- The motion engine: GSAP + ScrollTrigger + Lenis, the pinned hero
+         and roster, masked split-text, clip-wipe reveals, parallax, and
+         magnetic pull. Bows out under reduced motion (static CSS stands in). -->
     <script>
-      import '../scripts/forge-motion';
+      import '../scripts/motion';
     </script>
 
     <style>
-      /* ---- Forge loader ------------------------------------------- */
+      /* ---- Intro cover -------------------------------------------- */
       /* Sits offscreen by default; html.loading holds it down over the
          page, and removing the class lifts it into the hero entrance. */
-      .forge-loader {
+      .intro {
         position: fixed;
         inset: 0;
         z-index: 120;
@@ -102,32 +102,32 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
         pointer-events: none;
       }
 
-      :global(html.loading) .forge-loader {
+      :global(html.loading) .intro {
         transform: none;
         transition: none;
         pointer-events: auto;
       }
 
-      :global(html.no-js) .forge-loader {
+      :global(html.no-js) .intro {
         display: none;
       }
 
-      .forge-loader-mark {
-        overflow: hidden;
+      .intro-mark {
+        overflow: clip;
         font-size: clamp(2.5rem, 8vw, 5rem);
         color: var(--color-ink);
       }
 
-      .forge-loader-line {
+      .intro-line {
         display: block;
         transform: translateY(115%);
       }
 
-      :global(html.loading) .forge-loader-line {
-        animation: forge-strike 620ms var(--ease-out-strong) 120ms both;
+      :global(html.loading) .intro-line {
+        animation: intro-strike 620ms var(--ease-out-strong) 120ms both;
       }
 
-      @keyframes forge-strike {
+      @keyframes intro-strike {
         to {
           transform: translateY(0);
         }

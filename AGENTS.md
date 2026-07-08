@@ -30,11 +30,12 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 ## Architecture notes
 
 - One shared shell: `src/layouts/BaseLayout.astro` (fonts, GearNav, Footer,
-  loader, heat rail). It imports the motion engine
-  `src/scripts/forge-motion.ts` (GSAP + ScrollTrigger + Lenis): the pinned
-  hero, split text (`[data-split]`), parallax (`[data-parallax]`), magnetic
-  CTAs (`[data-magnetic]`), and the `[data-reveal]` entrances. All of it is
-  reduced-motion safe (the module bows out; static CSS stands in).
+  intro cover, heat rail). It imports the motion engine
+  `src/scripts/motion.ts` (GSAP + ScrollTrigger + Lenis): the pinned hero
+  and roster scenes, masked split text (`[data-split]`), clip-wipe reveals
+  (`[data-reveal]`), parallax (`[data-parallax]`), magnetic CTAs
+  (`[data-magnetic]`). All of it is reduced-motion safe (the module bows
+  out; static CSS stands in). No opacity cross-fades ("no ombre").
 - Navigation is `src/components/GearNav.astro` (orbital gear hub). Page list
   changes go in its `links` array AND `Footer.astro`.
 - Design tokens live in the `@theme` block of `src/styles/global.css`;

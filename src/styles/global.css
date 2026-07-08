@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------
-   DESIGN TOKENS — "The Forge"
-   Four teams forged into one. Coal, night, ember, ash:
+   DESIGN TOKENS — "Coal & Ember"
+   Four teams become one. Coal, night, ember, ash:
      #0A0908 coal · #1A0F20 night · #6E0D25 ember · #E8E2DC ash
    plus transparencies of the ash for rules and muted text.
 
@@ -109,7 +109,7 @@ body {
 }
 
 /* ------------------------------------------------------------------
-   FORGE TEXTURES
+   TEXTURES
    ------------------------------------------------------------------ */
 /* Ember: one radial glow, used only where heat belongs (hero, the
    sponsor band, the open menu). Never stacked, never animated. */
@@ -244,12 +244,22 @@ html.js [data-reveal].is-revealed {
 /* ------------------------------------------------------------------
    MOTION ENGINE (GSAP)
    Split text, no-flash pre-hiding, and hand-off from the CSS reveal
-   fallback to GSAP. See src/scripts/forge-motion.ts. All of this is
+   fallback to GSAP. See src/scripts/motion.ts. All of this is
    inert under reduced motion (the head never sets html.will-animate,
    and the module bows out).
    ------------------------------------------------------------------ */
-/* Per-character split for [data-split] headings and the hero lines.
-   Words stay unbroken; characters are the animation unit. */
+/* Masked split text: each visual line is an overflow-clipped window,
+   its characters rise from behind it. Crisp mask reveal, no fade. */
+.split-line {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.08em; /* room for descenders inside the mask */
+}
+
+.split-line-inner {
+  display: block;
+}
+
 .split-word {
   display: inline-block;
   white-space: nowrap;
@@ -260,21 +270,22 @@ html.js [data-reveal].is-revealed {
   will-change: transform;
 }
 
-/* 3D room for the letters that tilt in on their X axis. */
+/* 3D room for the letters that tilt in on their X axis (hero). */
 [data-split],
-.fs-heads {
+.hero-heads {
   perspective: 700px;
 }
 
-/* No-flash: hide what is about to fly before first paint. Set
+/* No-flash: hide what is about to move before first paint. Set
    synchronously by the head script; cleared when the module boots (or
    by the head failsafe if it never does). */
 html.will-animate [data-split],
-html.will-animate .fs-head-b,
-html.will-animate .fs-tail,
-html.will-animate .fs-number,
-html.will-animate .fs-eyebrow,
-html.will-animate .fs-cue {
+html.will-animate [data-roster-item],
+html.will-animate .hero-head-b,
+html.will-animate .hero-tail,
+html.will-animate .hero-number,
+html.will-animate .hero-eyebrow,
+html.will-animate .hero-cue {
   opacity: 0;
 }
 
