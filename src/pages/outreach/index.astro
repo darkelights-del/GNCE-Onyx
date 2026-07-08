@@ -77,11 +77,9 @@ const fmt = (d: Date) =>
   <!-- BRING US IN -->
   <section class="ember hairline border-t bg-surface py-28 sm:py-40">
     <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <Reveal variant="clip">
-        <h2 class="type-display max-w-4xl text-[clamp(2.5rem,7vw,6rem)]">
-          Bring us in
-        </h2>
-      </Reveal>
+      <h2 class="type-display max-w-4xl text-[clamp(2.5rem,7vw,6rem)]" data-split>
+        Bring us in
+      </h2>
 
       <Reveal variant="up" delay={120} class="mt-10 max-w-2xl">
         <p class="text-muted">
@@ -91,7 +89,7 @@ const fmt = (d: Date) =>
       </Reveal>
 
       <Reveal variant="up" delay={200} class="mt-10">
-        <a href={`${base}/contact/`} class="btn btn-solid">Get in touch</a>
+        <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.35">Get in touch</a>
       </Reveal>
     </div>
   </section>

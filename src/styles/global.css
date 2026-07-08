@@ -242,6 +242,59 @@ html.js [data-reveal].is-revealed {
 }
 
 /* ------------------------------------------------------------------
+   MOTION ENGINE (GSAP)
+   Split text, no-flash pre-hiding, and hand-off from the CSS reveal
+   fallback to GSAP. See src/scripts/forge-motion.ts. All of this is
+   inert under reduced motion (the head never sets html.will-animate,
+   and the module bows out).
+   ------------------------------------------------------------------ */
+/* Per-character split for [data-split] headings and the hero lines.
+   Words stay unbroken; characters are the animation unit. */
+.split-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.split-char {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* 3D room for the letters that tilt in on their X axis. */
+[data-split],
+.fs-heads {
+  perspective: 700px;
+}
+
+/* No-flash: hide what is about to fly before first paint. Set
+   synchronously by the head script; cleared when the module boots (or
+   by the head failsafe if it never does). */
+html.will-animate [data-split],
+html.will-animate .fs-head-b,
+html.will-animate .fs-tail,
+html.will-animate .fs-number,
+html.will-animate .fs-eyebrow,
+html.will-animate .fs-cue {
+  opacity: 0;
+}
+
+/* When GSAP owns the reveals, drop the CSS reveal transition so the two
+   systems never double-play. GSAP writes inline styles that win. */
+html.gsap [data-reveal],
+html.gsap [data-reveal='clip'] {
+  transition: none !important;
+}
+
+html.gsap [data-reveal='clip'] .reveal-clip-inner {
+  transition: none !important;
+}
+
+/* Magnetic targets translate toward the cursor (pointer-fine only). */
+[data-magnetic] {
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------
    SHARED PRIMITIVES
    ------------------------------------------------------------------ */
 .btn {

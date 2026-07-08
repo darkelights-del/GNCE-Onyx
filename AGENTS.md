@@ -30,14 +30,20 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 ## Architecture notes
 
 - One shared shell: `src/layouts/BaseLayout.astro` (fonts, GearNav, Footer,
-  Lenis smooth scroll, IntersectionObserver driving `[data-reveal]`).
+  loader, heat rail). It imports the motion engine
+  `src/scripts/forge-motion.ts` (GSAP + ScrollTrigger + Lenis): the pinned
+  hero, split text (`[data-split]`), parallax (`[data-parallax]`), magnetic
+  CTAs (`[data-magnetic]`), and the `[data-reveal]` entrances. All of it is
+  reduced-motion safe (the module bows out; static CSS stands in).
 - Navigation is `src/components/GearNav.astro` (orbital gear hub). Page list
   changes go in its `links` array AND `Footer.astro`.
 - Design tokens live in the `@theme` block of `src/styles/global.css`;
   Tailwind v4 derives utilities from them (`bg-bg`, `text-accent`,
   `ease-out-strong`, ...). There is no `tailwind.config.*`.
 - Scroll entrances: wrap content in `components/Reveal.astro`; stagger
-  siblings by putting `data-reveal-group` on their parent.
+  siblings by putting `data-reveal-group` on their parent. For a heading
+  that should fly in per character, add `data-split` to it instead (plain
+  text only, no inner markup). See `DESIGN.md` "Experience layer".
 - Blog: posts are markdown in `src/content/blog/` (collection defined in
   `src/content.config.ts`), rendered by `src/pages/outreach/[id].astro`.
   Comments/views services are configured in `src/lib/services.ts`.

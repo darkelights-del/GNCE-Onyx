@@ -74,21 +74,42 @@ skills in `.claude/skills/`) before touching UI.
 
 ## Experience layer (BaseLayout + index)
 
+The whole motion system lives in one module, `src/scripts/forge-motion.ts`
+(GSAP + ScrollTrigger, wired to Lenis so smooth scroll and scroll-driven
+animation share one clock). It is strictly progressive: the head sets
+`html.will-animate` synchronously so first paint already hides what is
+about to move (no flash), and clears it once the module boots; a 2.6s
+failsafe (and the module's own try/catch) reveal everything if it never
+does. Under `prefers-reduced-motion` the module bows out entirely and the
+static CSS composition stands alone.
+
 - **Forge loader**: once per session (sessionStorage `forged`), skipped
   under reduced motion and no-JS, with an inline failsafe that lifts the
   cover after 2s even if the module never runs. Wordmark strikes up, the
   cover lifts into the hero entrance.
-- **Forge scene** (`index.astro`): a pinned scroll scene (320svh track,
-  sticky stage). Four team numbers converge while "Four teams." yields to
-  "One Onyx.". Driven by a single custom property `--p` (0..1) that a tiny
-  JS scrubber sets from scroll progress; every value is a `calc()` of
-  `--p`, so it works in every browser. Without JS or under reduced motion
+- **Forge scene** (`index.astro` + `initHero`): a GSAP timeline pins the
+  stage (`ScrollTrigger` pin, `end: +=210%`) and choreographs the merge.
+  On load the four team numbers fly in from the corners; as you scroll
+  they lift and burn out like sparks, "Four teams." disintegrates letter
+  by letter on its X axis, "One Onyx." is struck in from the center out,
+  and the ember swells. The load intro plays as the loader lifts; the CTA
+  is anchored (visible the whole time). Without JS or under reduced motion
   a clean static hero shows instead (only "One Onyx." + sub + CTA).
+- **Split text** (`[data-split]`): hero and section headings are split
+  per character (hand-rolled splitter: `aria-label` on the element,
+  `aria-hidden` chars) and assembled on scroll-in. Headings with inline
+  markup (an accent `<span>`) stay as clip reveals instead.
+- **Parallax** (`[data-parallax="±px"]`): depth via a scrubbed y shift.
+- **Magnetic** (`[data-magnetic="strength"]`): CTAs lean toward the
+  cursor (pointer-fine only); the scattered hero numbers drift with the
+  pointer too. Not applied to the gear (would fight its scroll-spin).
 - **View transitions**: cross-document fade/rise via `@view-transition`;
   browsers without it just navigate.
-- **Reveals**: IntersectionObserver + `[data-reveal]` (up/left/right/
-  scale/clip). Clip lives on an inner wrapper (Chromium quirk). Stagger
-  via `data-reveal-group`.
+- **Reveals** (`[data-reveal]`, up/left/right/scale/clip): the supporting
+  cast (copy, cards, rows). GSAP owns them when active (`ScrollTrigger`
+  per element, richer easing + group stagger via `data-reveal-group`);
+  the CSS transition is the reduced-motion fallback. Clip lives on an
+  inner wrapper (Chromium quirk).
 
 ## The blog (Outreach)
 
@@ -102,7 +123,8 @@ IDs are set in `src/lib/services.ts` (see README, "Blog").
 
 | Component | Purpose |
 | --- | --- |
-| `layouts/BaseLayout.astro` | Shell: fonts, loader, heat rail, view transitions, GearNav, footer, Lenis, reveal observer. |
+| `scripts/forge-motion.ts` | The motion engine: GSAP + ScrollTrigger + Lenis, the pinned hero, split text, parallax, magnetic pull, and `[data-reveal]` entrances. Reduced-motion safe. |
+| `layouts/BaseLayout.astro` | Shell: fonts, loader, heat rail, view transitions, GearNav, footer, imports the motion engine. |
 | `components/GearNav.astro` | The gear (turns with scroll) + full-screen menu with staggered display-type lines. |
 | `components/Reveal.astro` | Scroll entrance wrapper. |
 | `components/Placeholder.astro` | Dashed ember frame + small-caps tag on content slots. |

@@ -15,14 +15,14 @@ import SectionLabel from '../components/SectionLabel.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
-/** The four squads whose veterans formed Onyx; scatter offsets feed the
- *  converge animation. */
+/** The four squads whose veterans formed Onyx; nx/ny scatter the team
+ *  numbers across the hero (corners), then they rise like sparks. */
 const lineage = [
   {
     num: '22489',
     name: 'GNCE Diamond',
-    sx: '-30vw',
-    sy: '-24vh',
+    nx: '9%',
+    ny: '24%',
     honors: [
       '2025 States: Winning Alliance Captain',
       '2025 FIRST World Championship, Jemison Division: Motivate Award 2nd Place',
@@ -35,8 +35,8 @@ const lineage = [
   {
     num: '26112',
     name: 'GNCE Organized Anarchy',
-    sx: '28vw',
-    sy: '-20vh',
+    nx: '83%',
+    ny: '18%',
     honors: [
       '2025 States: Finalist Alliance Captain',
       '2025 New England Premier Event, Courville Division',
@@ -45,8 +45,8 @@ const lineage = [
       '2026 Multinational Tech Invitational qualification',
     ],
   },
-  { num: '26413', name: 'GNCE Mercury', sx: '-26vw', sy: '22vh', honors: [] },
-  { num: '26111', name: 'GNCE Electrified Chickens', sx: '30vw', sy: '24vh', honors: [] },
+  { num: '26413', name: 'GNCE Mercury', nx: '14%', ny: '72%', honors: [] },
+  { num: '26111', name: 'GNCE Electrified Chickens', nx: '86%', ny: '66%', honors: [] },
 ];
 
 const roster = [
@@ -75,7 +75,9 @@ const specs = [
 >
   <!-- ============================================= ACT 1: THE FORGE -->
   <section class="forge-track" aria-label="GNCE Onyx: four teams forged into one">
-    <div class="forge-stage ember">
+    <div class="forge-stage">
+      <div class="fs-ember" aria-hidden="true"></div>
+
       <p class="fs-eyebrow type-label">
         FIRST Tech Challenge · Weston High School
       </p>
@@ -83,7 +85,7 @@ const specs = [
       <div class="fs-numbers" aria-hidden="true">
         {
           lineage.map((team) => (
-            <span class="fs-number type-label" style={`--sx:${team.sx};--sy:${team.sy}`}>
+            <span class="fs-number type-label" style={`left:${team.nx};top:${team.ny}`}>
               {team.num}
             </span>
           ))
@@ -101,21 +103,21 @@ const specs = [
           teams, competing in BIOBUZZ 2026-2027.
         </p>
         <p class="fs-cta">
-          <a href={`${base}/contact/`} class="btn btn-solid">Sponsor the team</a>
+          <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
           <a href={`${base}/season/`} class="fs-link">See our first season</a>
         </p>
       </div>
+
+      <span class="fs-cue type-label" aria-hidden="true">Scroll to forge</span>
     </div>
   </section>
 
   <!-- ================================================ LINEAGE LEDGER -->
   <section class="bg-surface py-28 sm:py-36">
     <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <Reveal variant="clip">
-        <h2 class="type-display text-[clamp(2.25rem,6vw,4.5rem)]">
-          Where we come from
-        </h2>
-      </Reveal>
+      <h2 class="type-display text-[clamp(2.25rem,6vw,4.5rem)]" data-split>
+        Where we come from
+      </h2>
 
       <Reveal variant="up" delay={100} class="mt-6 max-w-2xl">
         <p class="text-muted">
@@ -177,11 +179,13 @@ const specs = [
 
       <div class="grid gap-10 md:grid-cols-2">
         <Reveal variant="left">
-          <Placeholder name="home-robot-photo">
-            <div class="slot aspect-[4/3]">
-              <span class="type-label text-muted">Robot photo, coming at kickoff</span>
-            </div>
-          </Placeholder>
+          <div data-parallax="-40">
+            <Placeholder name="home-robot-photo">
+              <div class="slot aspect-[4/3]">
+                <span class="type-label text-muted">Robot photo, coming at kickoff</span>
+              </div>
+            </Placeholder>
+          </div>
         </Reveal>
 
         <Reveal variant="right" delay={120}>
@@ -243,11 +247,9 @@ const specs = [
   <!-- ==================================================== SPONSOR BAND -->
   <section class="ember bg-surface py-32 sm:py-44">
     <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <Reveal variant="clip">
-        <h2 class="type-display max-w-4xl text-[clamp(2.75rem,8vw,6.5rem)]">
-          Back the build
-        </h2>
-      </Reveal>
+      <h2 class="type-display max-w-4xl text-[clamp(2.75rem,8vw,6.5rem)]" data-split>
+        Back the build
+      </h2>
 
       <Reveal variant="up" delay={120} class="mt-8 max-w-2xl">
         <p class="text-muted">
@@ -259,7 +261,7 @@ const specs = [
       </Reveal>
 
       <Reveal variant="up" delay={200} class="mt-10">
-        <a href={`${base}/contact/`} class="btn btn-solid">Sponsor the team</a>
+        <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
       </Reveal>
     </div>
   </section>
@@ -267,12 +269,12 @@ const specs = [
 
 <style>
   /* ---- Act 1: The Forge scene ------------------------------------ */
-  /* One scrubbed scene driven by a single custom property --p (0..1)
-     set by JS on .forge-track. Every animated value is a calc() of --p,
-     so it works in every browser and never leaves the two headlines
-     both visible. Without JS or under reduced motion the static
-     composition below applies instead. */
+  /* The motion module (forge-motion.ts) pins this stage and choreographs
+     the merge with GSAP. Everything here is the resting/static layer:
+     without JS or under reduced motion it stands alone as a clean hero
+     (only "One Onyx." shows; "Four teams." is hidden). */
   .forge-stage {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -284,6 +286,31 @@ const specs = [
     overflow: clip;
   }
 
+  /* Animated ember: a single radial heat glow with local grain. Rests
+     lit; the module swells it as the four numbers merge. */
+  /* Negative z keeps the ember behind the content without forcing
+     position on the absolutely-placed layers (numbers, cue). */
+  .fs-ember {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    transform-origin: 50% 115%;
+    background: radial-gradient(
+      120% 90% at 50% 115%,
+      color-mix(in srgb, var(--color-accent) 40%, transparent) 0%,
+      transparent 60%
+    );
+  }
+
+  .fs-ember::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
   .fs-eyebrow {
     color: var(--color-muted);
   }
@@ -291,17 +318,18 @@ const specs = [
   .fs-numbers {
     position: absolute;
     inset: 0;
+    z-index: 0;
     pointer-events: none;
   }
 
+  /* Team numbers scattered to the corners; the module flies them in and
+     lifts them like sparks as the merge completes. */
   .fs-number {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: clamp(1rem, 2.2vw, 1.5rem);
+    translate: -50% -50%;
+    font-size: clamp(1.15rem, 2.4vw, 1.9rem);
     color: var(--color-muted);
-    opacity: 0.4;
-    transform: translate(-50%, -50%) translate(var(--sx), var(--sy));
+    opacity: 0.5;
   }
 
   .fs-heads {
@@ -316,6 +344,12 @@ const specs = [
 
   .fs-head-b {
     color: var(--color-accent);
+  }
+
+  /* Static fallback: "Four teams." is hidden; the module shows and
+     animates it only when it takes over. */
+  .fs-head-a {
+    display: none;
   }
 
   .fs-sub {
@@ -347,108 +381,27 @@ const specs = [
     }
   }
 
-  /* ---- Static composition (no JS, reduced motion, before scrub) --- */
-  .fs-head-a {
+  /* Scroll cue: only meaningful once the pinned scene is live. */
+  .fs-cue {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1.25rem, 4vh, 2.5rem);
+    translate: -50% 0;
+    z-index: 1;
     display: none;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-muted);
   }
 
-  /* Gentle load entrance for the static hero; suppressed once the JS
-     scrub takes over (.forge-track.is-scrub). */
-  :global(html.js) .forge-track:not(.is-scrub) .fs-head-b,
-  :global(html.js) .forge-track:not(.is-scrub) .fs-tail,
-  :global(html.js) .forge-track:not(.is-scrub) .fs-eyebrow {
-    animation: fs-arrive 640ms var(--ease-out-strong) both;
+  .fs-cue::after {
+    content: '';
+    width: 1px;
+    height: 1.75rem;
+    background: linear-gradient(var(--color-accent), transparent);
   }
 
-  :global(html.js) .forge-track:not(.is-scrub) .fs-head-b {
-    animation-delay: 80ms;
-  }
-
-  :global(html.js) .forge-track:not(.is-scrub) .fs-tail {
-    animation-delay: 220ms;
-  }
-
-  @keyframes fs-arrive {
-    from {
-      opacity: 0;
-      transform: translateY(22px);
-    }
-  }
-
-  /* ---- The scrub (JS sets --p; pure calc, all browsers) ---------- */
-  .forge-track.is-scrub {
-    height: 320svh;
-  }
-
-  .forge-track.is-scrub .forge-stage {
-    position: sticky;
-    top: 0;
-    height: 100svh;
-  }
-
-  /* Four numbers slide to center (p:0 -> 0.4) then fade (~0.45). */
-  .forge-track.is-scrub .fs-number {
-    --conv: min(calc(var(--p) / 0.4), 1);
-    opacity: calc(0.55 * (1 - clamp(0, calc((var(--p) - 0.38) * 12), 1)));
-    transform: translate(-50%, -50%)
-      translate(
-        calc(var(--sx) * (1 - var(--conv))),
-        calc(var(--sy) * (1 - var(--conv)))
-      );
-  }
-
-  /* "Four teams." holds, then yields (0.30 -> 0.44). */
-  .forge-track.is-scrub .fs-head-a {
-    --out: clamp(0, calc((var(--p) - 0.30) * 7), 1);
-    display: block;
-    opacity: calc(1 - var(--out));
-    transform: translateY(calc(var(--out) * -14px));
-  }
-
-  /* "One Onyx." strikes in (0.42 -> 0.58). */
-  .forge-track.is-scrub .fs-head-b {
-    --in: clamp(0, calc((var(--p) - 0.42) * 6), 1);
-    opacity: var(--in);
-    transform: scale(calc(0.94 + var(--in) * 0.06));
-  }
-
-  /* Sub + CTA settle last (0.66 -> 0.82). */
-  .forge-track.is-scrub .fs-tail {
-    --in: clamp(0, calc((var(--p) - 0.66) * 6), 1);
-    opacity: var(--in);
-    transform: translateY(calc((1 - var(--in)) * 18px));
+  :global(html.gsap) .fs-cue {
+    display: flex;
   }
 </style>
-
-<script>
-  // Deterministic scrub: map scroll progress through the pinned track to
-  // --p in [0,1]. No scroll-timeline dependency, no Astro-scoping traps.
-  function initForge() {
-    const track = document.querySelector<HTMLElement>('.forge-track');
-    if (!track) return;
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    track.classList.add('is-scrub');
-    let queued = false;
-    const update = () => {
-      queued = false;
-      const total = track.offsetHeight - window.innerHeight;
-      const p = total > 0 ? Math.min(Math.max(-track.getBoundingClientRect().top / total, 0), 1) : 0;
-      track.style.setProperty('--p', p.toFixed(4));
-    };
-    addEventListener(
-      'scroll',
-      () => {
-        if (!queued) {
-          queued = true;
-          requestAnimationFrame(update);
-        }
-      },
-      { passive: true }
-    );
-    addEventListener('resize', update, { passive: true });
-    update();
-  }
-
-  initForge();
-</script>

@@ -36,17 +36,22 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
     <title>{title} · GNCE Onyx</title>
     <script is:inline>
       document.documentElement.classList.replace('no-js', 'js');
-      // Forge loader: once per session, never under reduced motion.
+      // Set motion flags synchronously, before first paint, so the page
+      // never flashes the pre-animation state. The motion module clears
+      // these once it boots; the failsafes clear them if it never does.
       try {
-        if (
-          !sessionStorage.getItem('forged') &&
-          !matchMedia('(prefers-reduced-motion: reduce)').matches
-        ) {
-          document.documentElement.classList.add('loading');
-          // Failsafe: never leave the cover up if the module never runs.
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('will-animate');
           setTimeout(function () {
-            document.documentElement.classList.remove('loading');
-          }, 2000);
+            document.documentElement.classList.remove('will-animate');
+          }, 2600);
+          // Forge loader: once per session.
+          if (!sessionStorage.getItem('forged')) {
+            document.documentElement.classList.add('loading');
+            setTimeout(function () {
+              document.documentElement.classList.remove('loading');
+            }, 2000);
+          }
         }
       } catch (e) {
         /* storage blocked: skip the loader */
@@ -73,68 +78,11 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
     <Footer />
     <GearNav />
 
+    <!-- The motion engine: GSAP + ScrollTrigger + Lenis, the pinned hero,
+         split-text, parallax, magnetic pull, and the [data-reveal]
+         entrances. Bows out under reduced motion (static CSS stands in). -->
     <script>
-      import Lenis from 'lenis';
-
-      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      // Smooth scrolling — skipped entirely under reduced motion
-      // (the CSS scroll-behavior fallback is disabled there too).
-      if (!reduced) {
-        const lenis = new Lenis({ lerp: 0.12, anchors: true });
-        const raf = (time: number) => {
-          lenis.raf(time);
-          requestAnimationFrame(raf);
-        };
-        requestAnimationFrame(raf);
-      }
-
-      // Loader: hold ~0.9s, then the cover lifts (CSS transition on
-      // html.loading removal). Reveals start with the lift so the hero
-      // entrance reads as the loader's exit.
-      const loading = document.documentElement.classList.contains('loading');
-      if (loading) {
-        try {
-          sessionStorage.setItem('forged', '1');
-        } catch (e) {
-          /* fine */
-        }
-        setTimeout(() => document.documentElement.classList.remove('loading'), 950);
-      }
-
-      const startReveals = () => {
-        // Auto-stagger reveals inside any [data-reveal-group] (60ms apart,
-        // capped so long lists never feel slow).
-        document.querySelectorAll('[data-reveal-group]').forEach((group) => {
-          group.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el, i) => {
-            if (!el.style.getPropertyValue('--reveal-delay')) {
-              el.style.setProperty('--reveal-delay', `${Math.min(i * 60, 360)}ms`);
-            }
-          });
-        });
-
-        // Huge top margin: anything at or above the viewport counts as
-        // seen, so fast scrolls (scrollbar drags, anchor jumps) can't
-        // strand skipped elements in their hidden state above the reader.
-        const io = new IntersectionObserver(
-          (entries) => {
-            for (const entry of entries) {
-              if (entry.isIntersecting) {
-                entry.target.classList.add('is-revealed');
-                io.unobserve(entry.target);
-              }
-            }
-          },
-          { threshold: 0.12, rootMargin: '2000% 0px -8% 0px' }
-        );
-        document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
-      };
-
-      if (loading) {
-        setTimeout(startReveals, 950);
-      } else {
-        startReveals();
-      }
+      import '../scripts/forge-motion';
     </script>
 
     <style>
