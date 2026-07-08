@@ -1,53 +1,23 @@
 ---
 /**
- * Home — the ONYX experience.
- * A 3D extruded wordmark runs behind the whole page, handing off
- * O -> N -> Y -> X as you scroll (motion.ts, initOnyxSpine). Sections:
- * Hero (O) -> Lineage card-stack (N) -> Mission + Robot (Y) ->
- * Roster coverflow + Back the build (X). Every scene is scroll-driven.
+ * Home — one immersive journey. The ONYX wordmark is a 3D object; the
+ * camera flies from the whole word into each letter (O -> N -> Y -> X),
+ * and each letter frames a segment of content (motion.ts, initJourney).
+ * Without JS / under reduced motion it degrades to a stacked static page.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Placeholder from '../components/Placeholder.astro';
-import Reveal from '../components/Reveal.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
-const glyphs = ['O', 'N', 'Y', 'X'];
 
-const lineage = [
-  {
-    num: '22489',
-    name: 'GNCE Diamond',
-    honors: [
-      '2025 States, Winning Alliance Captain',
-      '2025 World Championship, Jemison: Motivate 2nd',
-      '2026 States, Innovate Award',
-      '2026 MTI, Mechatronics Synergy Winner',
-    ],
-  },
-  {
-    num: '26112',
-    name: 'GNCE Organized Anarchy',
-    honors: [
-      '2025 States, Finalist Alliance Captain',
-      '2026 States, Finalist Alliance Captain',
-      '2026 World Championship, Jackson: Semifinalist',
-      '2026 MTI qualification',
-    ],
-  },
-  { num: '26413', name: 'GNCE Mercury', honors: [] },
-  { num: '26111', name: 'GNCE Electrified Chickens', honors: [] },
+const stations = [
+  { letter: 'O', key: 'onyx' },
+  { letter: 'N', key: 'roots' },
+  { letter: 'Y', key: 'robot' },
+  { letter: 'X', key: 'crew' },
 ];
 
-const roster = [
-  { name: 'Ethan Zhang', role: 'Captain' },
-  { name: 'Ethan Zhuang', role: 'Captain' },
-  { name: 'Anson Su', role: '' },
-  { name: 'Adrian Chang', role: '' },
-  { name: 'Leo Li', role: '' },
-  { name: 'Nicholas Colli', role: '' },
-  { name: 'Raymond Liu', role: '' },
-];
-
+const numbers = ['22489', '26112', '26413', '26111'];
+const roster = ['Ethan Zhang', 'Ethan Zhuang', 'Anson Su', 'Adrian Chang', 'Leo Li', 'Nicholas Colli', 'Raymond Liu'];
 const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
 ---
 
@@ -55,259 +25,167 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
   title="Home"
   description="GNCE Onyx is a rookie FIRST Tech Challenge team at Weston High School, built by championship veterans, competing in the 2026-2027 BIOBUZZ season."
 >
-  <!-- ===================================== 3D ONYX SPINE (background) -->
-  <div class="onyx-spine scene-3d" aria-hidden="true">
-    {
-      glyphs.map((ch) => (
-        <div class="onyx-letter preserve-3d">
-          {Array.from({ length: 10 }).map((_, d) => (
-            <span class="onyx-face" style={`transform:translate(-50%,-50%) translateZ(${-d * 2.5}px)`}>
-              {ch}
-            </span>
-          ))}
-        </div>
-      ))
-    }
-  </div>
-
-  <!-- ============================================= HERO / O -->
-  <section class="hero" data-hero>
-    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
-      <p class="type-label text-muted">FIRST Tech Challenge · Weston, MA</p>
-
-      <h1 class="hero-word type-display" aria-label="Onyx">
-        {glyphs.map((ch) => (
-          <span class="hero-glyph-mask" aria-hidden="true"><span class="hero-glyph">{ch}</span></span>
-        ))}
-      </h1>
-
-      <p class="hero-script type-script" aria-hidden="true">GNCE Onyx</p>
-
-      <div class="hero-tail">
-        <p class="hero-sub">
-          A rookie robotics team of championship veterans, built for the
-          2026-2027 BIOBUZZ season.
-        </p>
-        <p class="hero-cta">
-          <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
-          <a href={`${base}/season/`} class="hero-link">Our first season</a>
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================= LINEAGE / N -->
-  <section class="band">
-    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
-      <h2 class="type-display headline" data-split>Where we come from</h2>
-      <Reveal variant="up" class="mt-6 max-w-xl">
-        <p class="text-muted">
-          Four of our seven members return from four GNCE teams, with world
-          championship and international invitational records.
-        </p>
-      </Reveal>
-    </div>
-
-    <!-- Pinned card stack: one heritage team at a time -->
-    <div class="stack" data-stack>
-      <div class="stack-inner mx-auto w-full max-w-3xl px-5 sm:px-8">
+  <section class="journey" data-journey aria-label="GNCE Onyx">
+    <div class="journey-stage scene-3d">
+      <!-- 3D wordmark: the camera flies through these letters -->
+      <div class="journey-world preserve-3d" data-world aria-hidden="true">
         {
-          lineage.map((team) => (
-            <article class="stack-card glass" data-stack-card>
-              <p class="type-display card-num">{team.num}</p>
-              <h3 class="type-display card-name">{team.name}</h3>
-              {team.honors.length > 0 ? (
-                <ul class="card-honors">
-                  {team.honors.map((h) => (
-                    <li class="hairline">{h}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p class="text-muted card-rookie">First full season with Onyx.</p>
-              )}
-            </article>
+          stations.map((s) => (
+            <div class="station-letter preserve-3d">
+              {Array.from({ length: 8 }).map((_, d) => (
+                <span
+                  class="letter-face"
+                  style={`transform:translateZ(${-(d + 1) * 4}px);color:color-mix(in srgb, var(--color-surface) ${92 - d * 9}%, var(--color-bg))`}
+                >
+                  {s.letter}
+                </span>
+              ))}
+              <span class="letter-front">{s.letter}</span>
+            </div>
           ))
         }
       </div>
-    </div>
-  </section>
 
-  <!-- ============================================= MISSION / Y -->
-  <section class="band mission">
-    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
-      <p class="type-display mission-line" data-split>
-        We build robots we understand end to end, so we can fix them in the
-        pit and trust them on the field.
-      </p>
-    </div>
-  </section>
-
-  <!-- ============================================= THE ROBOT / Y -->
-  <section class="band">
-    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
-      <h2 class="type-display headline" data-split>The machine</h2>
-
-      <div class="mt-12 grid gap-10 md:grid-cols-[1.1fr_1fr]">
-        <div data-reveal-scrub="up">
-          <Placeholder name="home-robot-photo">
-            <div class="slot aspect-[4/3]">
-              <span class="type-label text-muted">Robot, at kickoff</span>
-            </div>
-          </Placeholder>
-        </div>
-
-        <div>
-          <p class="max-w-prose text-muted">
-            The BIOBUZZ build starts at kickoff. This is where the machine
-            takes shape, from first sketch to competition ready.
+      <!-- Content, synced to each letter -->
+      <div class="journey-overlay">
+        <!-- O: identity -->
+        <div class="panel" data-panel="0">
+          <p class="type-label text-muted">FIRST Tech Challenge · Weston, MA</p>
+          <p class="type-script panel-script">GNCE Onyx</p>
+          <p class="panel-sub">
+            A rookie robotics team of championship veterans, built for the
+            2026-2027 BIOBUZZ season.
           </p>
-          <dl class="specs" data-reveal-group>
-            {
-              specs.map((key) => (
-                <Reveal as="div" class="spec-row hairline">
-                  <dt class="type-label text-muted">{key}</dt>
-                  <dd class="stub" title="Set at kickoff">TBD</dd>
-                </Reveal>
-              ))
-            }
-          </dl>
+          <p class="panel-cta">
+            <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
+            <a href={`${base}/season/`} class="panel-link">Our first season</a>
+          </p>
+        </div>
+
+        <!-- N: roots (brief, not highlighted) -->
+        <div class="panel" data-panel="1">
+          <h2 class="type-display panel-head">Where we come from</h2>
+          <p class="panel-sub">
+            Four of our seven are veterans of four GNCE teams, with world
+            championship and international records.
+          </p>
+          <p class="panel-numbers type-label text-muted">{numbers.join('  ·  ')}</p>
+        </div>
+
+        <!-- Y: our robot -->
+        <div class="panel" data-panel="2">
+          <h2 class="type-display panel-head">Our robot</h2>
+          <p class="panel-sub">
+            Proven designs we can fix in the pit and trust on the field. The
+            build starts at kickoff.
+          </p>
+          <ul class="panel-specs">
+            {specs.map((s) => <li><span class="text-muted">{s}</span><span class="stub" title="Set at kickoff">TBD</span></li>)}
+          </ul>
+        </div>
+
+        <!-- X: crew + close -->
+        <div class="panel" data-panel="3">
+          <h2 class="type-display panel-head">The crew</h2>
+          <p class="panel-roster">{roster.join(' · ')}. Two or three more, joining soon.</p>
+          <p class="panel-cta">
+            <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Back the build</a>
+          </p>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ============================================= ROSTER / X -->
-  <section class="band">
-    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
-      <h2 class="type-display headline" data-split>The crew</h2>
-      <Reveal variant="up" class="mt-6 max-w-xl">
-        <p class="text-muted">
-          Seven and counting, led by two captains. Drag through.
-        </p>
-      </Reveal>
-    </div>
-
-    <div class="swiper roster" data-coverflow>
-      <div class="swiper-wrapper">
-        {
-          roster.map((m) => (
-            <div class="swiper-slide roster-slide glass">
-              <span class="roster-name type-display">{m.name}</span>
-              {m.role && <span class="roster-role type-label text-accent">{m.role}</span>}
-            </div>
-          ))
-        }
-        <div class="swiper-slide roster-slide roster-open">
-          <span class="text-muted">Two or three more, joining soon.</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================= BACK THE BUILD / X -->
-  <section class="band closing">
-    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
-      <h2 class="type-display headline-xl" data-split>Back the build</h2>
-      <Reveal variant="up" class="mt-8 max-w-2xl">
-        <p class="text-muted">
-          Sponsorship covers what a season costs: parts, tools, registration,
-          and travel. Cash is one way in. Mentorship and shop tours count too.
-        </p>
-      </Reveal>
-      <Reveal variant="up" class="mt-10">
-        <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
-      </Reveal>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  /* ---- 3D ONYX spine ------------------------------------------- */
-  .onyx-spine {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    display: grid;
-    place-items: center;
-    pointer-events: none;
-    opacity: 0;
-  }
-
-  main > :global(section) {
+  .journey {
     position: relative;
-    z-index: 1;
   }
 
-  .onyx-letter {
+  .journey-stage {
+    position: relative;
+    height: 100svh;
+    overflow: clip;
+    perspective: 1200px;
+  }
+
+  .journey-world {
     position: absolute;
     inset: 0;
-  }
-
-  .onyx-face {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-family: var(--font-display);
-    font-size: clamp(20rem, 64vh, 42rem);
-    line-height: 1;
-    color: var(--color-surface);
-  }
-
-  /* front-most face reads a touch lighter for a defined edge (solid step, no gradient) */
-  .onyx-letter .onyx-face:first-child {
-    color: var(--color-panel);
-  }
-
-  /* ---- Hero / O ------------------------------------------------ */
-  .hero {
-    min-height: 100svh;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    padding: clamp(4rem, 10vh, 8rem) 0;
+    gap: 0.12em;
+    transform-origin: 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 20vw, 16rem);
+    line-height: 1;
+    will-change: transform;
   }
 
-  .hero-word {
-    display: flex;
-    gap: clamp(0.1rem, 1vw, 0.6rem);
-    margin-top: 1rem;
-    font-size: clamp(3.5rem, 17vw, 13rem);
-    line-height: 0.95;
-  }
-
-  .hero-glyph-mask {
-    display: inline-block;
-    overflow: clip;
-    padding: 0 0.02em 0.1em;
-  }
-
-  .hero-glyph {
+  .station-letter {
+    position: relative;
     display: inline-block;
   }
 
-  .hero-script {
-    margin-top: 0.25rem;
-    font-size: clamp(2rem, 7vw, 4.5rem);
+  /* Front face: a bright outline that reads as a wordmark. */
+  .letter-front {
+    position: relative;
+    z-index: 2;
+    color: transparent;
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-ink) 78%, transparent);
+  }
+
+  /* Extrusion body: solid dark purple steps behind the outline. */
+  .letter-face {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  /* Content overlay (screen space, crisp) */
+  .journey-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .panel {
+    position: absolute;
+    left: clamp(1.25rem, 6vw, 6rem);
+    bottom: clamp(3rem, 12vh, 8rem);
+    width: min(90vw, 34rem);
+    pointer-events: auto;
+  }
+
+  .panel > * + * {
+    margin-top: 1.25rem;
+  }
+
+  .panel-head {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1;
+  }
+
+  .panel-script {
+    font-size: clamp(1.75rem, 5vw, 3rem);
     color: var(--color-accent);
   }
 
-  .hero-sub {
-    margin-top: 2.5rem;
-    max-width: 34rem;
+  .panel-sub {
+    max-width: 32rem;
     color: var(--color-muted);
   }
 
-  .hero-cta {
+  .panel-cta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 1.5rem;
-    margin-top: 1.75rem;
   }
 
-  .hero-link {
+  .panel-link {
     color: var(--color-ink);
-    font-family: var(--font-text);
     font-weight: 700;
     font-size: 0.9375rem;
     letter-spacing: 0.08em;
@@ -315,145 +193,57 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
     text-decoration: underline;
     text-underline-offset: 0.35em;
     text-decoration-color: var(--color-accent);
-    transition: color 200ms ease;
   }
 
-  @media (hover: hover) and (pointer: fine) {
-    .hero-link:hover {
-      color: var(--color-accent);
-    }
+  .panel-numbers {
+    letter-spacing: 0.18em;
   }
 
-  /* ---- Section rhythm (transparent, so the spine shows) -------- */
-  .band {
-    padding: clamp(6rem, 14vh, 11rem) 0;
+  .panel-specs {
+    columns: 2;
+    column-gap: 2.5rem;
+    max-width: 30rem;
   }
 
-  .headline {
-    font-size: clamp(2.25rem, 6vw, 4.5rem);
-  }
-
-  .headline-xl {
-    font-size: clamp(2.75rem, 9vw, 7rem);
-  }
-
-  /* ---- Lineage card stack / N --------------------------------- */
-  .stack {
-    position: relative;
-    margin-top: 3rem;
-  }
-
-  .stack-inner {
-    position: relative;
-    height: 100svh;
-    display: grid;
-    place-items: center;
-  }
-
-  .stack-card {
-    grid-area: 1 / 1;
-    width: 100%;
-    padding: clamp(1.5rem, 4vw, 2.75rem);
-    background: color-mix(in srgb, var(--color-panel) 88%, transparent);
-    will-change: transform, opacity;
-  }
-
-  /* No-JS / reduced motion: cards flow as a readable list, not a stack. */
-  :global(html:not(.gsap)) .stack-inner {
-    display: block;
-    height: auto;
-  }
-
-  :global(html:not(.gsap)) .stack-card {
-    grid-area: auto;
-    margin-bottom: 1.25rem;
-  }
-
-  .card-num {
-    font-size: clamp(2.5rem, 6vw, 4rem);
-    color: var(--color-accent);
-    line-height: 1;
-  }
-
-  .card-name {
-    margin-top: 0.5rem;
-    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
-  }
-
-  .card-honors {
-    margin-top: 1.5rem;
-  }
-
-  .card-honors li {
-    border-top: 1px solid var(--color-line);
-    padding: 0.7rem 0;
-    color: var(--color-muted);
-    font-size: 0.95rem;
-  }
-
-  .card-rookie {
-    margin-top: 1.25rem;
-  }
-
-  /* ---- Mission / Y -------------------------------------------- */
-  .mission-line {
-    max-width: 24ch;
-    font-size: clamp(1.75rem, 4.5vw, 3.75rem);
-    line-height: 1.1;
-  }
-
-  /* ---- The machine / specs ------------------------------------ */
-  .specs {
-    margin-top: 2rem;
-  }
-
-  .spec-row {
+  .panel-specs li {
     display: flex;
-    align-items: baseline;
     justify-content: space-between;
-    gap: 1.5rem;
+    gap: 1rem;
     border-top: 1px solid var(--color-line);
-    padding: 0.85rem 0;
+    padding: 0.5rem 0;
+    break-inside: avoid;
   }
 
-  .spec-row:last-child {
-    border-bottom: 1px solid var(--color-line);
+  .panel-roster {
+    max-width: 34rem;
+    color: var(--color-ink);
+    line-height: 1.6;
   }
 
-  /* ---- Roster coverflow / X ----------------------------------- */
-  .roster {
-    margin-top: 3rem;
-    padding: 1rem 0 2rem;
+  /* ---- No-JS / reduced motion: a readable stacked page ---------- */
+  :global(html:not(.gsap)) .journey-stage {
+    height: auto;
     overflow: visible;
+    perspective: none;
   }
 
-  .roster-slide {
-    width: min(74vw, 22rem);
-    aspect-ratio: 3 / 4;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    padding: 1.75rem;
+  :global(html:not(.gsap)) .journey-world {
+    position: relative;
+    inset: auto;
+    flex-wrap: wrap;
+    font-size: clamp(4rem, 16vw, 10rem);
+    padding: 8rem 1.25rem 2rem;
+    transform: none !important;
   }
 
-  .roster-name {
-    font-size: clamp(1.5rem, 3vw, 2.1rem);
-    line-height: 1.05;
+  :global(html:not(.gsap)) .journey-overlay {
+    position: static;
   }
 
-  .roster-open {
-    align-items: flex-start;
-    justify-content: center;
-    border: 1px dashed var(--color-line);
-    background: transparent;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    text-align: left;
-  }
-
-  /* ---- Closing ------------------------------------------------ */
-  .closing {
-    padding-bottom: clamp(7rem, 18vh, 13rem);
+  :global(html:not(.gsap)) .panel {
+    position: static;
+    width: auto;
+    max-width: 42rem;
+    padding: 3rem clamp(1.25rem, 6vw, 6rem);
   }
 </style>

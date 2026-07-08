@@ -72,9 +72,7 @@ function boot() {
         initHoverPreview();
       }
       // scenes (each no-ops if its element is absent)
-      initOnyxSpine();
-      initHero();
-      initCardStack();
+      initJourney();
       initHorizontalReveal();
       initHScroll();
       initFlip();
@@ -361,90 +359,57 @@ function initHoverPreview() {
 }
 
 /* ================================================================== */
-/* SCENE: the 3D ONYX spine (home) — one extruded letter runs behind  */
-/* the whole page, handing off O -> N -> Y -> X as you scroll.         */
+/* SCENE: the immersive ONYX journey (home). The camera flies from the */
+/* whole wordmark into each letter (O -> N -> Y -> X); each letter's    */
+/* content panel wipes in when the camera arrives.                      */
 /* ================================================================== */
-function initOnyxSpine() {
-  const spine = document.querySelector<HTMLElement>('.onyx-spine');
-  if (!spine) return;
-  const letters = gsap.utils.toArray<HTMLElement>('.onyx-letter', spine);
+function initJourney() {
+  const journey = document.querySelector<HTMLElement>('.journey');
+  const world = document.querySelector<HTMLElement>('[data-world]');
+  if (!journey || !world) return;
+  const letters = gsap.utils.toArray<HTMLElement>('.station-letter', world);
+  const panels = gsap.utils.toArray<HTMLElement>('.panel');
   if (!letters.length) return;
 
-  spine.style.opacity = '0.5';
-  gsap.set(letters, { rotationX: -92, transformPerspective: 1000 });
-  gsap.set(letters[0], { rotationX: 0 });
+  const S = 2.7; // zoom factor when a letter fills the frame
+  gsap.set(world, { transformOrigin: '0 0', x: 0, y: 0, scale: 1, force3D: true });
+  gsap.set(panels, { clipPath: 'inset(0 0 100% 0)', opacity: 1 });
 
-  const seg = 1 / letters.length;
-  const tl = gsap.timeline({
-    scrollTrigger: { trigger: 'main', start: 'top top', end: 'bottom bottom', scrub: 1 },
-  });
-  letters.forEach((L, i) => {
-    // active letter turns gently through its segment (scroll-driven life)
-    tl.fromTo(L, { rotationY: -7 }, { rotationY: 7, ease: 'none', duration: seg }, i * seg);
-    if (i < letters.length - 1) {
-      const at = (i + 1) * seg - 0.04;
-      tl.to(L, { rotationX: 92, duration: 0.08, ease: 'power2.in' }, at);
-      tl.fromTo(
-        letters[i + 1],
-        { rotationX: -92 },
-        { rotationX: 0, duration: 0.08, ease: 'power2.out' },
-        at
-      );
-    }
-  });
-}
+  // Camera target to center letter i, measured from its untransformed
+  // layout position (transform-origin 0 0 => screen = translate + scale*pos).
+  const camFor = (i: number) => {
+    const L = letters[i];
+    const cx = L.offsetLeft + L.offsetWidth / 2;
+    const cy = L.offsetTop + L.offsetHeight / 2;
+    return { x: window.innerWidth / 2 - S * cx, y: window.innerHeight / 2 - S * cy };
+  };
 
-/* SCENE: hero wordmark (home) — ONYX assembles, then scrolls into 3D. */
-function initHero() {
-  const hero = document.querySelector<HTMLElement>('[data-hero]');
-  if (!hero) return;
-  const word = hero.querySelector<HTMLElement>('.hero-word');
-  const glyphs = gsap.utils.toArray<HTMLElement>('.hero-glyph', hero);
-  const tail = hero.querySelector<HTMLElement>('.hero-tail');
-  const script = hero.querySelector<HTMLElement>('.hero-script');
-
-  // load intro: glyphs rise from a mask, script + tail settle
-  const intro = gsap.timeline({ defaults: { ease: 'power4.out' } });
-  intro.from(glyphs, { yPercent: 120, duration: 1, stagger: 0.08 }, 0.1);
-  if (script) intro.from(script, { opacity: 0, y: 16, duration: 0.7 }, 0.7);
-  if (tail) intro.from(tail, { y: 24, opacity: 0, duration: 0.8 }, 0.85);
-
-  // scrub: as you leave, the word tips back into depth
-  if (word) {
-    gsap.to(word, {
-      rotationX: 34,
-      yPercent: -12,
-      transformPerspective: 900,
-      transformOrigin: '50% 100%',
-      ease: 'none',
-      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6 },
-    });
-  }
-}
-
-/* SCENE: pinned card stack (lineage). [data-stack] > [data-stack-card] */
-function initCardStack() {
-  const stack = document.querySelector<HTMLElement>('[data-stack]');
-  if (!stack) return;
-  const cards = gsap.utils.toArray<HTMLElement>('[data-stack-card]', stack);
-  if (cards.length < 2) return;
-
-  gsap.set(cards, { transformPerspective: 1200 });
   const tl = gsap.timeline({
     scrollTrigger: {
-      trigger: stack,
+      trigger: journey,
       start: 'top top',
-      end: `+=${(cards.length - 1) * 78}%`,
-      scrub: 0.6,
+      end: '+=560%',
       pin: true,
+      scrub: 0.8,
       anticipatePin: 1,
+      invalidateOnRefresh: true,
     },
   });
-  cards.forEach((card, i) => {
-    if (i === 0) return;
-    gsap.set(card, { yPercent: 14, rotationX: -8, opacity: 0 });
-    tl.to(cards[i - 1], { yPercent: -10, rotationX: 8, opacity: 0, ease: 'none' }, i - 1);
-    tl.to(card, { yPercent: 0, rotationX: 0, opacity: 1, ease: 'none' }, i - 1);
+
+  letters.forEach((_, i) => {
+    tl.to(world, {
+      x: () => camFor(i).x,
+      y: () => camFor(i).y,
+      scale: S,
+      rotationY: i % 2 ? 5 : -5,
+      ease: 'power2.inOut',
+      duration: 1,
+    });
+    if (panels[i]) tl.to(panels[i], { clipPath: 'inset(0 0 0% 0)', ease: 'power3.out', duration: 0.4 }, '<0.45');
+    tl.to({}, { duration: 0.9 }); // dwell
+    if (i < letters.length - 1 && panels[i]) {
+      tl.to(panels[i], { clipPath: 'inset(0 0 100% 0)', ease: 'power2.in', duration: 0.3 });
+    }
   });
 }
 

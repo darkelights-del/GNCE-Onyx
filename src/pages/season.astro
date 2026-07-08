@@ -84,14 +84,15 @@ const timeline = [
     <Reveal variant="up" class="mt-6 max-w-prose">
       <p class="text-muted">Anything the judges hand us gets logged here, next to what it recognized.</p>
     </Reveal>
-    <div class="scene-3d mt-12 grid gap-5 sm:grid-cols-3">
+    <div class="mt-12 grid gap-5 sm:grid-cols-3" data-reveal-group>
       {
-        Array.from({ length: 3 }).map((_, i) => (
-          <article class="award-card glass" data-flip data-flip-delay={i * 90}>
-            <p class="type-label text-accent">Award</p>
-            <p class="type-display mt-3 text-2xl">TBD</p>
-            <p class="mt-4 text-sm/relaxed text-muted">Event, division, and what it recognized.</p>
-          </article>
+        Array.from({ length: 3 }).map(() => (
+          <Reveal>
+            <article class="award-card glass">
+              <p class="type-label text-accent">Award</p>
+              <p class="type-display mt-3 text-2xl">TBD</p>
+            </article>
+          </Reveal>
         ))
       }
     </div>

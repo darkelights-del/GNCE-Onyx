@@ -230,14 +230,8 @@ html.gsap [data-reveal] {
 html.will-animate [data-split],
 html.will-animate [data-reveal-scrub],
 html.will-animate [data-count],
-html.will-animate .hero-script,
-html.will-animate .hero-tail {
+html.will-animate .panel {
   opacity: 0;
-}
-
-/* Hero glyphs sit below their mask until the intro lifts them. */
-html.will-animate .hero-glyph {
-  transform: translateY(120%);
 }
 
 [data-magnetic] {
