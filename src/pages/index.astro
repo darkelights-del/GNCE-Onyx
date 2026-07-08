@@ -1,51 +1,41 @@
 ---
 /**
- * Home — four teams, one team.
- * Act 1 is a pinned scene (see src/scripts/motion.ts, initHero): four
- * team numbers fly in from the corners and lift like sparks while "Four
- * teams." gives way to "One Onyx." struck in ember. Without JS or under
- * reduced motion it degrades to a clean static hero.
- * Then: lineage ledger → mission → robot → roster → sponsor band.
+ * Home — the ONYX experience.
+ * A 3D extruded wordmark runs behind the whole page, handing off
+ * O -> N -> Y -> X as you scroll (motion.ts, initOnyxSpine). Sections:
+ * Hero (O) -> Lineage card-stack (N) -> Mission + Robot (Y) ->
+ * Roster coverflow + Back the build (X). Every scene is scroll-driven.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Placeholder from '../components/Placeholder.astro';
 import Reveal from '../components/Reveal.astro';
-import SectionLabel from '../components/SectionLabel.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+const glyphs = ['O', 'N', 'Y', 'X'];
 
-/** The four squads whose veterans formed Onyx; nx/ny scatter the team
- *  numbers across the hero (corners), then they rise like sparks. */
 const lineage = [
   {
     num: '22489',
     name: 'GNCE Diamond',
-    nx: '9%',
-    ny: '24%',
     honors: [
-      '2025 States: Winning Alliance Captain',
-      '2025 FIRST World Championship, Jemison Division: Motivate Award 2nd Place',
-      '2025 MTI: Hardware Honorable Mention',
-      '2026 States: Innovate Award',
-      '2026 Michiana, Croft Division: Finalist Alliance, Control Award 1st Place',
-      '2026 MTI: Mechatronics Synergy Winner',
+      '2025 States, Winning Alliance Captain',
+      '2025 World Championship, Jemison: Motivate 2nd',
+      '2026 States, Innovate Award',
+      '2026 MTI, Mechatronics Synergy Winner',
     ],
   },
   {
     num: '26112',
     name: 'GNCE Organized Anarchy',
-    nx: '83%',
-    ny: '18%',
     honors: [
-      '2025 States: Finalist Alliance Captain',
-      '2025 New England Premier Event, Courville Division',
-      '2026 States: Finalist Alliance Captain',
-      '2026 FIRST World Championship, Jackson Division: Playoff Semifinalist',
-      '2026 Multinational Tech Invitational qualification',
+      '2025 States, Finalist Alliance Captain',
+      '2026 States, Finalist Alliance Captain',
+      '2026 World Championship, Jackson: Semifinalist',
+      '2026 MTI qualification',
     ],
   },
-  { num: '26413', name: 'GNCE Mercury', nx: '14%', ny: '72%', honors: [] },
-  { num: '26111', name: 'GNCE Electrified Chickens', nx: '86%', ny: '66%', honors: [] },
+  { num: '26413', name: 'GNCE Mercury', honors: [] },
+  { num: '26111', name: 'GNCE Electrified Chickens', honors: [] },
 ];
 
 const roster = [
@@ -58,208 +48,173 @@ const roster = [
   { name: 'Raymond Liu', role: '' },
 ];
 
-const specs = [
-  { key: 'Size', value: 'TBD' },
-  { key: 'Mass', value: 'TBD' },
-  { key: 'Drivetrain', value: 'TBD' },
-  { key: 'TeleOp', value: 'TBD' },
-  { key: 'Auto', value: 'TBD' },
-  { key: 'Solo score', value: 'TBD' },
-];
+const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
 ---
 
 <BaseLayout
   title="Home"
-  description="GNCE Onyx is a rookie FIRST Tech Challenge team at Weston High School, built by veterans of four GNCE teams for the 2026-2027 BIOBUZZ season."
+  description="GNCE Onyx is a rookie FIRST Tech Challenge team at Weston High School, built by championship veterans, competing in the 2026-2027 BIOBUZZ season."
 >
-  <!-- ================================================ ACT 1: THE HERO -->
-  <section class="hero-scene" aria-label="GNCE Onyx: four teams, one team">
-    <div class="hero-stage">
-      <div class="hero-ember" aria-hidden="true"></div>
-
-      <p class="hero-eyebrow type-label">
-        FIRST Tech Challenge · Weston High School
-      </p>
-
-      <div class="hero-numbers" aria-hidden="true">
-        {
-          lineage.map((team) => (
-            <span class="hero-number type-label" style={`left:${team.nx};top:${team.ny}`}>
-              {team.num}
+  <!-- ===================================== 3D ONYX SPINE (background) -->
+  <div class="onyx-spine scene-3d" aria-hidden="true">
+    {
+      glyphs.map((ch) => (
+        <div class="onyx-letter preserve-3d">
+          {Array.from({ length: 10 }).map((_, d) => (
+            <span class="onyx-face" style={`transform:translate(-50%,-50%) translateZ(${-d * 2.5}px)`}>
+              {ch}
             </span>
-          ))
-        }
-      </div>
+          ))}
+        </div>
+      ))
+    }
+  </div>
 
-      <div class="hero-heads">
-        <p class="hero-head-a type-display" aria-hidden="true">Four teams.</p>
-        <h1 class="hero-head-b type-display">One Onyx.</h1>
-      </div>
+  <!-- ============================================= HERO / O -->
+  <section class="hero" data-hero>
+    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
+      <p class="type-label text-muted">FIRST Tech Challenge · Weston, MA</p>
+
+      <h1 class="hero-word type-display" aria-label="Onyx">
+        {glyphs.map((ch) => (
+          <span class="hero-glyph-mask" aria-hidden="true"><span class="hero-glyph">{ch}</span></span>
+        ))}
+      </h1>
+
+      <p class="hero-script type-script" aria-hidden="true">GNCE Onyx</p>
 
       <div class="hero-tail">
         <p class="hero-sub">
-          A rookie FTC team at Weston High, built by members of four GNCE
-          teams, competing in BIOBUZZ 2026-2027.
+          A rookie robotics team of championship veterans, built for the
+          2026-2027 BIOBUZZ season.
         </p>
         <p class="hero-cta">
           <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
-          <a href={`${base}/season/`} class="hero-link">See our first season</a>
+          <a href={`${base}/season/`} class="hero-link">Our first season</a>
         </p>
       </div>
-
-      <span class="hero-cue type-label" aria-hidden="true">Scroll</span>
     </div>
   </section>
 
-  <!-- ================================================ LINEAGE LEDGER -->
-  <section class="bg-surface py-28 sm:py-36">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <h2 class="type-display text-[clamp(2.25rem,6vw,4.5rem)]" data-split>
-        Where we come from
-      </h2>
-
-      <Reveal variant="up" delay={100} class="mt-6 max-w-2xl">
+  <!-- ============================================= LINEAGE / N -->
+  <section class="band">
+    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
+      <h2 class="type-display headline" data-split>Where we come from</h2>
+      <Reveal variant="up" class="mt-6 max-w-xl">
         <p class="text-muted">
-          Four of our seven members are returning veterans from four GNCE
-          teams. Their record travels with them.
+          Four of our seven members return from four GNCE teams, with world
+          championship and international invitational records.
         </p>
       </Reveal>
+    </div>
 
-      <div class="mt-16" data-reveal-group>
+    <!-- Pinned card stack: one heritage team at a time -->
+    <div class="stack" data-stack>
+      <div class="stack-inner mx-auto w-full max-w-3xl px-5 sm:px-8">
         {
           lineage.map((team) => (
-            <Reveal class="hairline border-t py-8 first:border-t-0 sm:py-10">
-              <div class="grid gap-4 sm:grid-cols-[8rem_1fr]">
-                <p class="type-label text-2xl text-accent">{team.num}</p>
-                <div>
-                  <h3 class="type-display text-[clamp(1.5rem,3vw,2.25rem)]">{team.name}</h3>
-                  {team.honors.length > 0 && (
-                    <ul class="mt-4 max-w-2xl">
-                      {team.honors.map((honor) => (
-                        <li class="hairline border-t py-2 text-[0.9375rem] text-muted first:border-t-0">
-                          {honor}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
-            </Reveal>
+            <article class="stack-card glass" data-stack-card>
+              <p class="type-display card-num">{team.num}</p>
+              <h3 class="type-display card-name">{team.name}</h3>
+              {team.honors.length > 0 ? (
+                <ul class="card-honors">
+                  {team.honors.map((h) => (
+                    <li class="hairline">{h}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="text-muted card-rookie">First full season with Onyx.</p>
+              )}
+            </article>
           ))
         }
       </div>
     </div>
   </section>
 
-  <!-- ======================================================== MISSION -->
-  <section class="py-32 sm:py-44">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <Reveal variant="clip">
-        <p class="type-display max-w-4xl text-[clamp(1.875rem,4.5vw,3.5rem)]">
-          Consistent, reliable robots we can maintain and trust on the field.
-        </p>
-      </Reveal>
-      <Reveal variant="up" delay={120} class="mt-8 max-w-2xl">
-        <p class="text-muted">
-          GNCE Onyx favors proven designs over complex ones with more ways to
-          fail: machines we understand end to end, fix in the pit, and count
-          on in a match. Off the field, we run outreach to get younger
-          students into robotics and grow FIRST and STEM in and around
-          Weston, Massachusetts.
-        </p>
-      </Reveal>
-    </div>
-  </section>
-
-  <!-- ====================================================== THE ROBOT -->
-  <section class="bg-surface py-24 sm:py-32">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <SectionLabel title="The robot" class="mb-12" />
-
-      <div class="grid gap-10 md:grid-cols-2">
-        <Reveal variant="left">
-          <div data-parallax="-40">
-            <Placeholder name="home-robot-photo">
-              <div class="slot aspect-[4/3]">
-                <span class="type-label text-muted">Robot photo, coming at kickoff</span>
-              </div>
-            </Placeholder>
-          </div>
-        </Reveal>
-
-        <Reveal variant="right" delay={120}>
-          <div class="flex h-full flex-col">
-            <p class="max-w-prose text-muted">
-              The BIOBUZZ build starts at kickoff. This space follows the
-              machine from first sketch to competition-ready.
-            </p>
-            <Placeholder name="home-robot-specs" class="mt-8 px-5 py-4">
-              <dl>
-                {
-                  specs.map((spec) => (
-                    <div class="hairline flex items-baseline justify-between gap-6 border-b py-3 last:border-b-0">
-                      <dt class="type-label text-muted">{spec.key}</dt>
-                      <dd class="text-[0.9375rem]">{spec.value}</dd>
-                    </div>
-                  ))
-                }
-              </dl>
-            </Placeholder>
-          </div>
-        </Reveal>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================= ROSTER -->
-  <!-- Pinned scene: members fly in from alternating sides (motion.ts,
-       initRoster). Without JS it is a plain, fully-visible list. -->
-  <section class="roster-scene py-28 sm:py-36" data-scene="roster">
+  <!-- ============================================= MISSION / Y -->
+  <section class="band mission">
     <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
-      <SectionLabel title="Roster" class="mb-10" />
-
-      <p class="mb-14 max-w-2xl text-lg text-muted">
-        Seven members and counting, led by two captains. Four of us
-        competed at Worlds and international invitationals on our previous
-        teams.
+      <p class="type-display mission-line" data-split>
+        We build robots we understand end to end, so we can fix them in the
+        pit and trust them on the field.
       </p>
-
-      <ol class="grid gap-x-12 sm:grid-cols-2">
-        {
-          roster.map((member) => (
-            <li
-              data-roster-item
-              class="hairline flex items-baseline justify-between gap-6 border-b py-4"
-            >
-              <span class="type-display text-[1.625rem]">{member.name}</span>
-              {member.role && <span class="type-label text-accent">{member.role}</span>}
-            </li>
-          ))
-        }
-        <li data-roster-item class="flex items-baseline py-4">
-          <span class="text-muted italic">Two or three more joining soon.</span>
-        </li>
-      </ol>
     </div>
   </section>
 
-  <!-- ==================================================== SPONSOR BAND -->
-  <section class="ember bg-surface py-32 sm:py-44">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <h2 class="type-display max-w-4xl text-[clamp(2.75rem,8vw,6.5rem)]" data-split>
-        Back the build
-      </h2>
+  <!-- ============================================= THE ROBOT / Y -->
+  <section class="band">
+    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
+      <h2 class="type-display headline" data-split>The machine</h2>
 
-      <Reveal variant="up" delay={120} class="mt-8 max-w-2xl">
+      <div class="mt-12 grid gap-10 md:grid-cols-[1.1fr_1fr]">
+        <div data-reveal-scrub="up">
+          <Placeholder name="home-robot-photo">
+            <div class="slot aspect-[4/3]">
+              <span class="type-label text-muted">Robot, at kickoff</span>
+            </div>
+          </Placeholder>
+        </div>
+
+        <div>
+          <p class="max-w-prose text-muted">
+            The BIOBUZZ build starts at kickoff. This is where the machine
+            takes shape, from first sketch to competition ready.
+          </p>
+          <dl class="specs" data-reveal-group>
+            {
+              specs.map((key) => (
+                <Reveal as="div" class="spec-row hairline">
+                  <dt class="type-label text-muted">{key}</dt>
+                  <dd class="stub" title="Set at kickoff">TBD</dd>
+                </Reveal>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================= ROSTER / X -->
+  <section class="band">
+    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
+      <h2 class="type-display headline" data-split>The crew</h2>
+      <Reveal variant="up" class="mt-6 max-w-xl">
         <p class="text-muted">
-          Sponsorship covers what a season actually costs: parts, tools,
-          registration, and travel. Cash is one way in. Mentorship, shop
-          tours, and co-hosted STEM events for Weston students count just as
-          much.
+          Seven and counting, led by two captains. Drag through.
         </p>
       </Reveal>
+    </div>
 
-      <Reveal variant="up" delay={200} class="mt-10">
+    <div class="swiper roster" data-coverflow>
+      <div class="swiper-wrapper">
+        {
+          roster.map((m) => (
+            <div class="swiper-slide roster-slide glass">
+              <span class="roster-name type-display">{m.name}</span>
+              {m.role && <span class="roster-role type-label text-accent">{m.role}</span>}
+            </div>
+          ))
+        }
+        <div class="swiper-slide roster-slide roster-open">
+          <span class="text-muted">Two or three more, joining soon.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================= BACK THE BUILD / X -->
+  <section class="band closing">
+    <div class="mx-auto w-full max-w-5xl px-5 sm:px-8">
+      <h2 class="type-display headline-xl" data-split>Back the build</h2>
+      <Reveal variant="up" class="mt-8 max-w-2xl">
+        <p class="text-muted">
+          Sponsorship covers what a season costs: parts, tools, registration,
+          and travel. Cash is one way in. Mentorship and shop tours count too.
+        </p>
+      </Reveal>
+      <Reveal variant="up" class="mt-10">
         <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
       </Reveal>
     </div>
@@ -267,91 +222,77 @@ const specs = [
 </BaseLayout>
 
 <style>
-  /* ---- Act 1: The hero scene ------------------------------------- */
-  /* The motion module (motion.ts) pins this stage and choreographs the
-     merge with GSAP. Everything here is the resting/static layer:
-     without JS or under reduced motion it stands alone as a clean hero
-     (only "One Onyx." shows; "Four teams." is hidden). */
-  .hero-stage {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 1.5rem;
-    min-height: 100svh;
-    padding: clamp(1.25rem, 5vw, 5rem);
-    background: var(--color-bg);
-    overflow: clip;
-  }
-
-  /* Animated ember: a single radial heat glow with local grain. Rests
-     lit; the module swells it as the four numbers merge. */
-  /* Negative z keeps the ember behind the content without forcing
-     position on the absolutely-placed layers (numbers, cue). */
-  .hero-ember {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    transform-origin: 50% 115%;
-    background: radial-gradient(
-      120% 90% at 50% 115%,
-      color-mix(in srgb, var(--color-accent) 40%, transparent) 0%,
-      transparent 60%
-    );
-  }
-
-  .hero-ember::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0.05;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  .hero-eyebrow {
-    color: var(--color-muted);
-  }
-
-  .hero-numbers {
-    position: absolute;
+  /* ---- 3D ONYX spine ------------------------------------------- */
+  .onyx-spine {
+    position: fixed;
     inset: 0;
     z-index: 0;
-    pointer-events: none;
-  }
-
-  /* Team numbers scattered to the corners; the module flies them in and
-     lifts them like sparks as the merge completes. */
-  .hero-number {
-    position: absolute;
-    translate: -50% -50%;
-    font-size: clamp(1.15rem, 2.4vw, 1.9rem);
-    color: var(--color-muted);
-    opacity: 0.5;
-  }
-
-  .hero-heads {
     display: grid;
+    place-items: center;
+    pointer-events: none;
+    opacity: 0;
   }
 
-  .hero-head-a,
-  .hero-head-b {
-    grid-area: 1 / 1;
-    font-size: clamp(3.25rem, 12vw, 10rem);
+  main > :global(section) {
+    position: relative;
+    z-index: 1;
   }
 
-  .hero-head-b {
+  .onyx-letter {
+    position: absolute;
+    inset: 0;
+  }
+
+  .onyx-face {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-family: var(--font-display);
+    font-size: clamp(20rem, 64vh, 42rem);
+    line-height: 1;
+    color: var(--color-surface);
+  }
+
+  /* front-most face reads a touch lighter for a defined edge (solid step, no gradient) */
+  .onyx-letter .onyx-face:first-child {
+    color: var(--color-panel);
+  }
+
+  /* ---- Hero / O ------------------------------------------------ */
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(4rem, 10vh, 8rem) 0;
+  }
+
+  .hero-word {
+    display: flex;
+    gap: clamp(0.1rem, 1vw, 0.6rem);
+    margin-top: 1rem;
+    font-size: clamp(3.5rem, 17vw, 13rem);
+    line-height: 0.95;
+  }
+
+  .hero-glyph-mask {
+    display: inline-block;
+    overflow: clip;
+    padding: 0 0.02em 0.1em;
+  }
+
+  .hero-glyph {
+    display: inline-block;
+  }
+
+  .hero-script {
+    margin-top: 0.25rem;
+    font-size: clamp(2rem, 7vw, 4.5rem);
     color: var(--color-accent);
   }
 
-  /* Static fallback: "Four teams." is hidden; the module shows and
-     animates it only when it takes over. */
-  .hero-head-a {
-    display: none;
-  }
-
   .hero-sub {
+    margin-top: 2.5rem;
     max-width: 34rem;
     color: var(--color-muted);
   }
@@ -361,13 +302,16 @@ const specs = [
     flex-wrap: wrap;
     align-items: center;
     gap: 1.5rem;
-    margin-top: 1.5rem;
+    margin-top: 1.75rem;
   }
 
   .hero-link {
     color: var(--color-ink);
-    font-family: var(--font-label);
+    font-family: var(--font-text);
+    font-weight: 700;
     font-size: 0.9375rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     text-decoration: underline;
     text-underline-offset: 0.35em;
     text-decoration-color: var(--color-accent);
@@ -380,35 +324,125 @@ const specs = [
     }
   }
 
-  /* Scroll cue: only meaningful once the pinned scene is live. */
-  .hero-cue {
-    position: absolute;
-    left: 50%;
-    bottom: clamp(1.25rem, 4vh, 2.5rem);
-    translate: -50% 0;
-    z-index: 1;
-    display: none;
-    align-items: center;
-    gap: 0.5rem;
+  /* ---- Section rhythm (transparent, so the spine shows) -------- */
+  .band {
+    padding: clamp(6rem, 14vh, 11rem) 0;
+  }
+
+  .headline {
+    font-size: clamp(2.25rem, 6vw, 4.5rem);
+  }
+
+  .headline-xl {
+    font-size: clamp(2.75rem, 9vw, 7rem);
+  }
+
+  /* ---- Lineage card stack / N --------------------------------- */
+  .stack {
+    position: relative;
+    margin-top: 3rem;
+  }
+
+  .stack-inner {
+    position: relative;
+    height: 100svh;
+    display: grid;
+    place-items: center;
+  }
+
+  .stack-card {
+    grid-area: 1 / 1;
+    width: 100%;
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+    background: color-mix(in srgb, var(--color-panel) 88%, transparent);
+    will-change: transform, opacity;
+  }
+
+  .card-num {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    color: var(--color-accent);
+    line-height: 1;
+  }
+
+  .card-name {
+    margin-top: 0.5rem;
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  }
+
+  .card-honors {
+    margin-top: 1.5rem;
+  }
+
+  .card-honors li {
+    border-top: 1px solid var(--color-line);
+    padding: 0.7rem 0;
     color: var(--color-muted);
+    font-size: 0.95rem;
   }
 
-  .hero-cue::after {
-    content: '';
-    width: 1px;
-    height: 1.75rem;
-    background: linear-gradient(var(--color-accent), transparent);
+  .card-rookie {
+    margin-top: 1.25rem;
   }
 
-  :global(html.gsap) .hero-cue {
+  /* ---- Mission / Y -------------------------------------------- */
+  .mission-line {
+    max-width: 24ch;
+    font-size: clamp(1.75rem, 4.5vw, 3.75rem);
+    line-height: 1.1;
+  }
+
+  /* ---- The machine / specs ------------------------------------ */
+  .specs {
+    margin-top: 2rem;
+  }
+
+  .spec-row {
     display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    border-top: 1px solid var(--color-line);
+    padding: 0.85rem 0;
   }
 
-  /* Roster becomes a full-height pinned stage only when the engine is
-     live; otherwise it is a normal, fully-visible list. */
-  :global(html.gsap) .roster-scene {
+  .spec-row:last-child {
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  /* ---- Roster coverflow / X ----------------------------------- */
+  .roster {
+    margin-top: 3rem;
+    padding: 1rem 0 2rem;
+    overflow: visible;
+  }
+
+  .roster-slide {
+    width: min(74vw, 22rem);
+    aspect-ratio: 3 / 4;
     display: flex;
-    min-height: 100svh;
-    align-items: center;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 1.75rem;
+  }
+
+  .roster-name {
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    line-height: 1.05;
+  }
+
+  .roster-open {
+    align-items: flex-start;
+    justify-content: center;
+    border: 1px dashed var(--color-line);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    text-align: left;
+  }
+
+  /* ---- Closing ------------------------------------------------ */
+  .closing {
+    padding-bottom: clamp(7rem, 18vh, 13rem);
   }
 </style>

@@ -2,16 +2,14 @@
  * motion — the site's motion engine.
  *
  * One GSAP + ScrollTrigger layer wired to Lenis so smooth scroll and
- * scroll-driven animation share a single clock. Design intent: crisp,
- * mechanical, scroll-locked motion. Reveals are clip-path wipes and
- * masked line/character rises, not opacity fades. The signature moments
- * (hero, roster) are pinned and scrubbed, so the reader drives them.
+ * scroll-driven animation share a single clock. Everything is:
+ *   - motivated (each effect communicates hierarchy, story, or feedback)
+ *   - crisp and scroll-locked (clip-path wipes and masked rises, no fades)
+ *   - reduced-motion safe (the module bows out; static CSS stands in)
+ *   - transform / opacity / clip-path only (GPU, no layout thrash)
  *
- * Strictly progressive: the head sets html.will-animate synchronously so
- * first paint already hides what is about to move (no flash) and clears
- * it once this boots; a 2.6s failsafe + a try/catch reveal everything if
- * it never does. Under prefers-reduced-motion the module bows out and the
- * static CSS composition stands alone.
+ * Structure: generic primitives ([data-*] attributes) + named scenes that
+ * only run when their element is on the page. See DESIGN.md.
  */
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
@@ -23,13 +21,12 @@ const root = document.documentElement;
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FINE = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-/** Reveal everything immediately — reduced-motion / failure path. */
+/** Reveal everything immediately — the reduced-motion / failure path. */
 function showEverything() {
   root.classList.remove('will-animate');
-  document.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-revealed'));
-  document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
-    el.style.opacity = '1';
-  });
+  document
+    .querySelectorAll<HTMLElement>('[data-split],[data-reveal-scrub],[data-count]')
+    .forEach((el) => (el.style.opacity = '1'));
 }
 
 if (REDUCED) {
@@ -45,14 +42,12 @@ if (REDUCED) {
 function boot() {
   root.classList.add('gsap');
 
-  // --- Lenis smooth scroll on the GSAP clock -----------------------
   const lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, anchors: true });
   lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((time) => lenis.raf(time * 1000));
+  gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
   (window as any).__motion = { lenis, ScrollTrigger, gsap };
 
-  // Intro cover (first visit) holds ~900ms; lift it, then start.
   const loading = root.classList.contains('loading');
   const startDelay = loading ? 950 : 60;
   if (loading) {
@@ -66,16 +61,26 @@ function boot() {
 
   const run = () => {
     try {
-      assignGroupDelays();
+      // primitives
       initReveals();
-      initTextReveals();
+      initScrubReveals();
+      initSplits();
       initParallax();
-      initHero();
-      initRoster();
+      initCounters();
       if (FINE) {
         initMagnetic();
-        initHeroPointer();
+        initHoverPreview();
       }
+      // scenes (each no-ops if its element is absent)
+      initOnyxSpine();
+      initHero();
+      initCardStack();
+      initHorizontalReveal();
+      initHScroll();
+      initFlip();
+      initTierLadder();
+      initProgress();
+      initRoster(); // async (dynamic Swiper import)
       root.classList.add('motion-booted');
       root.classList.remove('will-animate');
       ScrollTrigger.refresh();
@@ -84,10 +89,7 @@ function boot() {
     }
   };
 
-  // Split measurements need real font metrics; wait for fonts, then the
-  // intro beat. A hard cap keeps a slow swap from stalling boot.
-  const fontsReady =
-    (document as any).fonts?.ready ?? new Promise((r) => setTimeout(r, 0));
+  const fontsReady = (document as any).fonts?.ready ?? new Promise((r) => setTimeout(r, 0));
   let started = false;
   const kick = () => {
     if (started) return;
@@ -95,11 +97,10 @@ function boot() {
     setTimeout(run, startDelay);
   };
   fontsReady.then(kick);
-  setTimeout(kick, 1200);
-
+  setTimeout(kick, 1400);
   setTimeout(() => {
     if (!root.classList.contains('motion-booted')) showEverything();
-  }, startDelay + 2600);
+  }, startDelay + 2800);
 
   // Re-split headings on width change so masked lines stay correct.
   let rz: number | undefined;
@@ -108,28 +109,26 @@ function boot() {
     () => {
       clearTimeout(rz);
       rz = window.setTimeout(() => {
-        if (!root.classList.contains('motion-booted')) return;
-        resplitAll();
-        ScrollTrigger.refresh();
+        if (root.classList.contains('motion-booted')) {
+          resplitAll();
+          ScrollTrigger.refresh();
+        }
       }, 250);
     },
     { passive: true }
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Split text into masked lines of characters (no wrappers survive in  */
-/* the a11y tree: aria-label on the element, aria-hidden on the parts).*/
-/* ------------------------------------------------------------------ */
-function splitToLines(el: HTMLElement): { chars: HTMLElement[]; lines: HTMLElement[] } {
-  const text =
-    el.dataset.splitText ?? (el.textContent ?? '').replace(/\s+/g, ' ').trim();
+/* ================================================================== */
+/* Split text into masked lines of characters.                        */
+/* ================================================================== */
+function splitToLines(el: HTMLElement): HTMLElement[] {
+  const text = el.dataset.splitText ?? (el.textContent ?? '').replace(/\s+/g, ' ').trim();
   el.dataset.splitText = text;
   el.setAttribute('aria-label', text);
   el.textContent = '';
 
-  // Lay words out flat first, measure their line by offsetTop.
-  const wordEls = text.split(' ').map((word) => {
+  const words = text.split(' ').map((word) => {
     const w = document.createElement('span');
     w.className = 'split-word';
     w.setAttribute('aria-hidden', 'true');
@@ -141,14 +140,14 @@ function splitToLines(el: HTMLElement): { chars: HTMLElement[]; lines: HTMLEleme
     }
     return w;
   });
-  wordEls.forEach((w, i) => {
+  words.forEach((w, i) => {
     el.appendChild(w);
-    if (i < wordEls.length - 1) el.appendChild(document.createTextNode(' '));
+    if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
   });
 
   const groups: HTMLElement[][] = [];
   let top: number | null = null;
-  wordEls.forEach((w) => {
+  words.forEach((w) => {
     const t = w.offsetTop;
     if (top === null || Math.abs(t - top) > 4) {
       groups.push([]);
@@ -157,92 +156,59 @@ function splitToLines(el: HTMLElement): { chars: HTMLElement[]; lines: HTMLEleme
     groups[groups.length - 1].push(w);
   });
 
-  // Rebuild with a masked line wrapper per visual line.
   el.textContent = '';
   const chars: HTMLElement[] = [];
-  const lines: HTMLElement[] = [];
-  groups.forEach((words) => {
-    const line = document.createElement('span');
-    line.className = 'split-line';
-    line.setAttribute('aria-hidden', 'true');
+  groups.forEach((line) => {
+    const wrap = document.createElement('span');
+    wrap.className = 'split-line';
+    wrap.setAttribute('aria-hidden', 'true');
     const inner = document.createElement('span');
     inner.className = 'split-line-inner';
-    words.forEach((w, i) => {
+    line.forEach((w, i) => {
       inner.appendChild(w);
-      if (i < words.length - 1) inner.appendChild(document.createTextNode(' '));
+      if (i < line.length - 1) inner.appendChild(document.createTextNode(' '));
       w.querySelectorAll<HTMLElement>('.split-char').forEach((c) => chars.push(c));
     });
-    line.appendChild(inner);
-    el.appendChild(line);
-    lines.push(inner);
+    wrap.appendChild(inner);
+    el.appendChild(wrap);
   });
-  return { chars, lines };
+  return chars;
+}
+
+function buildSplit(el: HTMLElement) {
+  el.dataset.splitDone = '1';
+  const chars = splitToLines(el);
+  el.style.opacity = '1';
+  gsap.set(chars, { yPercent: 115 });
+  const tween = gsap.to(chars, {
+    yPercent: 0,
+    ease: 'power4.out',
+    stagger: { each: 0.02, from: 'start' },
+    scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 48%', scrub: 0.5 },
+  });
+  (el as any)._st = tween.scrollTrigger;
+}
+
+function initSplits() {
+  document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
+    if (!el.dataset.splitDone) buildSplit(el);
+  });
 }
 
 function resplitAll() {
   document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
-    const st = (el as any)._splitST as ScrollTrigger | undefined;
-    if (st) st.kill();
+    (el as any)._st?.kill();
     delete el.dataset.splitDone;
     buildSplit(el);
   });
 }
 
-function buildSplit(el: HTMLElement) {
-  el.dataset.splitDone = '1';
-  const fromSide = el.dataset.split === 'side';
-  const { chars } = splitToLines(el);
-  el.style.opacity = '1';
-
-  const fromVars: gsap.TweenVars = fromSide
-    ? { xPercent: (i: number) => (i % 2 ? 60 : -60), yPercent: 40, opacity: 0 }
-    : { yPercent: 115 };
-  gsap.set(chars, fromVars);
-
-  const tween = gsap.to(chars, {
-    xPercent: 0,
-    yPercent: 0,
-    opacity: 1,
-    ease: 'power4.out',
-    stagger: { each: 0.02, from: fromSide ? 'random' : 'start' },
-    scrollTrigger: {
-      trigger: el,
-      start: 'top 88%',
-      end: 'top 46%',
-      scrub: 0.5,
-    },
-  });
-  (el as any)._splitST = tween.scrollTrigger;
-}
-
-/** [data-split] headings assemble, scroll-locked, from masked lines. */
-function initTextReveals() {
-  document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
-    if (el.dataset.splitDone) return;
-    buildSplit(el);
-  });
-}
-
-/** Auto-stagger reveals inside any [data-reveal-group]. */
-function assignGroupDelays() {
-  document.querySelectorAll('[data-reveal-group]').forEach((group) => {
-    group.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el, i) => {
-      if (!el.style.getPropertyValue('--reveal-delay')) {
-        el.style.setProperty('--reveal-delay', `${Math.min(i * 55, 330)}ms`);
-      }
-    });
-  });
-}
-
-/* ------------------------------------------------------------------ */
-/* [data-reveal] — crisp clip-path wipes. Opacity stays 1: the mask does
-   the reveal, so nothing cross-fades (no "ombre"). Directional.        */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
+/* [data-reveal] — crisp clip-path wipes, opacity held at 1.          */
+/* ================================================================== */
 function initReveals() {
   gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
     const v = el.getAttribute('data-reveal') || 'up';
-    // Force opaque up front (overrides the CSS fallback's opacity:0), so
-    // the reveal is a pure wipe rather than a fade.
     const from: gsap.TweenVars = { opacity: 1 };
     if (v === 'up') {
       from.clipPath = 'inset(100% 0 0 0)';
@@ -256,57 +222,61 @@ function initReveals() {
     } else if (v === 'scale') {
       from.clipPath = 'inset(100% 0 0 0)';
       from.scale = 0.94;
-    } else if (v === 'clip') {
-      const inner = el.querySelector<HTMLElement>('.reveal-clip-inner');
-      if (inner) gsap.set(inner, { clipPath: 'inset(0 0 100% 0)' });
-      from.y = 20;
     }
     gsap.set(el, from);
-
-    const delay =
-      (parseFloat(el.style.getPropertyValue('--reveal-delay')) || 0) / 1000;
-
+    const delay = (parseFloat(el.dataset.revealDelay || '0') || 0) / 1000;
     ScrollTrigger.create({
       trigger: el,
       start: 'top 86%',
       once: true,
-      onEnter: () => {
+      onEnter: () =>
         gsap.to(el, {
           clipPath: 'inset(0% 0 0% 0)',
           x: 0,
           y: 0,
           scale: 1,
-          duration: 0.95,
+          duration: 0.9,
           delay,
           ease: 'power3.out',
           overwrite: 'auto',
-        });
-        const inner = el.querySelector<HTMLElement>('.reveal-clip-inner');
-        if (inner) {
-          gsap.to(inner, {
-            clipPath: 'inset(0 0 0% 0)',
-            duration: 1.05,
-            delay,
-            ease: 'power4.out',
-          });
-        }
-        el.classList.add('is-revealed');
-      },
+        }),
     });
   });
 }
 
-/* ------------------------------------------------------------------ */
-/* [data-parallax="±px"] — depth via a scrubbed y shift.               */
-/* ------------------------------------------------------------------ */
-function initParallax() {
-  document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((el) => {
-    const shift = parseFloat(el.dataset.parallax || '-60');
+/* [data-reveal-scrub] — the same wipe, but locked to scroll progress. */
+function initScrubReveals() {
+  gsap.utils.toArray<HTMLElement>('[data-reveal-scrub]').forEach((el) => {
+    const v = el.getAttribute('data-reveal-scrub') || 'up';
+    const hidden =
+      v === 'left'
+        ? 'inset(0 100% 0 0)'
+        : v === 'right'
+          ? 'inset(0 0 0 100%)'
+          : 'inset(100% 0 0 0)';
     gsap.fromTo(
       el,
-      { y: -shift },
+      { clipPath: hidden, opacity: 1 },
       {
-        y: shift,
+        clipPath: 'inset(0% 0 0% 0)',
+        ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 55%', scrub: 0.5 },
+      }
+    );
+  });
+}
+
+/* ================================================================== */
+/* [data-parallax="±px"] — depth via scrubbed y shift.                */
+/* ================================================================== */
+function initParallax() {
+  document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((el) => {
+    const s = parseFloat(el.dataset.parallax || '-60');
+    gsap.fromTo(
+      el,
+      { y: -s },
+      {
+        y: s,
         ease: 'none',
         scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true },
       }
@@ -314,139 +284,36 @@ function initParallax() {
   });
 }
 
-/* ------------------------------------------------------------------ */
-/* The hero: a pinned scene making four teams into one.                */
-/* ------------------------------------------------------------------ */
-function initHero() {
-  const scene = document.querySelector<HTMLElement>('.hero-scene');
-  const stage = document.querySelector<HTMLElement>('.hero-stage');
-  if (!scene || !stage) return;
-
-  const numbers = gsap.utils.toArray<HTMLElement>('.hero-number');
-  const headA = stage.querySelector<HTMLElement>('.hero-head-a');
-  const headB = stage.querySelector<HTMLElement>('.hero-head-b');
-  const eyebrow = stage.querySelector<HTMLElement>('.hero-eyebrow');
-  const tail = stage.querySelector<HTMLElement>('.hero-tail');
-  const cue = stage.querySelector<HTMLElement>('.hero-cue');
-  const ember = stage.querySelector<HTMLElement>('.hero-ember');
-
-  if (headA) headA.style.display = 'block';
-  const aChars = headA ? splitToLines(headA).chars : [];
-  const bChars = headB ? splitToLines(headB).chars : [];
-  if (headB) headB.style.opacity = '1';
-
-  const w = () => window.innerWidth;
-  const h = () => window.innerHeight;
-
-  // --- Load intro (plays as the cover lifts) -----------------------
-  const intro = gsap.timeline({ defaults: { ease: 'power4.out' } });
-  if (eyebrow) intro.from(eyebrow, { yPercent: 130, opacity: 0, duration: 0.7 }, 0);
-  intro.from(
-    numbers,
-    {
-      x: (i: number) => (i % 2 === 0 ? -1 : 1) * w() * 0.34,
-      y: (i: number) => (i < 2 ? -1 : 1) * h() * 0.3,
-      rotate: (i: number) => (i % 2 === 0 ? -1 : 1) * 28,
-      opacity: 0,
-      scale: 0.4,
-      duration: 1.3,
-      stagger: 0.09,
-    },
-    0.05
-  );
-  intro.from(aChars, { yPercent: 120, duration: 1, stagger: 0.035 }, 0.2);
-  if (tail) intro.from(tail, { y: 26, opacity: 0, duration: 0.8 }, 0.55);
-  if (cue) intro.from(cue, { opacity: 0, y: 14, duration: 0.6 }, 0.95);
-
-  // --- Scroll-scrubbed merge (pinned) ------------------------------
-  const scrub = gsap.timeline({
-    scrollTrigger: {
-      trigger: scene,
-      start: 'top top',
-      end: '+=210%',
-      scrub: 0.6,
-      pin: stage,
-      pinSpacing: true,
-      anticipatePin: 1,
-    },
-  });
-
-  scrub.to(
-    numbers,
-    { y: '-=90', opacity: 0, scale: 0.62, ease: 'power1.in', stagger: 0.03, duration: 0.4 },
-    0
-  );
-  if (ember) {
-    scrub.fromTo(
-      ember,
-      { scale: 0.55, opacity: 0.45 },
-      { scale: 1.15, opacity: 1, ease: 'sine.inOut', duration: 0.72 },
-      0.14
-    );
-  }
-  if (aChars.length) {
-    scrub.to(
-      aChars,
-      { yPercent: -170, opacity: 0, rotateX: 90, stagger: 0.012, ease: 'power3.in', duration: 0.26 },
-      0.24
-    );
-  }
-  if (bChars.length) {
-    gsap.set(bChars, { yPercent: 120, opacity: 0 });
-    scrub.to(
-      bChars,
-      {
-        yPercent: 0,
-        opacity: 1,
-        stagger: { each: 0.03, from: 'center' },
-        ease: 'back.out(1.7)',
-        duration: 0.42,
-      },
-      0.42
-    );
-  }
-  if (cue) scrub.to(cue, { opacity: 0, duration: 0.14 }, 0);
-}
-
-/* ------------------------------------------------------------------ */
-/* The roster: a pinned scene where members fly in from the sides.     */
-/* ------------------------------------------------------------------ */
-function initRoster() {
-  const scene = document.querySelector<HTMLElement>('[data-scene="roster"]');
-  if (!scene) return;
-  const items = gsap.utils.toArray<HTMLElement>('[data-roster-item]', scene);
-  if (!items.length) return;
-
-  gsap.set(items, {
-    xPercent: (i) => (i % 2 ? 1 : -1) * 115,
-    opacity: 0,
-  });
-
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: scene,
-      start: 'top top',
-      end: `+=${Math.max(items.length * 42, 140)}%`,
-      scrub: 0.5,
-      pin: true,
-      anticipatePin: 1,
-    },
-  });
-  tl.to(items, {
-    xPercent: 0,
-    opacity: 1,
-    ease: 'power3.out',
-    stagger: 0.5,
-    duration: 1,
+/* ================================================================== */
+/* [data-count] — number counts up from 0 when it locks in.           */
+/* ================================================================== */
+function initCounters() {
+  document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+    const target = parseFloat(el.dataset.count || '0');
+    const suffix = el.dataset.countSuffix || '';
+    el.style.opacity = '1';
+    const obj = { n: 0 };
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 82%',
+      once: true,
+      onEnter: () =>
+        gsap.to(obj, {
+          n: target,
+          duration: 1.4,
+          ease: 'power2.out',
+          onUpdate: () => (el.textContent = Math.round(obj.n) + suffix),
+        }),
+    });
   });
 }
 
-/* ------------------------------------------------------------------ */
-/* Magnetic pull — CTAs lean toward the cursor (pointer-fine only).    */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
+/* [data-magnetic] — CTAs lean toward the cursor (pointer-fine only).  */
+/* ================================================================== */
 function initMagnetic() {
   document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => {
-    const strength = parseFloat(el.dataset.magnetic || '0.4');
+    const strength = parseFloat(el.dataset.magnetic || '0.35');
     const xTo = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3.out' });
     const yTo = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3.out' });
     el.addEventListener('pointermove', (e) => {
@@ -461,22 +328,241 @@ function initMagnetic() {
   });
 }
 
-/* ------------------------------------------------------------------ */
-/* Hero pointer field — the scattered numbers drift with the cursor.   */
-/* ------------------------------------------------------------------ */
-function initHeroPointer() {
-  const stage = document.querySelector<HTMLElement>('.hero-stage');
-  const field = document.querySelector<HTMLElement>('.hero-numbers');
-  if (!stage || !field) return;
-  const xTo = gsap.quickTo(field, 'x', { duration: 0.9, ease: 'power3.out' });
-  const yTo = gsap.quickTo(field, 'y', { duration: 0.9, ease: 'power3.out' });
-  stage.addEventListener('pointermove', (e) => {
-    const r = stage.getBoundingClientRect();
-    xTo(((e.clientX - (r.left + r.width / 2)) / r.width) * 26);
-    yTo(((e.clientY - (r.top + r.height / 2)) / r.height) * 26);
+/* ================================================================== */
+/* [data-hover-preview] — a row reveals its image beside the cursor.  */
+/* Wrapper [data-preview-root] holds one shared floating <img>.        */
+/* ================================================================== */
+function initHoverPreview() {
+  const rootEl = document.querySelector<HTMLElement>('[data-preview-root]');
+  const img = rootEl?.querySelector<HTMLImageElement>('[data-preview-img]');
+  if (!rootEl || !img) return;
+  const xTo = gsap.quickTo(img, 'x', { duration: 0.5, ease: 'power3.out' });
+  const yTo = gsap.quickTo(img, 'y', { duration: 0.5, ease: 'power3.out' });
+  let raf = 0;
+  rootEl.addEventListener('pointermove', (e) => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      const r = rootEl.getBoundingClientRect();
+      xTo(e.clientX - r.left);
+      yTo(e.clientY - r.top);
+    });
   });
-  stage.addEventListener('pointerleave', () => {
-    xTo(0);
-    yTo(0);
+  rootEl.querySelectorAll<HTMLElement>('[data-hover-preview]').forEach((rowEl) => {
+    rowEl.addEventListener('pointerenter', () => {
+      const src = rowEl.dataset.hoverPreview;
+      if (src) img.src = src;
+      gsap.to(img, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'power3.out' });
+    });
+    rowEl.addEventListener('pointerleave', () =>
+      gsap.to(img, { autoAlpha: 0, scale: 0.9, duration: 0.3, ease: 'power2.out' })
+    );
   });
+}
+
+/* ================================================================== */
+/* SCENE: the 3D ONYX spine (home) — one extruded letter runs behind  */
+/* the whole page, handing off O -> N -> Y -> X as you scroll.         */
+/* ================================================================== */
+function initOnyxSpine() {
+  const spine = document.querySelector<HTMLElement>('.onyx-spine');
+  if (!spine) return;
+  const letters = gsap.utils.toArray<HTMLElement>('.onyx-letter', spine);
+  if (!letters.length) return;
+
+  spine.style.opacity = '0.5';
+  gsap.set(letters, { rotationX: -92, transformPerspective: 1000 });
+  gsap.set(letters[0], { rotationX: 0 });
+
+  const seg = 1 / letters.length;
+  const tl = gsap.timeline({
+    scrollTrigger: { trigger: 'main', start: 'top top', end: 'bottom bottom', scrub: 1 },
+  });
+  letters.forEach((L, i) => {
+    // active letter turns gently through its segment (scroll-driven life)
+    tl.fromTo(L, { rotationY: -7 }, { rotationY: 7, ease: 'none', duration: seg }, i * seg);
+    if (i < letters.length - 1) {
+      const at = (i + 1) * seg - 0.04;
+      tl.to(L, { rotationX: 92, duration: 0.08, ease: 'power2.in' }, at);
+      tl.fromTo(
+        letters[i + 1],
+        { rotationX: -92 },
+        { rotationX: 0, duration: 0.08, ease: 'power2.out' },
+        at
+      );
+    }
+  });
+}
+
+/* SCENE: hero wordmark (home) — ONYX assembles, then scrolls into 3D. */
+function initHero() {
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  if (!hero) return;
+  const word = hero.querySelector<HTMLElement>('.hero-word');
+  const glyphs = gsap.utils.toArray<HTMLElement>('.hero-glyph', hero);
+  const tail = hero.querySelector<HTMLElement>('.hero-tail');
+  const script = hero.querySelector<HTMLElement>('.hero-script');
+
+  // load intro: glyphs rise from a mask, script + tail settle
+  const intro = gsap.timeline({ defaults: { ease: 'power4.out' } });
+  intro.from(glyphs, { yPercent: 120, duration: 1, stagger: 0.08 }, 0.1);
+  if (script) intro.from(script, { opacity: 0, y: 16, duration: 0.7 }, 0.7);
+  if (tail) intro.from(tail, { y: 24, opacity: 0, duration: 0.8 }, 0.85);
+
+  // scrub: as you leave, the word tips back into depth
+  if (word) {
+    gsap.to(word, {
+      rotationX: 34,
+      yPercent: -12,
+      transformPerspective: 900,
+      transformOrigin: '50% 100%',
+      ease: 'none',
+      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6 },
+    });
+  }
+}
+
+/* SCENE: pinned card stack (lineage). [data-stack] > [data-stack-card] */
+function initCardStack() {
+  const stack = document.querySelector<HTMLElement>('[data-stack]');
+  if (!stack) return;
+  const cards = gsap.utils.toArray<HTMLElement>('[data-stack-card]', stack);
+  if (cards.length < 2) return;
+
+  gsap.set(cards, { transformPerspective: 1200 });
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: stack,
+      start: 'top top',
+      end: `+=${(cards.length - 1) * 78}%`,
+      scrub: 0.6,
+      pin: true,
+      anticipatePin: 1,
+    },
+  });
+  cards.forEach((card, i) => {
+    if (i === 0) return;
+    gsap.set(card, { yPercent: 14, rotationX: -8, opacity: 0 });
+    tl.to(cards[i - 1], { yPercent: -10, rotationX: 8, opacity: 0, ease: 'none' }, i - 1);
+    tl.to(card, { yPercent: 0, rotationX: 0, opacity: 1, ease: 'none' }, i - 1);
+  });
+}
+
+/* SCENE: horizontal text reveal (mission). [data-hreveal] chars wipe   */
+/* brighter across on scrub. */
+function initHorizontalReveal() {
+  const el = document.querySelector<HTMLElement>('[data-hreveal]');
+  if (!el) return;
+  const chars = splitToLines(el);
+  el.style.opacity = '1';
+  gsap.set(chars, { opacity: 0.14 });
+  gsap.to(chars, {
+    opacity: 1,
+    ease: 'none',
+    stagger: 0.02,
+    scrollTrigger: { trigger: el, start: 'top 80%', end: 'bottom 55%', scrub: 0.5 },
+  });
+}
+
+/* SCENE: horizontal scroll-hijack (season build log). [data-hscroll]   */
+/* pins and pans its [data-hscroll-track] sideways. */
+function initHScroll() {
+  const wrap = document.querySelector<HTMLElement>('[data-hscroll]');
+  const track = wrap?.querySelector<HTMLElement>('[data-hscroll-track]');
+  if (!wrap || !track) return;
+  const distance = () => track.scrollWidth - window.innerWidth;
+  gsap.to(track, {
+    x: () => -distance(),
+    ease: 'none',
+    scrollTrigger: {
+      trigger: wrap,
+      start: 'top top',
+      end: () => `+=${distance()}`,
+      pin: true,
+      scrub: 0.6,
+      invalidateOnRefresh: true,
+    },
+  });
+}
+
+/* SCENE: flip cards (season awards). [data-flip] turns in on enter.    */
+function initFlip() {
+  const cards = gsap.utils.toArray<HTMLElement>('[data-flip]');
+  if (!cards.length) return;
+  cards.forEach((card) => {
+    gsap.set(card, { rotationY: -100, transformPerspective: 800, transformOrigin: '50% 50%' });
+    ScrollTrigger.create({
+      trigger: card,
+      start: 'top 84%',
+      once: true,
+      onEnter: () =>
+        gsap.to(card, {
+          rotationY: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+          delay: (parseFloat(card.dataset.flipDelay || '0') || 0) / 1000,
+        }),
+    });
+  });
+}
+
+/* SCENE: tier ladder (contact). [data-ladder] > [data-rung] lock in    */
+/* one at a time on scrub via a left-to-right clip. */
+function initTierLadder() {
+  const ladder = document.querySelector<HTMLElement>('[data-ladder]');
+  if (!ladder) return;
+  gsap.utils.toArray<HTMLElement>('[data-rung]', ladder).forEach((r) => {
+    gsap.fromTo(
+      r,
+      { clipPath: 'inset(0 100% 0 0)', opacity: 1 },
+      {
+        clipPath: 'inset(0 0% 0 0)',
+        ease: 'none',
+        scrollTrigger: { trigger: r, start: 'top 88%', end: 'top 62%', scrub: 0.5 },
+      }
+    );
+  });
+}
+
+/* SCENE: reading progress bar (blog post). [data-progress] fills.      */
+function initProgress() {
+  const bar = document.querySelector<HTMLElement>('[data-progress]');
+  const article = document.querySelector<HTMLElement>('article');
+  if (!bar || !article) return;
+  gsap.fromTo(
+    bar,
+    { scaleX: 0 },
+    {
+      scaleX: 1,
+      ease: 'none',
+      transformOrigin: '0 0',
+      scrollTrigger: { trigger: article, start: 'top top', end: 'bottom bottom', scrub: 0.3 },
+    }
+  );
+}
+
+/* SCENE: roster coverflow (home). [data-coverflow] via Swiper.         */
+async function initRoster() {
+  const el = document.querySelector<HTMLElement>('[data-coverflow]');
+  if (!el) return;
+  try {
+    const [{ default: Swiper }, mods] = await Promise.all([
+      import('swiper'),
+      import('swiper/modules'),
+    ]);
+    await import('swiper/css');
+    await import('swiper/css/effect-coverflow');
+    new Swiper(el, {
+      modules: [mods.EffectCoverflow, mods.Keyboard, mods.A11y],
+      effect: 'coverflow',
+      grabCursor: true,
+      centeredSlides: true,
+      slidesPerView: 'auto',
+      loop: true,
+      keyboard: { enabled: true },
+      coverflowEffect: { rotate: 28, stretch: 0, depth: 160, modifier: 1, slideShadows: false },
+    });
+  } catch (e) {
+    /* carousel degrades to a plain scrollable row if Swiper fails */
+  }
 }

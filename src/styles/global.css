@@ -1,44 +1,38 @@
 @import 'tailwindcss';
 
-/* ------------------------------------------------------------------
-   DESIGN TOKENS — "Coal & Ember"
-   Four teams become one. Coal, night, ember, ash:
-     #0A0908 coal · #1A0F20 night · #6E0D25 ember · #E8E2DC ash
-   plus transparencies of the ash for rules and muted text.
-
-   Type: Grenze Gotisch (display; blackletter-roman hybrid, ALWAYS
-   mixed case, never uppercase), Vollkorn (text), Vollkorn SC (labels).
-   See DESIGN.md for usage rules.
-   ------------------------------------------------------------------ */
+/* ==================================================================
+   GNCE ONYX — design tokens
+   Four colors only: coal, purple (two steps), crimson, off-white.
+   No idle glows. No gradient fills. Motion and solid color carry the
+   life; texture is grain and (non-gradient) frosted glass, used sparingly.
+   Type: Uncial Antiqua (display), Grey Qo (script accent), Cardo (body).
+   ================================================================== */
 @theme {
   /* Type */
-  --font-display: 'Grenze Gotisch Variable', 'Grenze Gotisch', serif;
-  --font-text: 'Vollkorn Variable', 'Vollkorn', Georgia, serif;
-  --font-label: 'Vollkorn SC', serif;
-  /* Real monospace only for code blocks in blog posts. */
-  --font-code: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, monospace;
-  /* Safety net: anything still asking for mono renders in the label
-     face instead of a system monospace. */
-  --font-mono: 'Vollkorn SC', serif;
+  --font-display: 'Uncial Antiqua', 'Cardo', serif;
+  --font-script: 'Grey Qo', 'Uncial Antiqua', cursive;
+  --font-text: 'Cardo', Georgia, serif;
+  --font-code: ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  /* Color — only the four palette values and ash alphas */
-  --color-bg: #0a0908;
-  --color-surface: #1a0f20;
-  --color-panel: #1a0f20;
-  --color-line: color-mix(in srgb, #e8e2dc 15%, transparent);
-  --color-ink: #e8e2dc;
-  --color-muted: color-mix(in srgb, #e8e2dc 62%, transparent);
-  --color-accent: #6e0d25;
+  /* Color — the four values (purple in two steps) + off-white alphas */
+  --color-bg: #0a0908; /* coal */
+  --color-surface: #1a0f20; /* purple, darker step */
+  --color-panel: #2b1b2f; /* purple, lighter step */
+  --color-line: color-mix(in srgb, #e8e2dc 14%, transparent);
+  --color-ink: #e8e2dc; /* off-white */
+  --color-muted: color-mix(in srgb, #e8e2dc 60%, transparent);
+  --color-faint: color-mix(in srgb, #e8e2dc 38%, transparent);
+  --color-accent: #6e0d25; /* crimson */
 
-  /* Motion — strong curves per the emil-design-eng skill. */
+  /* Motion — strong curves (emil-design-eng); never ease-in on UI. */
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ------------------------------------------------------------------
+/* ==================================================================
    BASE
-   ------------------------------------------------------------------ */
+   ================================================================== */
 html {
   background: var(--color-bg);
   color-scheme: dark;
@@ -57,6 +51,7 @@ body {
   color: var(--color-ink);
   font-family: var(--font-text);
   font-size: 1.0625rem;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
@@ -71,35 +66,45 @@ body {
   outline-offset: 3px;
 }
 
-/* Display: Grenze Gotisch. Mixed case only — blackletter capitals are
-   illegible in runs. Weight carries the medieval mass. */
+/* Display: Uncial Antiqua. Medieval uncial forms; one case, so never
+   force uppercase. Tighten line-height at scale. */
 .type-display {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: 0;
-  line-height: 0.95;
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: 0.005em;
   text-wrap: balance;
 }
 
-/* Labels: Vollkorn small caps. Replaces the old mono callouts. */
+/* Script: Grey Qo. The single fancy flourish — one per page, short. */
+.type-script {
+  font-family: var(--font-script);
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* Label: Cardo, spaced small caps. Metadata and the rare eyebrow. */
 .type-label {
-  font-family: var(--font-label);
+  font-family: var(--font-text);
   font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .skip-link {
   position: fixed;
   top: 0.75rem;
   left: 0.75rem;
-  z-index: 100;
-  padding: 0.5rem 0.875rem;
+  z-index: 200;
+  padding: 0.55rem 0.9rem;
   background: var(--color-accent);
   color: var(--color-ink);
-  font-family: var(--font-label);
+  font-family: var(--font-text);
   font-size: 0.8125rem;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   transform: translateY(-200%);
   transition: transform 160ms var(--ease-out-strong);
 }
@@ -108,43 +113,29 @@ body {
   transform: translateY(0);
 }
 
-/* ------------------------------------------------------------------
-   TEXTURES
-   ------------------------------------------------------------------ */
-/* Ember: one radial glow, used only where heat belongs (hero, the
-   sponsor band, the open menu). Never stacked, never animated. */
-.ember {
-  position: relative;
-}
-
-.ember::before {
+/* ==================================================================
+   TEXTURE
+   Grain only (no gradient). Frosted glass is a uniform tint + blur +
+   hairline, never a colored gradient.
+   ================================================================== */
+.grain::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    120% 90% at 50% 115%,
-    color-mix(in srgb, var(--color-accent) 38%, transparent) 0%,
-    transparent 60%
-  );
+  z-index: 0;
   pointer-events: none;
-}
-
-/* Local grain inside ember zones only: breaks gradient banding and
-   reads as heat shimmer. Never applied site-wide. */
-.ember::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.ember > * {
-  position: relative;
+.glass {
+  background: color-mix(in srgb, var(--color-panel) 55%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--color-line);
 }
 
-/* Empty slot awaiting real content (photos, video) */
+/* Empty media frame awaiting real content (photos, video). */
 .slot {
   display: flex;
   align-items: center;
@@ -157,103 +148,61 @@ body {
   border-color: var(--color-line);
 }
 
-/* Heavy anvil rule for section openings */
 .rule-heavy {
   height: 3px;
   background: var(--color-accent);
   border: 0;
 }
 
-/* Inline placeholder mark for small unknowns (team number, handles,
-   dates). Bigger unresolved blocks use <Placeholder> instead. */
+/* Inline mark for small unknowns (team number, handle, TBD date). */
 .stub {
   border-bottom: 1px dashed color-mix(in srgb, var(--color-accent) 60%, transparent);
   cursor: help;
 }
 
-/* ------------------------------------------------------------------
-   SCROLL REVEALS
-   Driven by the IntersectionObserver in BaseLayout. Hidden states are
-   gated behind html.js so content is never invisible without JS.
-   ------------------------------------------------------------------ */
+/* ==================================================================
+   3D HELPERS (the ONYX spine + perspective cards)
+   ================================================================== */
+.scene-3d {
+  perspective: 1200px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+/* ==================================================================
+   REVEALS — crisp clip-path wipes. Opacity held at 1 so nothing
+   cross-fades (no "ombre"). Directional. Driven by motion.ts; hidden
+   states gated behind html.js so no-JS shows everything.
+   ================================================================== */
 html.js [data-reveal] {
   opacity: 0;
-  transition:
-    opacity 640ms var(--ease-out-strong),
-    transform 640ms var(--ease-out-strong);
-  transition-delay: var(--reveal-delay, 0ms);
 }
 
-html.js [data-reveal='up'] {
-  transform: translateY(26px);
-}
-
-html.js [data-reveal='left'] {
-  transform: translateX(-26px);
-}
-
-html.js [data-reveal='right'] {
-  transform: translateX(26px);
-}
-
-html.js [data-reveal='scale'] {
-  transform: scale(0.96);
-}
-
-/* Clip variant: the clip lives on an inner wrapper because a fully
-   clipped target never intersects in Chromium's IntersectionObserver. */
-html.js [data-reveal='clip'] {
-  transform: none;
-  transition: opacity 420ms var(--ease-out-strong);
-  transition-delay: var(--reveal-delay, 0ms);
+html.gsap [data-reveal] {
+  opacity: 1; /* motion.ts owns visibility via clip-path */
+  transition: none !important;
 }
 
 .reveal-clip-inner {
   display: block;
 }
 
-html.js [data-reveal='clip'] .reveal-clip-inner {
-  clip-path: inset(0 0 100% 0);
-  transition: clip-path 820ms var(--ease-in-out-strong);
-  transition-delay: var(--reveal-delay, 0ms);
-}
-
-html.js [data-reveal='clip'].is-revealed .reveal-clip-inner {
-  clip-path: inset(0 0 0 0);
-}
-
-html.js [data-reveal].is-revealed {
-  opacity: 1;
-  transform: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  html.js [data-reveal],
-  html.js [data-reveal='clip'] {
-    transform: none;
-    transition: opacity 240ms ease;
-  }
-
-  html.js [data-reveal='clip'] .reveal-clip-inner,
-  html.js [data-reveal='clip'].is-revealed .reveal-clip-inner {
-    clip-path: none;
-    transition: none;
+  html.js [data-reveal] {
+    opacity: 1;
   }
 }
 
-/* ------------------------------------------------------------------
-   MOTION ENGINE (GSAP)
-   Split text, no-flash pre-hiding, and hand-off from the CSS reveal
-   fallback to GSAP. See src/scripts/motion.ts. All of this is
-   inert under reduced motion (the head never sets html.will-animate,
-   and the module bows out).
-   ------------------------------------------------------------------ */
-/* Masked split text: each visual line is an overflow-clipped window,
-   its characters rise from behind it. Crisp mask reveal, no fade. */
+/* ==================================================================
+   SPLIT TEXT — masked lines of characters that rise from behind the
+   line. Crisp mask reveal, never a fade.
+   ================================================================== */
 .split-line {
   display: block;
   overflow: clip;
-  padding-bottom: 0.08em; /* room for descenders inside the mask */
+  padding-bottom: 0.08em;
 }
 
 .split-line-inner {
@@ -270,54 +219,47 @@ html.js [data-reveal].is-revealed {
   will-change: transform;
 }
 
-/* 3D room for the letters that tilt in on their X axis (hero). */
 [data-split],
-.hero-heads {
+.hero-word {
   perspective: 700px;
 }
 
 /* No-flash: hide what is about to move before first paint. Set
-   synchronously by the head script; cleared when the module boots (or
-   by the head failsafe if it never does). */
+   synchronously in <head>; cleared when motion.ts boots (failsafe clears
+   it otherwise). */
 html.will-animate [data-split],
-html.will-animate [data-roster-item],
-html.will-animate .hero-head-b,
-html.will-animate .hero-tail,
-html.will-animate .hero-number,
-html.will-animate .hero-eyebrow,
-html.will-animate .hero-cue {
+html.will-animate [data-reveal-scrub],
+html.will-animate [data-count],
+html.will-animate .hero-script,
+html.will-animate .hero-tail {
   opacity: 0;
 }
 
-/* When GSAP owns the reveals, drop the CSS reveal transition so the two
-   systems never double-play. GSAP writes inline styles that win. */
-html.gsap [data-reveal],
-html.gsap [data-reveal='clip'] {
-  transition: none !important;
+/* Hero glyphs sit below their mask until the intro lifts them. */
+html.will-animate .hero-glyph {
+  transform: translateY(120%);
 }
 
-html.gsap [data-reveal='clip'] .reveal-clip-inner {
-  transition: none !important;
-}
-
-/* Magnetic targets translate toward the cursor (pointer-fine only). */
 [data-magnetic] {
   will-change: transform;
 }
 
-/* ------------------------------------------------------------------
-   SHARED PRIMITIVES
-   ------------------------------------------------------------------ */
+/* ==================================================================
+   BUTTONS — tactile press (emil), crimson fill for legibility on coal.
+   Hover draws a border in, no glow.
+   ================================================================== */
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.875rem 1.75rem;
+  gap: 0.6rem;
+  padding: 0.85rem 1.75rem;
   border: 1px solid var(--color-line);
-  font-family: var(--font-label);
+  font-family: var(--font-text);
   font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--color-ink);
   background: transparent;
   cursor: pointer;
@@ -336,7 +278,6 @@ html.gsap [data-reveal='clip'] .reveal-clip-inner {
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: var(--color-ink);
-  font-weight: 700;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -347,13 +288,13 @@ html.gsap [data-reveal='clip'] .reveal-clip-inner {
   }
 
   .btn-solid:hover {
-    filter: brightness(1.22);
+    filter: brightness(1.2);
   }
 }
 
-/* ------------------------------------------------------------------
-   BLOG POST BODY — styles for rendered markdown (see outreach/[id])
-   ------------------------------------------------------------------ */
+/* ==================================================================
+   BLOG POST BODY — rendered markdown (outreach/[id])
+   ================================================================== */
 .post-body {
   color: var(--color-ink);
   font-size: 1.125rem;
@@ -367,17 +308,17 @@ html.gsap [data-reveal='clip'] .reveal-clip-inner {
 .post-body h2,
 .post-body h3 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.05;
   margin-top: 2em;
 }
 
 .post-body h2 {
-  font-size: 2rem;
+  font-size: 1.9rem;
 }
 
 .post-body h3 {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
 }
 
 .post-body a {
@@ -395,7 +336,6 @@ html.gsap [data-reveal='clip'] .reveal-clip-inner {
 .post-body ul {
   list-style: square;
 }
-
 .post-body ol {
   list-style: decimal;
 }
