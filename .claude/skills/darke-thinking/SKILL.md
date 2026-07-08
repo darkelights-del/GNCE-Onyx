@@ -119,8 +119,9 @@ Never guess what only the user can know. Never ask what you can cheaply determin
 
 On activation, silently run FRAME and MODEL on the user's task, then either (a) proceed if no load-bearing gaps exist, or (b) open with the Clarification Protocol's single batched round of questions. Do not narrate the skill's machinery ("now entering FRAME phase...") — the discipline should be visible only in the quality of the questions asked and the output produced.
 
-> Note: this SKILL.md was reconstructed after the original upload package was
-> lost to a container reset. The three companion reference files it shipped with
-> (`references/reasoning-toolbox.md`, `references/playbooks.md`,
-> `references/failure-modes.md`) were binary in the package and could not be
-> recovered from the conversation. Re-upload the original `.skill` to restore them.
+> Companion references (restored): `references/reasoning-toolbox.md` (20
+> techniques), `references/playbooks.md` (ANALYZE / SOLVE / CREATE / DECIDE
+> procedures), and `references/failure-modes.md` (cognitive + agent-specific
+> anti-patterns, calibration standard). Consult the toolbox when picking a
+> technique, the playbook for the current mode, and the failure modes before
+> the VERIFY pass on medium/high-stakes work.
