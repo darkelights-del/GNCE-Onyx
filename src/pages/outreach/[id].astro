@@ -25,6 +25,8 @@ const dateStr = post.data.date.toLocaleDateString('en-US', {
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description}>
+  <div class="read-progress" data-progress aria-hidden="true"></div>
+
   <article>
     <!-- POST HEADER -->
     <header class="bg-bg pt-36 pb-16 sm:pt-44">
@@ -37,11 +39,9 @@ const dateStr = post.data.date.toLocaleDateString('en-US', {
           </p>
         </Reveal>
 
-        <Reveal variant="clip" delay={80}>
-          <h1 class="type-display mt-6 text-[clamp(2rem,6vw,4.5rem)]">
-            {post.data.title}
-          </h1>
-        </Reveal>
+        <h1 class="type-display mt-6 text-[clamp(2rem,6vw,4.5rem)]" data-split>
+          {post.data.title}
+        </h1>
 
         <Reveal delay={160} class="mt-6 flex flex-wrap items-baseline gap-x-6 gap-y-2">
           {post.data.author && (
@@ -70,6 +70,18 @@ const dateStr = post.data.date.toLocaleDateString('en-US', {
 </BaseLayout>
 
 <style>
+  .read-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 90;
+    width: 100%;
+    height: 3px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: 0 0;
+  }
+
   .back-link {
     color: var(--color-muted);
     text-decoration: none;

@@ -1,9 +1,9 @@
 ---
 /**
- * Season Recap — the team's first (and only) season: 2026-2027 BIOBUZZ.
- * The season hasn't started, so every block is a clearly-marked slot
- * that fills in as it happens (see <Placeholder> wrappers).
- * Build log → Highlight match → Awards → Gallery.
+ * Season Recap — the 2026-2027 BIOBUZZ season. The season hasn't started,
+ * so every block is a clearly-marked slot (see <Placeholder>). Specialties:
+ * kinetic header, horizontal-scroll build log, flip-card awards, reveal
+ * gallery.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Placeholder from '../components/Placeholder.astro';
@@ -13,180 +13,144 @@ const timeline = [
   {
     date: 'TBD',
     stage: 'Kickoff',
-    body: 'Game reveal day. Our read on the BIOBUZZ challenge and the first strategy calls land here.',
+    body: 'Game reveal day. Our read on the BIOBUZZ challenge and the first strategy calls.',
   },
-  { date: 'TBD', stage: 'TBD', body: 'Logged when it happens.' },
-  { date: 'TBD', stage: 'TBD', body: 'Logged when it happens.' },
-  { date: 'TBD', stage: 'TBD', body: 'Logged when it happens.' },
+  { date: 'TBD', stage: 'Build', body: 'Logged when it happens.' },
+  { date: 'TBD', stage: 'Compete', body: 'Logged when it happens.' },
+  { date: 'TBD', stage: 'Iterate', body: 'Logged when it happens.' },
 ];
 ---
 
 <BaseLayout
-  title="Season Recap"
-  description="GNCE Onyx's rookie season recap: the 2026-2027 BIOBUZZ season, presented by RTX, part of the FIRST CANOPY season. Build log, highlight matches, and awards as they happen."
+  title="Season"
+  description="GNCE Onyx's rookie season: the 2026-2027 BIOBUZZ season, presented by RTX, part of the FIRST CANOPY season. Build log, highlight matches, and awards as they happen."
 >
-  <!-- PAGE HEADER -->
-  <header class="ember bg-bg pt-36 pb-20 sm:pt-44">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <Reveal>
-        <p class="type-label text-muted">Season 01 · 2026-2027</p>
-      </Reveal>
-
-      <h1 class="type-display mt-8 text-[clamp(2.75rem,9vw,8rem)]" data-split>Biobuzz</h1>
-
-      <Reveal delay={160}>
-        <p class="type-label mt-4 text-muted">
-          Presented by RTX · part of the FIRST CANOPY season
-        </p>
-      </Reveal>
-
-      <Reveal delay={240} class="mt-10 max-w-prose">
-        <p class="text-muted">
-          Our first FTC season, and the only one on the books. This page is
-          the running recap: the build log, the matches worth rewatching,
-          whatever hardware comes home with us, and the photos to prove it.
-        </p>
-      </Reveal>
-    </div>
+  <!-- HEADER -->
+  <header class="mx-auto max-w-5xl px-5 pt-40 pb-16 sm:px-8 sm:pt-48">
+    <p class="type-label text-muted">Season 01 · 2026-2027</p>
+    <h1 class="type-display mt-8 text-[clamp(3rem,12vw,9rem)]" data-split>Biobuzz</h1>
+    <p class="type-label mt-4 text-muted">Presented by RTX · FIRST CANOPY</p>
+    <Reveal variant="up" class="mt-10 max-w-prose">
+      <p class="text-muted">
+        Our first FTC season, and the only one on the books. The running
+        recap: build log, the matches worth rewatching, and whatever hardware
+        comes home with us.
+      </p>
+    </Reveal>
   </header>
 
-  <!-- BUILD LOG -->
-  <section class="bg-bg py-24 sm:py-32">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <Reveal variant="clip">
-        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Build log</h2>
-      </Reveal>
-
-      <Placeholder name="season-timeline" class="mt-14 p-6 sm:p-10">
-        <div class="ml-2 border-l hairline" data-reveal-group>
-          {
-            timeline.map((entry, i) => (
-              <Reveal class="relative pb-12 pl-8 last:pb-0">
-                <span
-                  class:list={[
-                    'absolute top-1.5 left-[-4.5px] h-2 w-2',
-                    i === 0 ? 'bg-accent' : 'bg-line',
-                  ]}
-                  aria-hidden="true"
-                ></span>
-                <p class="type-label text-muted">Date: {entry.date}</p>
-                <h3 class="type-display mt-3 text-xl sm:text-2xl">
-                  {entry.stage}
-                </h3>
-                <p class="mt-3 max-w-prose text-muted">
-                  {entry.body}
-                </p>
-              </Reveal>
-            ))
-          }
-        </div>
-      </Placeholder>
+  <!-- BUILD LOG: horizontal scroll-hijack -->
+  <section class="hscroll" data-hscroll aria-label="Build log">
+    <div class="hscroll-track" data-hscroll-track>
+      <div class="hscroll-lead">
+        <h2 class="type-display text-[clamp(2rem,5vw,3.5rem)]">Build log</h2>
+        <p class="mt-4 max-w-xs text-muted">Kickoff to competition, in order.</p>
+      </div>
+      {
+        timeline.map((entry, i) => (
+          <article class="hscroll-panel glass">
+            <span class="type-label text-accent">{String(i + 1).padStart(2, '0')}</span>
+            <p class="type-label mt-6 text-muted">{entry.date}</p>
+            <h3 class="type-display mt-2 text-[clamp(1.75rem,3vw,2.5rem)]">{entry.stage}</h3>
+            <p class="mt-4 text-muted">{entry.body}</p>
+          </article>
+        ))
+      }
     </div>
   </section>
 
   <!-- HIGHLIGHT MATCH -->
-  <section class="border-y hairline bg-surface py-32 sm:py-44">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <Reveal variant="clip">
-        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">
-          Highlight match
-        </h2>
-      </Reveal>
-
-      <Reveal delay={80} class="mt-6 max-w-prose">
-        <p class="text-muted">
-          One match per event earns this spot: the video, plus why we picked
-          it.
-        </p>
-      </Reveal>
-
-      <Placeholder name="season-highlight-match" class="mt-12 p-3 sm:p-4">
-        <!-- Swap this frame for the real embed when there's a video:
-        <iframe
-          class="aspect-video w-full"
-          src="https://www.youtube.com/embed/VIDEO_ID"
-          title="GNCE Onyx highlight match"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>
-        -->
+  <section class="mx-auto max-w-5xl px-5 py-28 sm:px-8 sm:py-36">
+    <h2 class="type-display text-[clamp(1.75rem,4vw,3rem)]" data-split>Highlight match</h2>
+    <Reveal variant="up" class="mt-6 max-w-prose">
+      <p class="text-muted">One match per event earns this spot: the video, and why we picked it.</p>
+    </Reveal>
+    <div class="mt-12" data-reveal-scrub="up">
+      <Placeholder name="season-highlight-match" class="p-3 sm:p-4">
         <div class="slot aspect-video">
-          <span class="type-label text-muted">Match video: TBD (YouTube embed)</span>
+          <span class="type-label text-muted">Match video, TBD</span>
         </div>
         <div class="hairline mt-3 flex flex-wrap items-baseline justify-between gap-2 border-t pt-3">
-          <p class="text-sm text-ink">Match: TBD</p>
-          <p class="text-sm text-muted">Score: TBD</p>
+          <p class="text-sm">Match: <span class="stub" title="Set at first event">TBD</span></p>
+          <p class="text-sm text-muted">Score: <span class="stub" title="Set at first event">TBD</span></p>
         </div>
       </Placeholder>
     </div>
   </section>
 
-  <!-- AWARDS -->
-  <section class="bg-bg py-24 sm:py-32">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <Reveal variant="clip">
-        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Awards</h2>
-      </Reveal>
-
-      <Reveal delay={80} class="mt-6 max-w-prose">
-        <p class="text-muted">
-          Anything the judges hand us this season gets logged here, next to
-          what it recognized.
-        </p>
-      </Reveal>
-
-      <Placeholder name="season-awards" class="mt-12 p-4 sm:p-6">
-        <div class="grid gap-4 sm:grid-cols-3" data-reveal-group>
-          {
-            Array.from({ length: 3 }).map(() => (
-              <Reveal class="h-full">
-                <article class="flex h-full flex-col gap-4 bg-surface p-6">
-                  <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    class="text-muted"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="9" r="5.25"></circle>
-                    <path d="M8.5 13.5 7 21l5-2.5L17 21l-1.5-7.5"></path>
-                  </svg>
-                  <p class="type-label text-ink">Award: TBD</p>
-                  <p class="text-sm/relaxed text-muted">
-                    Event, division, and what the award was for.
-                  </p>
-                </article>
-              </Reveal>
-            ))
-          }
-        </div>
-      </Placeholder>
+  <!-- AWARDS: flip cards -->
+  <section class="mx-auto max-w-5xl px-5 py-28 sm:px-8 sm:py-36">
+    <h2 class="type-display text-[clamp(1.75rem,4vw,3rem)]" data-split>Awards</h2>
+    <Reveal variant="up" class="mt-6 max-w-prose">
+      <p class="text-muted">Anything the judges hand us gets logged here, next to what it recognized.</p>
+    </Reveal>
+    <div class="scene-3d mt-12 grid gap-5 sm:grid-cols-3">
+      {
+        Array.from({ length: 3 }).map((_, i) => (
+          <article class="award-card glass" data-flip data-flip-delay={i * 90}>
+            <p class="type-label text-accent">Award</p>
+            <p class="type-display mt-3 text-2xl">TBD</p>
+            <p class="mt-4 text-sm/relaxed text-muted">Event, division, and what it recognized.</p>
+          </article>
+        ))
+      }
     </div>
   </section>
 
   <!-- GALLERY -->
-  <section class="border-y hairline bg-surface py-28 sm:py-36">
-    <div class="mx-auto max-w-5xl px-5 sm:px-8">
-      <Reveal variant="clip">
-        <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Gallery</h2>
-      </Reveal>
-
-      <Placeholder name="season-gallery" class="mt-14 p-3 sm:p-4">
-        <div class="grid grid-cols-2 gap-3 md:grid-cols-3" data-reveal-group>
-          {
-            Array.from({ length: 6 }).map(() => (
-              <Reveal variant="scale">
-                <div class="slot aspect-square">
-                  <span class="type-label text-muted">Photo: TBD</span>
-                </div>
-              </Reveal>
-            ))
-          }
-        </div>
-      </Placeholder>
+  <section class="mx-auto max-w-5xl px-5 py-28 sm:px-8 sm:py-36">
+    <h2 class="type-display text-[clamp(1.75rem,4vw,3rem)]" data-split>Gallery</h2>
+    <div class="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3" data-reveal-group>
+      {
+        Array.from({ length: 6 }).map((_, i) => (
+          <Reveal variant="scale" data-parallax={i % 2 === 0 ? '-24' : '24'}>
+            <div class="slot aspect-square">
+              <span class="type-label text-muted">Photo, TBD</span>
+            </div>
+          </Reveal>
+        ))
+      }
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .hscroll {
+    overflow: hidden;
+  }
+
+  .hscroll-track {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    height: 100svh;
+    padding-inline: clamp(1.25rem, 6vw, 8rem);
+    width: max-content;
+    will-change: transform;
+  }
+
+  .hscroll-lead {
+    width: min(80vw, 22rem);
+    flex: none;
+  }
+
+  .hscroll-panel {
+    width: min(80vw, 26rem);
+    flex: none;
+    padding: clamp(1.75rem, 4vw, 3rem);
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .award-card {
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    will-change: transform;
+  }
+
+  /* No-JS / reduced motion: the horizontal track scrolls normally. */
+  :global(html:not(.gsap)) .hscroll {
+    overflow-x: auto;
+  }
+</style>
