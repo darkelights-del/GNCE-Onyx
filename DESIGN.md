@@ -1,150 +1,109 @@
-# Design System — "Coal & Ember"
+# Design System — GNCE Onyx
 
-Four teams become one. Coal-black fields, one ember, medieval-robust
-type, machined edges. Typography carries the identity; decoration exists
-only where it states something true.
-
-This file is the source of truth for visual decisions. Read it (and the
-skills in `.claude/skills/`) before touching UI.
+A dark, medieval-modern identity built for a scroll-driven experience.
+Coal-black fields, one crimson accent, two purple steps, and a distinctive
+uncial + script + old-style-serif type system. Typography carries the
+identity; motion is the life. Read this (and the skills in `.claude/skills/`)
+before touching UI.
 
 ## Principles
 
-1. **Four colors, nothing else.** `#0A0908` coal, `#1A0F20` night,
-   `#6E0D25` ember, `#E8E2DC` ash, plus ash transparencies for rules and
-   muted text. No gradients except the single ember glow. No glows on
-   components, no glassmorphism, no shadows.
-2. **One ember.** The crimson is the accent everywhere: fills (solid
-   buttons, the heat rail, timeline markers), accent text on coal, and the
-   `.ember` radial glow, used at most once per page (hero, sponsor band,
-   open menu).
-3. **Typography is the imagery.** Grenze Gotisch does what photography
-   would. Push scale hard (`clamp` up to 10rem+), keep body modest, and
-   never set Grenze Gotisch in uppercase: blackletter capitals in runs are
-   illegible. Mixed case always.
-4. **Machined corners.** Radius 0 on everything except the gear button.
-   No pills, no chips, no badges. Labels are bare small-caps text.
-5. **Motion is purposeful, crisp, and scroll-locked.** Every animation
-   answers "what does this communicate?" The hero scene tells the merge
-   story; the roster flies members in from the sides; the gear turns with
-   scroll because it drives the page; the heat rail is a progress gauge;
-   reveals are clip-path wipes and masked line/character rises, not
-   opacity fades. Nothing loops decoratively.
-   Everything respects `prefers-reduced-motion` and degrades without JS
-   or scroll-timeline support.
-6. **Placeholders are loud.** Blocks awaiting content use
-   `<Placeholder name="...">`; inline unknowns use `.stub`. Both visible.
-7. **No em-dashes in visible copy.** Periods, commas, colons, hyphens.
-8. **Copy earns its place.** Every visible sentence passes the
-   no-slop-writing skill; anything that restates gets cut.
+1. **Four colors, two purple steps.** `#0A0908` coal, `#1A0F20` +
+   `#2B1B2F` purple (darker / lighter), `#6E0D25` crimson, `#E8E2DC`
+   off-white, plus off-white alphas for rules and muted text. Crimson and
+   purple both read as text on coal (intentional low-key contrast).
+2. **No idle glows. No gradient fills.** Life comes from motion and solid
+   color. Texture is film grain and *non-gradient* frosted glass (uniform
+   tint + blur + hairline), used sparingly. No ambient/looping glow.
+3. **Type is the imagery.** Uncial Antiqua (display), Grey Qo (one script
+   flourish per page), Cardo (body). Push display scale hard; keep body
+   readable (Cardo is a scholar's old-style serif, tuned for length).
+4. **Machined edges.** Radius 0 except the gear button. Hairline rules and
+   negative space over cards; glass panels where a surface is warranted.
+5. **Every animation is scroll-driven and motivated.** It communicates
+   hierarchy, story, or feedback, never decoration. Reveals are clip-path
+   wipes and masked character rises, never opacity cross-fades. Everything
+   respects `prefers-reduced-motion` and degrades without JS.
+6. **Placeholders are loud.** `<Placeholder name="...">` for blocks; `.stub`
+   for inline unknowns (team number, handle, TBD dates).
+7. **No em-dashes in visible copy. Lean copy only** (no-slop-writing): every
+   visible sentence earns its place; anything that restates gets cut.
 
-## Tokens (defined in `src/styles/global.css` `@theme`)
+## Tokens (`src/styles/global.css` `@theme`)
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--color-bg` | `#0a0908` | Page background (coal) |
-| `--color-surface` | `#1a0f20` | Alternate bands, footer, slots (night) |
-| `--color-line` | ash @ 15% | Hairline rules |
-| `--color-ink` | `#e8e2dc` | Text (ash) |
-| `--color-muted` | ash @ 62% | Secondary text, labels |
-| `--color-accent` | `#6e0d25` | Ember: fills, accent text, glow |
-| `--ease-out-strong` | `cubic-bezier(0.23,1,0.32,1)` | Entrances, UI feedback |
-| `--ease-in-out-strong` | `cubic-bezier(0.77,0,0.175,1)` | Loader lift, on-screen movement |
-| `--ease-spring` | `cubic-bezier(0.34,1.56,0.64,1)` | Gear spin only |
+| `--font-display` | Uncial Antiqua | Headlines, the ONYX wordmark |
+| `--font-script` | Grey Qo | One script flourish per page |
+| `--font-text` | Cardo | Body, labels (`.type-label` = spaced small caps) |
+| `--color-bg` | `#0a0908` | Coal background |
+| `--color-surface` / `--color-panel` | `#1a0f20` / `#2b1b2f` | Purple, darker / lighter (glass, footer) |
+| `--color-accent` | `#6e0d25` | Crimson: fills, accent text, markers |
+| `--color-ink` / `--color-muted` | `#e8e2dc` / ash 60% | Text / secondary text |
+| `--ease-out-strong` etc. | cubic-beziers | Entrances, on-screen movement, spring |
 
-## Type
+## Motion engine — `src/scripts/motion.ts`
 
-- **Display** (`.type-display`): Grenze Gotisch Variable, weight ~600,
-  line-height 0.95, mixed case only. Headlines, nav menu, wordmark,
-  roster names, blog titles.
-- **Body** (default, no class): Vollkorn Variable. Dark, sturdy serif;
-  muted color for long runs. Blog post bodies use `.post-body`.
-- **Label** (`.type-label`): Vollkorn SC 600. Eyebrows (max one per
-  page), spec keys, metadata, buttons, footer small print.
-- **Code** (`--font-code`): a real monospace stack, used only in blog
-  post code blocks (`.post-body code/pre`).
+One GSAP + ScrollTrigger layer wired to Lenis. The head sets
+`html.will-animate` synchronously (no first-paint flash); the module clears
+it on boot, and failsafes clear it (and reveal everything) if it never does.
+Under reduced motion the module bows out and static CSS stands in.
 
-## Motifs
+**Primitives** (data attributes, work on any page):
+- `[data-split]` — headings split into masked lines of characters that rise
+  from behind the line, scroll-locked; re-split on resize.
+- `[data-reveal]` (up/left/right/scale) — crisp clip-path wipe on enter,
+  opacity held at 1 (no fade). `[data-reveal-scrub]` is the same, locked to
+  scroll. `data-reveal-group` staggers children.
+- `[data-parallax="±px"]`, `[data-count]` (number counter),
+  `[data-magnetic]` (cursor pull, pointer-fine), `[data-hover-preview]`
+  (image beside cursor, needs `[data-preview-root]` + `[data-preview-img]`).
 
-- `.ember` — the radial crimson glow with local grain; one per page max.
-- `.slot` — empty media frame (night fill, hairline border) for photos
-  and video awaiting content.
-- `.rule-heavy` / SectionLabel's short ember rule — the anvil mark that
-  opens a labeled section.
-- Heat rail — 3px ember line on the left edge that fills with scroll
-  (scroll-driven CSS, hidden where unsupported).
-- Roman numerals (I-IV) in the gear menu only.
+**Scenes** (named, run only when their element exists):
+- `.onyx-spine` — the 3D extruded wordmark behind Home; letters hand off
+  O → N → Y → X as you scroll (`initOnyxSpine`).
+- `[data-hero]` — hero wordmark assembles, then tips into depth.
+- `[data-stack]` / `[data-stack-card]` — pinned card stack (lineage).
+- `[data-hscroll]` / `[data-hscroll-track]` — horizontal scroll-hijack
+  (season build log).
+- `[data-coverflow]` — Swiper coverflow (roster), Swiper dynamically
+  imported only where used.
+- `[data-flip]` (awards), `[data-ladder]`/`[data-rung]` (sponsor tiers),
+  `[data-progress]` (blog reading bar).
 
-## Experience layer (BaseLayout + index)
+## Per-page specialties
 
-The whole motion system lives in one module, `src/scripts/motion.ts`
-(GSAP + ScrollTrigger, wired to Lenis so smooth scroll and scroll-driven
-animation share one clock). Intent: crisp, mechanical, scroll-locked
-motion, never soft cross-fades. It is strictly progressive: the head sets
-`html.will-animate` synchronously so first paint already hides what is
-about to move (no flash), and clears it once the module boots; a 2.6s
-failsafe (and the module's own try/catch) reveal everything if it never
-does. Under `prefers-reduced-motion` the module bows out entirely and the
-static CSS composition stands alone.
-
-- **Intro cover**: once per session (sessionStorage `intro-seen`), skipped
-  under reduced motion and no-JS, with an inline failsafe that lifts the
-  cover after 2s even if the module never runs. Wordmark strikes up, the
-  cover lifts into the hero entrance.
-- **Hero scene** (`index.astro` + `initHero`): a GSAP timeline pins the
-  stage (`ScrollTrigger` pin, `end: +=210%`) and choreographs the merge.
-  On load the four team numbers fly in from the corners; as you scroll
-  they lift and burn out like sparks, "Four teams." disintegrates letter
-  by letter on its X axis, "One Onyx." is struck in from the center out,
-  and the ember swells. The CTA is anchored (visible the whole time).
-  Without JS or under reduced motion a clean static hero shows instead.
-- **Roster scene** (`[data-scene="roster"]` + `initRoster`): the roster
-  section pins and its members fly in from alternating sides, scrubbed, as
-  you scroll through. Without JS it is a plain, fully-visible list.
-- **Split text** (`[data-split]`): headings are split into masked lines of
-  characters (`.split-line` clips, `.split-char` rises from behind it) and
-  assemble scroll-locked (scrubbed), re-splitting on resize. Crisp mask
-  reveal, no fade. `data-split="side"` flies the characters in from the
-  sides instead. Headings with inline markup (an accent `<span>`) stay as
-  clip reveals. a11y: `aria-label` on the element, `aria-hidden` parts.
-- **Parallax** (`[data-parallax="±px"]`): depth via a scrubbed y shift.
-- **Magnetic** (`[data-magnetic="strength"]`): CTAs lean toward the
-  cursor (pointer-fine only); the scattered hero numbers drift with the
-  pointer too. Not applied to the gear (would fight its scroll-spin).
-- **View transitions**: cross-document fade/rise via `@view-transition`;
-  browsers without it just navigate.
-- **Reveals** (`[data-reveal]`, up/left/right/scale/clip): the supporting
-  cast (copy, cards, rows). Crisp clip-path wipes, opacity held at 1 so
-  nothing cross-fades; directional, with group stagger via
-  `data-reveal-group`. The CSS transition is the reduced-motion fallback.
+- **Home**: 3D ONYX spine · hero wordmark · pinned lineage card stack ·
+  masked mission line · scroll-reveal robot specs · coverflow roster ·
+  magnetic sponsor CTA.
+- **Season**: kinetic header · horizontal-scroll build log · reveal
+  highlight match · flip-card awards · reveal gallery.
+- **Outreach**: kinetic header · line-hover post rows · magnetic CTA.
+- **Contact**: kinetic header · magnetic contact CTA · scrubbed tier
+  ladder · staggered partner rows.
+- **Blog post**: reading-progress bar · masked title.
 
 ## The blog (Outreach)
 
-Outreach is a markdown blog (Astro content collection, `src/content/blog/`).
-`outreach/index.astro` lists posts as hairline-ruled rows; `outreach/[id].astro`
-renders a post in `.post-body` with a `ViewCounter` (GoatCounter) and
-`Comments` (giscus). Both third-party widgets show marked stubs until their
-IDs are set in `src/lib/services.ts` (see README, "Blog").
+Markdown collection in `src/content/blog/`. `outreach/index.astro` lists
+posts as line-hover rows; `outreach/[id].astro` renders a post in
+`.post-body` with a `ViewCounter` (GoatCounter) and `Comments` (giscus),
+both stubbed until IDs are set in `src/lib/services.ts` (see README).
 
 ## Component inventory
 
 | Component | Purpose |
 | --- | --- |
-| `scripts/motion.ts` | The motion engine: GSAP + ScrollTrigger + Lenis, the pinned hero and roster scenes, masked split text, clip-wipe reveals, parallax, magnetic pull. Reduced-motion safe. |
-| `layouts/BaseLayout.astro` | Shell: fonts, intro cover, heat rail, view transitions, GearNav, footer, imports the motion engine. |
-| `components/GearNav.astro` | The gear (turns with scroll) + full-screen menu with staggered display-type lines. |
-| `components/Reveal.astro` | Scroll entrance wrapper. |
-| `components/Placeholder.astro` | Dashed ember frame + small-caps tag on content slots. |
-| `components/SectionLabel.astro` | Ember rule + small-caps section label; `index` only for real sequences. |
-| `components/Footer.astro` | Plain-link nav fallback + identity. |
-| `components/ViewCounter.astro` | Per-post view count (GoatCounter), stub until configured. |
-| `components/Comments.astro` | Post comments + reactions (giscus), stub until configured. |
+| `scripts/motion.ts` | Motion engine: primitives + scenes. Reduced-motion safe. |
+| `layouts/BaseLayout.astro` | Shell: fonts, intro cover, heat rail, view transitions, GearNav, footer, imports motion. |
+| `components/Reveal.astro` | `[data-reveal]` wrapper. |
+| `components/GearNav.astro` | Gear button + full-screen menu. |
+| `components/Placeholder.astro` / `SectionLabel.astro` / `Footer.astro` | Content slots / label / footer. |
+| `components/ViewCounter.astro` / `Comments.astro` | Blog views / comments, stub until configured. |
 
-## Page conventions
+## Conventions
 
-- Content column: `mx-auto max-w-5xl px-5 sm:px-8` (blog post bodies use
-  `max-w-3xl` for reading measure).
-- Section rhythm varies on purpose (py-24 through py-44); don't
-  metronome identical sections.
-- Rows and ledgers over cards; hairline `border-t` separation.
-- At most one `.type-label` eyebrow per page opening a section; most
-  sections open with a display headline.
+- Content column: `mx-auto max-w-5xl px-5 sm:px-8` (blog body `max-w-3xl`).
+- Section rhythm varies on purpose; don't metronome identical sections.
+- At most one `.type-label` eyebrow per page opening; most sections open
+  with a display headline.

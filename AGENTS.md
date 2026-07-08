@@ -29,13 +29,18 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 
 ## Architecture notes
 
+- Fonts: Uncial Antiqua (display), Grey Qo (script accent), Cardo (body).
+  Palette is the four colors with two purple steps; no idle glows, no
+  gradient fills. See `DESIGN.md`.
 - One shared shell: `src/layouts/BaseLayout.astro` (fonts, GearNav, Footer,
   intro cover, heat rail). It imports the motion engine
-  `src/scripts/motion.ts` (GSAP + ScrollTrigger + Lenis): the pinned hero
-  and roster scenes, masked split text (`[data-split]`), clip-wipe reveals
-  (`[data-reveal]`), parallax (`[data-parallax]`), magnetic CTAs
-  (`[data-magnetic]`). All of it is reduced-motion safe (the module bows
-  out; static CSS stands in). No opacity cross-fades ("no ombre").
+  `src/scripts/motion.ts` (GSAP + ScrollTrigger + Lenis): generic
+  primitives (`[data-split]` masked lines, `[data-reveal]`/
+  `[data-reveal-scrub]` clip wipes, `[data-parallax]`, `[data-count]`,
+  `[data-magnetic]`, `[data-hover-preview]`) plus named scenes (the 3D
+  `.onyx-spine`, `[data-hero]`, `[data-stack]` card stack, `[data-hscroll]`
+  horizontal pan, `[data-coverflow]` Swiper, `[data-flip]`, `[data-ladder]`,
+  `[data-progress]`). All reduced-motion safe. No opacity cross-fades.
 - Navigation is `src/components/GearNav.astro` (orbital gear hub). Page list
   changes go in its `links` array AND `Footer.astro`.
 - Design tokens live in the `@theme` block of `src/styles/global.css`;
@@ -44,7 +49,7 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 - Scroll entrances: wrap content in `components/Reveal.astro`; stagger
   siblings by putting `data-reveal-group` on their parent. For a heading
   that should fly in per character, add `data-split` to it instead (plain
-  text only, no inner markup). See `DESIGN.md` "Experience layer".
+  text only, no inner markup). See `DESIGN.md` "Motion engine".
 - Blog: posts are markdown in `src/content/blog/` (collection defined in
   `src/content.config.ts`), rendered by `src/pages/outreach/[id].astro`.
   Comments/views services are configured in `src/lib/services.ts`.

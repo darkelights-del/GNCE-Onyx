@@ -358,6 +358,17 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
     will-change: transform, opacity;
   }
 
+  /* No-JS / reduced motion: cards flow as a readable list, not a stack. */
+  :global(html:not(.gsap)) .stack-inner {
+    display: block;
+    height: auto;
+  }
+
+  :global(html:not(.gsap)) .stack-card {
+    grid-area: auto;
+    margin-bottom: 1.25rem;
+  }
+
   .card-num {
     font-size: clamp(2.5rem, 6vw, 4rem);
     color: var(--color-accent);
