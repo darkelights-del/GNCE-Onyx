@@ -1,105 +1,122 @@
-# Design System — "Pit Bay Blueprint"
+# Design System — "The Forge"
 
-The visual direction for the team site: a robotics pit bay crossed with an
-engineering drawing. Near-black and dark-purple #1A0F20 surfaces, one deep crimson
-accent, machine-cut display type, and mono "callout" micro-labels everywhere
-— the site should feel like a technical document that moves.
+Four teams forged into one. The site is a night forge: coal-black fields,
+one ember, medieval-robust type, machined edges. Typography carries the
+identity; decoration exists only where it states something true.
 
-This file is the source of truth for visual decisions. Read it (and
-`.claude/skills/emil-design-eng/SKILL.md`) before touching UI.
+This file is the source of truth for visual decisions. Read it (and the
+skills in `.claude/skills/`) before touching UI.
 
 ## Principles
 
-1. **Four colors, nothing else.** The whole site uses only `#0A0908`,
-   `#1A0F20`, `#6E0D25`, `#E8E2DC`, plus transparencies of the ink for
-   hairlines and muted text. No derived hues.
-2. **One accent.** Deep crimson (`--color-accent`, `#6E0D25`) is the accent
-   everywhere: as a fill (solid buttons, the current nav bubble, the timeline
-   marker) and as accent text directly on the near-black (hero words, numbers,
-   labels, brackets, placeholder tags). Ink (`#E8E2DC`) is kept for text that
-   was always light (headlines, body, callout labels), not as an accent.
-3. **Drawing, not dashboard.** Texture comes from hairlines, blueprint grids,
-   hatching, corner registration marks, and mono callouts — not from cards,
-   shadows, or gradients. No glassmorphism, no glow.
-4. **Motion is mechanical and earned.** Entrances use strong ease-out;
-   interactive UI stays under 300ms; the gear hub is the only playful
-   (springy) element. Everything respects `prefers-reduced-motion`.
-5. **Placeholders are loud.** Blocks awaiting content are wrapped in
-   `<Placeholder name="...">`; inline unknowns use a `.stub` span. Both are
-   impossible to miss in the browser.
-6. **Eyebrow restraint.** `SectionLabel` callouts appear on at most a couple
-   of sections per page, and get an `index` only when the order itself is
-   content (e.g. the season timeline). Most sections open with a display
-   headline instead (see the `taste` skill's eyebrow rules).
-7. **No em-dashes in visible copy** (see the `taste` skill). Use periods,
-   commas, colons, or hyphens.
+1. **Four colors, nothing else.** `#0A0908` coal, `#1A0F20` night,
+   `#6E0D25` ember, `#E8E2DC` ash, plus ash transparencies for rules and
+   muted text. No gradients except the single ember glow. No glows on
+   components, no glassmorphism, no shadows.
+2. **One ember.** The crimson is the accent everywhere: fills (solid
+   buttons, the heat rail, timeline markers), accent text on coal, and the
+   `.ember` radial glow, used at most once per page (hero, sponsor band,
+   open menu).
+3. **Typography is the imagery.** Grenze Gotisch does what photography
+   would. Push scale hard (`clamp` up to 10rem+), keep body modest, and
+   never set Grenze Gotisch in uppercase: blackletter capitals in runs are
+   illegible. Mixed case always.
+4. **Machined corners.** Radius 0 on everything except the gear button.
+   No pills, no chips, no badges. Labels are bare small-caps text.
+5. **Motion is purposeful.** Every animation answers "what does this
+   communicate?" The forge scene tells the merge story; the gear turns
+   with scroll because it drives the page; the heat rail is a progress
+   gauge; reveals establish reading order. Nothing loops decoratively.
+   Everything respects `prefers-reduced-motion` and degrades without JS
+   or scroll-timeline support.
+6. **Placeholders are loud.** Blocks awaiting content use
+   `<Placeholder name="...">`; inline unknowns use `.stub`. Both visible.
+7. **No em-dashes in visible copy.** Periods, commas, colons, hyphens.
+8. **Copy earns its place.** Every visible sentence passes the
+   no-slop-writing skill; anything that restates gets cut.
 
 ## Tokens (defined in `src/styles/global.css` `@theme`)
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--color-bg` | `#0a0908` | Page background (near-black) |
-| `--color-surface` | `#1a0f20` | Cards, alternate bands, footer, nav bubbles, form inputs |
-| `--color-panel` | `#1a0f20` | Same as surface (cards are set apart by their border) |
-| `--color-line` | `#e8e2dc` @ 15% | All hairline borders (ink at low opacity) |
-| `--color-ink` | `#e8e2dc` | Primary text (warm off-white) |
-| `--color-muted` | `#e8e2dc` @ 62% | Secondary text, labels (ink at low opacity) |
-| `--color-accent` | `#6e0d25` | Deep crimson — the accent, as fills and as text |
+| `--color-bg` | `#0a0908` | Page background (coal) |
+| `--color-surface` | `#1a0f20` | Alternate bands, footer, slots (night) |
+| `--color-line` | ash @ 15% | Hairline rules |
+| `--color-ink` | `#e8e2dc` | Text (ash) |
+| `--color-muted` | ash @ 62% | Secondary text, labels |
+| `--color-accent` | `#6e0d25` | Ember: fills, accent text, glow |
 | `--ease-out-strong` | `cubic-bezier(0.23,1,0.32,1)` | Entrances, UI feedback |
-| `--ease-in-out-strong` | `cubic-bezier(0.77,0,0.175,1)` | On-screen movement, clip reveals |
-| `--ease-spring` | `cubic-bezier(0.34,1.56,0.64,1)` | Gear hub fan-out only |
-
-Tailwind maps these automatically: `bg-bg`, `bg-surface`, `bg-panel`,
-`text-ink`, `text-muted`, `text-accent`, `border-line`, `font-display`,
-`font-mono`, `ease-out-strong`, etc.
+| `--ease-in-out-strong` | `cubic-bezier(0.77,0,0.175,1)` | Loader lift, on-screen movement |
+| `--ease-spring` | `cubic-bezier(0.34,1.56,0.64,1)` | Gear spin only |
 
 ## Type
 
-- **Display** (`.type-display`): Archivo Variable, stretched to 118%, weight
-  800, uppercase, tight leading. Headlines and big numbers. Size with
-  Tailwind clamp-y utilities, e.g. `text-[clamp(2.5rem,8vw,7rem)]`.
-- **Callout** (`.type-callout`): JetBrains Mono, 11px, uppercase, wide
-  tracking. Section labels, annotations, metadata, tags.
-- **Body**: Archivo at normal width via `font-display`, `text-base/relaxed`,
-  usually `text-muted` for long Lorem Ipsum runs.
+- **Display** (`.type-display`): Grenze Gotisch Variable, weight ~600,
+  line-height 0.95, mixed case only. Headlines, nav menu, wordmark,
+  roster names, blog titles.
+- **Body** (default, no class): Vollkorn Variable. Dark, sturdy serif;
+  muted color for long runs. Blog post bodies use `.post-body`.
+- **Label** (`.type-label`): Vollkorn SC 600. Eyebrows (max one per
+  page), spec keys, metadata, buttons, footer small print.
+- **Code** (`--font-code`): a real monospace stack, used only in blog
+  post code blocks (`.post-body code/pre`).
 
 ## Motifs
 
-- `.bp-grid` — faint blueprint grid background (heroes, section bands).
-- `.bp-hatch` — diagonal hatching (image/frame placeholders, "unbuilt" areas).
-- `.bp-corners` — corner registration marks on panels and frames.
-- `SectionLabel` — `[ THE ROBOT ]` callout with a trailing rule; used on at
-  most a couple of sections per page (see Principles 5).
-- Mono metadata as garnish only where it states something real (dates,
-  team numbers, match IDs); never decorative version stamps.
+- `.ember` — the radial crimson glow with local grain; one per page max.
+- `.slot` — empty media frame (night fill, hairline border) for photos
+  and video awaiting content.
+- `.rule-heavy` / SectionLabel's short ember rule — the anvil mark that
+  opens a labeled section.
+- Heat rail — 3px ember line on the left edge that fills with scroll
+  (scroll-driven CSS, hidden where unsupported).
+- Roman numerals (I-IV) in the gear menu only.
 
-## Motion rules (from the emil-design-eng skill)
+## Experience layer (BaseLayout + index)
 
-- Only animate `transform`, `opacity`, `clip-path`. Never `all`.
-- Entrances: `ease-out-strong`; scroll reveals 640ms (clip variant 820ms).
-- Interactive UI: 120–300ms. Buttons get `scale(0.97)` on `:active`.
-- Hover effects only inside `@media (hover: hover) and (pointer: fine)`.
-- Nothing enters from `scale(0)`; minimum `scale(0.9)` + opacity.
-- Stagger 45–60ms between siblings, capped (~360ms max delay).
-- `prefers-reduced-motion`: movement is removed, opacity fades remain.
+- **Forge loader**: once per session (sessionStorage `forged`), skipped
+  under reduced motion and no-JS, with an inline failsafe that lifts the
+  cover after 2s even if the module never runs. Wordmark strikes up, the
+  cover lifts into the hero entrance.
+- **Forge scene** (`index.astro`): a pinned scroll scene (320svh track,
+  sticky stage). Four team numbers converge while "Four teams." yields to
+  "One Onyx.". Driven by a single custom property `--p` (0..1) that a tiny
+  JS scrubber sets from scroll progress; every value is a `calc()` of
+  `--p`, so it works in every browser. Without JS or under reduced motion
+  a clean static hero shows instead (only "One Onyx." + sub + CTA).
+- **View transitions**: cross-document fade/rise via `@view-transition`;
+  browsers without it just navigate.
+- **Reveals**: IntersectionObserver + `[data-reveal]` (up/left/right/
+  scale/clip). Clip lives on an inner wrapper (Chromium quirk). Stagger
+  via `data-reveal-group`.
+
+## The blog (Outreach)
+
+Outreach is a markdown blog (Astro content collection, `src/content/blog/`).
+`outreach/index.astro` lists posts as hairline-ruled rows; `outreach/[id].astro`
+renders a post in `.post-body` with a `ViewCounter` (GoatCounter) and
+`Comments` (giscus). Both third-party widgets show marked stubs until their
+IDs are set in `src/lib/services.ts` (see README, "Blog").
 
 ## Component inventory
 
 | Component | Purpose |
 | --- | --- |
-| `layouts/BaseLayout.astro` | Shared shell: fonts, GearNav, footer, Lenis smooth scroll, reveal observer. Props: `title`, `description`. |
-| `components/GearNav.astro` | Orbital gear hub navigation (bottom-right). Update `links` there when pages change. |
-| `components/Reveal.astro` | Scroll entrance wrapper. `variant`: `up` (default) / `left` / `right` / `scale` / `clip`; optional `delay` ms. Put `data-reveal-group` on a parent to auto-stagger children. |
-| `components/Placeholder.astro` | Dashed frame + tag marking Lorem Ipsum slots. Required `name`. |
-| `components/SectionLabel.astro` | `[ title ]` section callout; optional `index` only for real sequences. |
-| `components/Footer.astro` | Plain-link nav fallback + placeholder identity. |
+| `layouts/BaseLayout.astro` | Shell: fonts, loader, heat rail, view transitions, GearNav, footer, Lenis, reveal observer. |
+| `components/GearNav.astro` | The gear (turns with scroll) + full-screen menu with staggered display-type lines. |
+| `components/Reveal.astro` | Scroll entrance wrapper. |
+| `components/Placeholder.astro` | Dashed ember frame + small-caps tag on content slots. |
+| `components/SectionLabel.astro` | Ember rule + small-caps section label; `index` only for real sequences. |
+| `components/Footer.astro` | Plain-link nav fallback + identity. |
+| `components/ViewCounter.astro` | Per-post view count (GoatCounter), stub until configured. |
+| `components/Comments.astro` | Post comments + reactions (giscus), stub until configured. |
 
 ## Page conventions
 
-- Content column: `mx-auto max-w-6xl px-5 sm:px-8`.
-- Section rhythm: `py-24 sm:py-32`; hero sections `min-h-svh`.
-- Alternate `bg-bg` and `bg-surface` bands for large sections.
-- Every page: `<BaseLayout title="...">`, sections opened with
-  `SectionLabel`, entrances via `Reveal`.
-- Placeholder names are kebab-case and unique per slot
-  (`grep -r "data-placeholder" src/` lists all remaining work).
+- Content column: `mx-auto max-w-5xl px-5 sm:px-8` (blog post bodies use
+  `max-w-3xl` for reading measure).
+- Section rhythm varies on purpose (py-24 through py-44); don't
+  metronome identical sections.
+- Rows and ledgers over cards; hairline `border-t` separation.
+- At most one `.type-label` eyebrow per page opening a section; most
+  sections open with a display headline.

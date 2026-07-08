@@ -9,12 +9,12 @@ import { GOATCOUNTER_CODE, goatcounterReady } from '../lib/services';
 
 {
   goatcounterReady ? (
-    <span class="type-callout text-muted" data-views>
-      views: <span data-views-n>…</span>
+    <span class="type-label text-muted" data-views>
+      Views: <span data-views-n>…</span>
     </span>
   ) : (
-    <span class="type-callout text-muted stub" title="View counts appear once GoatCounter is configured (see README)">
-      views: TBD
+    <span class="type-label text-muted stub" title="View counts appear once GoatCounter is configured (see README)">
+      Views: TBD
     </span>
   )
 }

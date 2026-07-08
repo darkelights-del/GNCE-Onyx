@@ -1,22 +1,28 @@
 ---
 /**
- * Home — scroll-driven landing page.
- * Hero (convergence story) → Legacy → Mission → The Robot → Roster → Sponsor.
- * Remaining placeholders carry <Placeholder> wrappers or .stub marks.
+ * Home — the forge story.
+ * Act 1: pinned scroll scene. Four team numbers converge and "Four
+ * teams." gives way to "One Onyx." struck in ember. A single custom
+ * property --p (0..1), set by JS on .forge-track, drives every value
+ * through calc(), so it works in every browser and degrades to a clean
+ * static hero without JS or under reduced motion.
+ * Then: lineage ledger → mission → robot → roster → sponsor band.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Placeholder from '../components/Placeholder.astro';
 import Reveal from '../components/Reveal.astro';
 import SectionLabel from '../components/SectionLabel.astro';
 
-/** Tick angles for the decorative hero ring (every 6°, long tick every 30°) */
-const ringTicks = Array.from({ length: 60 }, (_, i) => i * 6);
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
-/** The four GNCE squads whose veterans formed Onyx. */
-const legacyTeams = [
+/** The four squads whose veterans formed Onyx; scatter offsets feed the
+ *  converge animation. */
+const lineage = [
   {
     num: '22489',
     name: 'GNCE Diamond',
+    sx: '-30vw',
+    sy: '-24vh',
     honors: [
       '2025 States: Winning Alliance Captain',
       '2025 FIRST World Championship, Jemison Division: Motivate Award 2nd Place',
@@ -29,6 +35,8 @@ const legacyTeams = [
   {
     num: '26112',
     name: 'GNCE Organized Anarchy',
+    sx: '28vw',
+    sy: '-20vh',
     honors: [
       '2025 States: Finalist Alliance Captain',
       '2025 New England Premier Event, Courville Division',
@@ -37,25 +45,18 @@ const legacyTeams = [
       '2026 Multinational Tech Invitational qualification',
     ],
   },
-  { num: '26413', name: 'GNCE Mercury', honors: [] },
-  { num: '26111', name: 'GNCE Electrified Chickens', honors: [] },
+  { num: '26413', name: 'GNCE Mercury', sx: '-26vw', sy: '22vh', honors: [] },
+  { num: '26111', name: 'GNCE Electrified Chickens', sx: '30vw', sy: '24vh', honors: [] },
 ];
 
-const chips = [
-  { num: '22489', label: 'Diamond', variant: 'left', delay: 0 },
-  { num: '26112', label: 'Organized Anarchy', variant: 'left', delay: 70 },
-  { num: '26413', label: 'Mercury', variant: 'right', delay: 140 },
-  { num: '26111', label: 'Electrified Chickens', variant: 'right', delay: 210 },
-] as const;
-
 const roster = [
-  { monogram: 'E.Z.', name: 'Ethan Zhang', role: 'Captain' },
-  { monogram: 'E.Z.', name: 'Ethan Zhuang', role: 'Captain' },
-  { monogram: 'A.S.', name: 'Anson Su', role: '' },
-  { monogram: 'A.C.', name: 'Adrian Chang', role: '' },
-  { monogram: 'L.L.', name: 'Leo Li', role: '' },
-  { monogram: 'N.C.', name: 'Nicholas Colli', role: '' },
-  { monogram: 'R.L.', name: 'Raymond Liu', role: '' },
+  { name: 'Ethan Zhang', role: 'Captain' },
+  { name: 'Ethan Zhuang', role: 'Captain' },
+  { name: 'Anson Su', role: '' },
+  { name: 'Adrian Chang', role: '' },
+  { name: 'Leo Li', role: '' },
+  { name: 'Nicholas Colli', role: '' },
+  { name: 'Raymond Liu', role: '' },
 ];
 
 const specs = [
@@ -66,185 +67,139 @@ const specs = [
   { key: 'Auto', value: 'TBD' },
   { key: 'Solo score', value: 'TBD' },
 ];
-
-const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 ---
 
 <BaseLayout
   title="Home"
-  description="GNCE Onyx is a rookie FIRST Tech Challenge team at Weston High School, built by championship veterans of four GNCE squads for the 2026-2027 BIOBUZZ season."
+  description="GNCE Onyx is a rookie FIRST Tech Challenge team at Weston High School, built by veterans of four GNCE teams for the 2026-2027 BIOBUZZ season."
 >
-  <!-- ============================================================ HERO -->
-  <section class="bp-grid relative flex min-h-svh flex-col overflow-clip bg-bg">
-    <!-- Decorative drawing ring, overflowing the right edge -->
-    <div
-      class="pointer-events-none absolute top-1/2 right-[-24vmin] -translate-y-1/2 text-line"
-      aria-hidden="true"
-    >
-      <svg
-        class="hero-ring-svg size-[70vmin] opacity-60"
-        viewBox="0 0 200 200"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="0.75"
-      >
-        <circle cx="100" cy="100" r="86"></circle>
-        <circle cx="100" cy="100" r="60" stroke-dasharray="2 6"></circle>
-        {ringTicks.map((deg) => (
-          <line
-            x1="100"
-            y1="14"
-            x2="100"
-            y2={deg % 30 === 0 ? '24' : '19'}
-            transform={`rotate(${deg} 100 100)`}
-          />
-        ))}
-      </svg>
-    </div>
+  <!-- ============================================= ACT 1: THE FORGE -->
+  <section class="forge-track" aria-label="GNCE Onyx: four teams forged into one">
+    <div class="forge-stage ember">
+      <p class="fs-eyebrow type-label">
+        FIRST Tech Challenge · Weston High School
+      </p>
 
-    <div class="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 sm:px-8">
-      <!-- Top chrome row -->
-      <Reveal variant="up" class="flex items-baseline justify-between gap-4 pt-7 sm:pt-9">
-        <p class="type-callout text-muted">[ FIRST Tech Challenge / Weston High School ]</p>
-        <p class="type-callout text-muted">
-          Team <span class="stub" title="Team number pending">#XXXXX</span>
+      <div class="fs-numbers" aria-hidden="true">
+        {
+          lineage.map((team) => (
+            <span class="fs-number type-label" style={`--sx:${team.sx};--sy:${team.sy}`}>
+              {team.num}
+            </span>
+          ))
+        }
+      </div>
+
+      <div class="fs-heads">
+        <p class="fs-head-a type-display" aria-hidden="true">Four teams.</p>
+        <h1 class="fs-head-b type-display">One Onyx.</h1>
+      </div>
+
+      <div class="fs-tail">
+        <p class="fs-sub">
+          A rookie FTC team at Weston High, built by members of four GNCE
+          teams, competing in BIOBUZZ 2026-2027.
         </p>
-      </Reveal>
-
-      <!-- Center: four numbers converge into one team -->
-      <div class="flex flex-1 flex-col justify-center py-16">
-        <ul class="flex flex-wrap gap-2 sm:gap-3" data-nosnippet>
-          {chips.map((chip) => (
-            <li>
-              <Reveal variant={chip.variant} delay={chip.delay} class="hairline flex items-baseline gap-2 border bg-panel px-3 py-1.5">
-                <span class="font-mono text-xs font-bold text-accent">{chip.num}</span>
-                <span class="type-callout text-muted">{chip.label}</span>
-              </Reveal>
-            </li>
-          ))}
-        </ul>
-
-        <h1 class="type-display mt-6 text-[clamp(2.75rem,8.5vw,7.5rem)]">
-          <Reveal as="span" variant="clip" delay={200} class="block">Four teams.</Reveal>
-          <Reveal as="span" variant="clip" delay={340} class="block text-accent">One Onyx.</Reveal>
-        </h1>
-
-        <Reveal variant="up" delay={480} class="mt-8 max-w-xl">
-          <p class="text-base/relaxed text-muted">
-            A rookie FTC team at Weston High, built by members of four GNCE
-            teams, competing in BIOBUZZ 2026-2027.
-          </p>
-        </Reveal>
-
-        <Reveal variant="up" delay={560} class="mt-10 flex flex-wrap items-center gap-4">
+        <p class="fs-cta">
           <a href={`${base}/contact/`} class="btn btn-solid">Sponsor the team</a>
-          <a href={`${base}/season/`} class="btn">Our first season</a>
-        </Reveal>
+          <a href={`${base}/season/`} class="fs-link">See our first season</a>
+        </p>
       </div>
     </div>
   </section>
 
-  <!-- ======================================================== LEGACY -->
-  <section class="hairline border-y bg-surface py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <!-- ================================================ LINEAGE LEDGER -->
+  <section class="bg-surface py-28 sm:py-36">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal variant="clip">
-        <h2 class="type-display max-w-4xl text-[clamp(2rem,5.5vw,4.5rem)]">
+        <h2 class="type-display text-[clamp(2.25rem,6vw,4.5rem)]">
           Where we come from
         </h2>
       </Reveal>
 
-      <Reveal variant="up" delay={100} class="mt-8 max-w-2xl">
-        <p class="text-base/relaxed text-muted">
-          Four of our seven current members are returning veterans with world
-          championship and international invitational experience, drawn from four
-          GNCE teams. Their record travels with them.
+      <Reveal variant="up" delay={100} class="mt-6 max-w-2xl">
+        <p class="text-muted">
+          Four of our seven members are returning veterans from four GNCE
+          teams. Their record travels with them.
         </p>
       </Reveal>
 
-      <div class="mt-14 grid gap-4 md:grid-cols-2" data-reveal-group>
-        {legacyTeams.slice(0, 2).map((team) => (
-          <Reveal variant="up" class="bp-corners hairline flex h-full flex-col border bg-panel p-6 sm:p-8">
-            <p class="font-mono text-3xl font-bold text-accent">{team.num}</p>
-            <p class="type-display mt-2 text-xl">{team.name}</p>
-            <ul class="hairline mt-6 border-t">
-              {team.honors.map((honor) => (
-                <li class="hairline border-b py-2.5 font-mono text-xs/relaxed text-muted">
-                  {honor}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-        ))}
-      </div>
-
-      <div class="mt-4 grid gap-4 sm:grid-cols-2" data-reveal-group>
-        {legacyTeams.slice(2).map((team) => (
-          <Reveal variant="up" class="hairline flex items-baseline gap-4 border bg-panel px-6 py-5">
-            <p class="font-mono text-xl font-bold text-accent">{team.num}</p>
-            <p class="type-display text-base">{team.name}</p>
-          </Reveal>
-        ))}
+      <div class="mt-16" data-reveal-group>
+        {
+          lineage.map((team) => (
+            <Reveal class="hairline border-t py-8 first:border-t-0 sm:py-10">
+              <div class="grid gap-4 sm:grid-cols-[8rem_1fr]">
+                <p class="type-label text-2xl text-accent">{team.num}</p>
+                <div>
+                  <h3 class="type-display text-[clamp(1.5rem,3vw,2.25rem)]">{team.name}</h3>
+                  {team.honors.length > 0 && (
+                    <ul class="mt-4 max-w-2xl">
+                      {team.honors.map((honor) => (
+                        <li class="hairline border-t py-2 text-[0.9375rem] text-muted first:border-t-0">
+                          {honor}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </Reveal>
+          ))
+        }
       </div>
     </div>
   </section>
 
   <!-- ======================================================== MISSION -->
-  <section class="bg-bg py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <section class="py-32 sm:py-44">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal variant="clip">
-        <p class="type-display max-w-4xl text-[clamp(1.75rem,4vw,3.5rem)]">
+        <p class="type-display max-w-4xl text-[clamp(1.875rem,4.5vw,3.5rem)]">
           Consistent, reliable robots we can maintain and trust on the field.
         </p>
       </Reveal>
-
-      <div class="mt-10 grid gap-8 md:grid-cols-2" data-reveal-group>
-        <Reveal variant="up">
-          <p class="max-w-prose text-base/relaxed text-muted">
-            GNCE Onyx favors proven designs over complex ones with more ways to
-            fail. We build machines we understand end to end, so we can fix them
-            in the pit and count on them in a match.
-          </p>
-        </Reveal>
-        <Reveal variant="up">
-          <p class="max-w-prose text-base/relaxed text-muted">
-            Off the field, we run outreach to get younger students into
-            robotics and grow FIRST and STEM in and around Weston,
-            Massachusetts.
-          </p>
-        </Reveal>
-      </div>
+      <Reveal variant="up" delay={120} class="mt-8 max-w-2xl">
+        <p class="text-muted">
+          GNCE Onyx favors proven designs over complex ones with more ways to
+          fail: machines we understand end to end, fix in the pit, and count
+          on in a match. Off the field, we run outreach to get younger
+          students into robotics and grow FIRST and STEM in and around
+          Weston, Massachusetts.
+        </p>
+      </Reveal>
     </div>
   </section>
 
   <!-- ====================================================== THE ROBOT -->
-  <section class="hairline border-y bg-surface py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
-      <SectionLabel title="The robot" class="mb-12 sm:mb-16" />
+  <section class="bg-surface py-24 sm:py-32">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
+      <SectionLabel title="The robot" class="mb-12" />
 
       <div class="grid gap-10 md:grid-cols-2">
         <Reveal variant="left">
           <Placeholder name="home-robot-photo">
-            <div class="bp-hatch flex aspect-[4/3] items-center justify-center">
-              <span class="type-callout text-muted">Robot photo, coming at kickoff</span>
+            <div class="slot aspect-[4/3]">
+              <span class="type-label text-muted">Robot photo, coming at kickoff</span>
             </div>
           </Placeholder>
         </Reveal>
 
         <Reveal variant="right" delay={120}>
           <div class="flex h-full flex-col">
-            <p class="max-w-prose text-base/relaxed text-muted">
-              The BIOBUZZ build starts at kickoff. This space will follow the
-              machine from first sketch to competition-ready, with the design
-              decisions that got it there.
+            <p class="max-w-prose text-muted">
+              The BIOBUZZ build starts at kickoff. This space follows the
+              machine from first sketch to competition-ready.
             </p>
             <Placeholder name="home-robot-specs" class="mt-8 px-5 py-4">
               <dl>
-                {specs.map((spec) => (
-                  <div class="hairline flex items-baseline justify-between gap-6 border-b py-3 last:border-b-0">
-                    <dt class="type-callout text-muted">{spec.key}</dt>
-                    <dd class="font-mono text-sm text-ink">{spec.value}</dd>
-                  </div>
-                ))}
+                {
+                  specs.map((spec) => (
+                    <div class="hairline flex items-baseline justify-between gap-6 border-b py-3 last:border-b-0">
+                      <dt class="type-label text-muted">{spec.key}</dt>
+                      <dd class="text-[0.9375rem]">{spec.value}</dd>
+                    </div>
+                  ))
+                }
               </dl>
             </Placeholder>
           </div>
@@ -254,54 +209,52 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
   </section>
 
   <!-- ========================================================= ROSTER -->
-  <section class="bg-bg py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
-      <SectionLabel title="Roster" class="mb-12 sm:mb-16" />
+  <section class="py-28 sm:py-36">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
+      <SectionLabel title="Roster" class="mb-12" />
 
       <Reveal variant="up">
-        <p class="max-w-prose text-lg text-muted">
+        <p class="max-w-2xl text-lg text-muted">
           Seven members and counting, led by two captains. Four of us
           competed at Worlds and international invitationals on our previous
           teams.
         </p>
       </Reveal>
 
-      <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group>
-        {roster.map((member) => (
-          <Reveal variant="up" class="bp-corners hairline border bg-panel p-5">
-            <div class="hairline flex size-14 items-center justify-center border bg-surface font-mono text-sm text-muted">
-              {member.monogram}
-            </div>
-            <p class="mt-5 font-display text-lg font-semibold text-ink">{member.name}</p>
-            {member.role && <p class="type-callout mt-1 text-accent">{member.role}</p>}
-          </Reveal>
-        ))}
-        <Reveal
-          variant="up"
-          class="flex min-h-40 flex-col items-start justify-center border border-dashed border-line p-5"
-        >
-          <p class="font-mono text-sm text-muted">2-3 spots</p>
-          <p class="type-callout mt-1 text-muted">New members joining soon</p>
+      <ol class="mt-12 grid gap-x-12 sm:grid-cols-2" data-reveal-group>
+        {
+          roster.map((member) => (
+            <Reveal
+              as="li"
+              class="hairline flex items-baseline justify-between gap-6 border-b py-4"
+            >
+              <span class="type-display text-[1.625rem]">{member.name}</span>
+              {member.role && <span class="type-label text-accent">{member.role}</span>}
+            </Reveal>
+          ))
+        }
+        <Reveal as="li" class="flex items-baseline py-4">
+          <span class="text-muted italic">Two or three more joining soon.</span>
         </Reveal>
-      </div>
+      </ol>
     </div>
   </section>
 
-  <!-- ======================================================== SPONSOR -->
-  <section class="hairline border-t bg-surface py-28 sm:py-40">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <!-- ==================================================== SPONSOR BAND -->
+  <section class="ember bg-surface py-32 sm:py-44">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal variant="clip">
-        <h2 class="type-display max-w-5xl text-[clamp(2.5rem,7vw,6rem)]">
+        <h2 class="type-display max-w-4xl text-[clamp(2.75rem,8vw,6.5rem)]">
           Back the build
         </h2>
       </Reveal>
 
-      <Reveal variant="up" delay={120} class="mt-10 max-w-2xl">
-        <p class="text-base/relaxed text-muted">
+      <Reveal variant="up" delay={120} class="mt-8 max-w-2xl">
+        <p class="text-muted">
           Sponsorship covers what a season actually costs: parts, tools,
-          registration, and travel to events. Cash is one way in. Mentorship,
-          shop tours, and co-hosted STEM events for Weston students count just
-          as much.
+          registration, and travel. Cash is one way in. Mentorship, shop
+          tours, and co-hosted STEM events for Weston students count just as
+          much.
         </p>
       </Reveal>
 
@@ -313,23 +266,189 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 </BaseLayout>
 
 <style>
-  /* Decorative hero ring — very slow constant rotation (transform-only). */
-  .hero-ring-svg {
-    animation: ring-rotate 120s linear infinite;
+  /* ---- Act 1: The Forge scene ------------------------------------ */
+  /* One scrubbed scene driven by a single custom property --p (0..1)
+     set by JS on .forge-track. Every animated value is a calc() of --p,
+     so it works in every browser and never leaves the two headlines
+     both visible. Without JS or under reduced motion the static
+     composition below applies instead. */
+  .forge-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1.5rem;
+    min-height: 100svh;
+    padding: clamp(1.25rem, 5vw, 5rem);
+    background: var(--color-bg);
+    overflow: clip;
   }
 
-  @keyframes ring-rotate {
+  .fs-eyebrow {
+    color: var(--color-muted);
+  }
+
+  .fs-numbers {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .fs-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: clamp(1rem, 2.2vw, 1.5rem);
+    color: var(--color-muted);
+    opacity: 0.4;
+    transform: translate(-50%, -50%) translate(var(--sx), var(--sy));
+  }
+
+  .fs-heads {
+    display: grid;
+  }
+
+  .fs-head-a,
+  .fs-head-b {
+    grid-area: 1 / 1;
+    font-size: clamp(3.25rem, 12vw, 10rem);
+  }
+
+  .fs-head-b {
+    color: var(--color-accent);
+  }
+
+  .fs-sub {
+    max-width: 34rem;
+    color: var(--color-muted);
+  }
+
+  .fs-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .fs-link {
+    color: var(--color-ink);
+    font-family: var(--font-label);
+    font-size: 0.9375rem;
+    text-decoration: underline;
+    text-underline-offset: 0.35em;
+    text-decoration-color: var(--color-accent);
+    transition: color 200ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .fs-link:hover {
+      color: var(--color-accent);
+    }
+  }
+
+  /* ---- Static composition (no JS, reduced motion, before scrub) --- */
+  .fs-head-a {
+    display: none;
+  }
+
+  /* Gentle load entrance for the static hero; suppressed once the JS
+     scrub takes over (.forge-track.is-scrub). */
+  :global(html.js) .forge-track:not(.is-scrub) .fs-head-b,
+  :global(html.js) .forge-track:not(.is-scrub) .fs-tail,
+  :global(html.js) .forge-track:not(.is-scrub) .fs-eyebrow {
+    animation: fs-arrive 640ms var(--ease-out-strong) both;
+  }
+
+  :global(html.js) .forge-track:not(.is-scrub) .fs-head-b {
+    animation-delay: 80ms;
+  }
+
+  :global(html.js) .forge-track:not(.is-scrub) .fs-tail {
+    animation-delay: 220ms;
+  }
+
+  @keyframes fs-arrive {
     from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
+      opacity: 0;
+      transform: translateY(22px);
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .hero-ring-svg {
-      animation: none;
-    }
+  /* ---- The scrub (JS sets --p; pure calc, all browsers) ---------- */
+  .forge-track.is-scrub {
+    height: 320svh;
+  }
+
+  .forge-track.is-scrub .forge-stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+  }
+
+  /* Four numbers slide to center (p:0 -> 0.4) then fade (~0.45). */
+  .forge-track.is-scrub .fs-number {
+    --conv: min(calc(var(--p) / 0.4), 1);
+    opacity: calc(0.55 * (1 - clamp(0, calc((var(--p) - 0.38) * 12), 1)));
+    transform: translate(-50%, -50%)
+      translate(
+        calc(var(--sx) * (1 - var(--conv))),
+        calc(var(--sy) * (1 - var(--conv)))
+      );
+  }
+
+  /* "Four teams." holds, then yields (0.30 -> 0.44). */
+  .forge-track.is-scrub .fs-head-a {
+    --out: clamp(0, calc((var(--p) - 0.30) * 7), 1);
+    display: block;
+    opacity: calc(1 - var(--out));
+    transform: translateY(calc(var(--out) * -14px));
+  }
+
+  /* "One Onyx." strikes in (0.42 -> 0.58). */
+  .forge-track.is-scrub .fs-head-b {
+    --in: clamp(0, calc((var(--p) - 0.42) * 6), 1);
+    opacity: var(--in);
+    transform: scale(calc(0.94 + var(--in) * 0.06));
+  }
+
+  /* Sub + CTA settle last (0.66 -> 0.82). */
+  .forge-track.is-scrub .fs-tail {
+    --in: clamp(0, calc((var(--p) - 0.66) * 6), 1);
+    opacity: var(--in);
+    transform: translateY(calc((1 - var(--in)) * 18px));
   }
 </style>
+
+<script>
+  // Deterministic scrub: map scroll progress through the pinned track to
+  // --p in [0,1]. No scroll-timeline dependency, no Astro-scoping traps.
+  function initForge() {
+    const track = document.querySelector<HTMLElement>('.forge-track');
+    if (!track) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    track.classList.add('is-scrub');
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const total = track.offsetHeight - window.innerHeight;
+      const p = total > 0 ? Math.min(Math.max(-track.getBoundingClientRect().top / total, 0), 1) : 0;
+      track.style.setProperty('--p', p.toFixed(4));
+    };
+    addEventListener(
+      'scroll',
+      () => {
+        if (!queued) {
+          queued = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true }
+    );
+    addEventListener('resize', update, { passive: true });
+    update();
+  }
+
+  initForge();
+</script>

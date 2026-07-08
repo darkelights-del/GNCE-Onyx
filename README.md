@@ -10,7 +10,7 @@ the team number, and contact handles are still marked placeholders.
 - [Astro](https://astro.build) — static site framework
 - [Tailwind CSS 4](https://tailwindcss.com) — styling (tokens in `src/styles/global.css`)
 - [Lenis](https://lenis.darkroom.engineering) — smooth scrolling
-- Archivo Variable + JetBrains Mono Variable (self-hosted via Fontsource)
+- Grenze Gotisch + Vollkorn + Vollkorn SC (self-hosted via Fontsource)
 
 ## Commands
 
@@ -28,10 +28,10 @@ src/
 ├── layouts/
 │   └── BaseLayout.astro   # Shared shell: nav, footer, smooth scroll, reveals
 ├── components/
-│   ├── GearNav.astro      # Orbital gear hub navigation (the centerpiece)
+│   ├── GearNav.astro      # Gear + full-screen menu (the centerpiece)
 │   ├── Reveal.astro       # Scroll-driven entrance wrapper
 │   ├── Placeholder.astro  # Marks every Lorem Ipsum slot
-│   ├── SectionLabel.astro # [ 01 / SECTION ] callouts
+│   ├── SectionLabel.astro # Small-caps section labels
 │   └── Footer.astro       # Plain-link nav fallback
 ├── pages/
 │   ├── index.astro        # Home / Welcome

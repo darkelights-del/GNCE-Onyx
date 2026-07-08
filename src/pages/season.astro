@@ -26,14 +26,10 @@ const timeline = [
   description="GNCE Onyx's rookie season recap: the 2026-2027 BIOBUZZ season, presented by RTX, part of the FIRST CANOPY season. Build log, highlight matches, and awards as they happen."
 >
   <!-- PAGE HEADER -->
-  <header class="bp-grid bg-bg pt-36 pb-20 sm:pt-44">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <header class="ember bg-bg pt-36 pb-20 sm:pt-44">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal>
-        <p class="type-callout text-muted">
-          <span class="text-accent" aria-hidden="true">[</span>
-          Season 01 / 2026-2027
-          <span class="text-accent" aria-hidden="true">]</span>
-        </p>
+        <p class="type-label text-muted">Season 01 · 2026-2027</p>
       </Reveal>
 
       <Reveal variant="clip" delay={80}>
@@ -41,17 +37,16 @@ const timeline = [
       </Reveal>
 
       <Reveal delay={160}>
-        <p class="type-callout mt-4 text-muted">
-          Presented by RTX / part of the FIRST CANOPY season
+        <p class="type-label mt-4 text-muted">
+          Presented by RTX · part of the FIRST CANOPY season
         </p>
       </Reveal>
 
       <Reveal delay={240} class="mt-10 max-w-prose">
-        <p class="text-base/relaxed text-muted">
+        <p class="text-muted">
           Our first FTC season, and the only one on the books. This page is
           the running recap: the build log, the matches worth rewatching,
           whatever hardware comes home with us, and the photos to prove it.
-          It fills in as the season happens.
         </p>
       </Reveal>
     </div>
@@ -59,7 +54,7 @@ const timeline = [
 
   <!-- BUILD LOG -->
   <section class="bg-bg py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal variant="clip">
         <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Build log</h2>
       </Reveal>
@@ -76,11 +71,11 @@ const timeline = [
                   ]}
                   aria-hidden="true"
                 ></span>
-                <p class="type-callout text-muted">Date: {entry.date}</p>
+                <p class="type-label text-muted">Date: {entry.date}</p>
                 <h3 class="type-display mt-3 text-xl sm:text-2xl">
                   {entry.stage}
                 </h3>
-                <p class="mt-3 max-w-prose text-base/relaxed text-muted">
+                <p class="mt-3 max-w-prose text-muted">
                   {entry.body}
                 </p>
               </Reveal>
@@ -92,8 +87,8 @@ const timeline = [
   </section>
 
   <!-- HIGHLIGHT MATCH -->
-  <section class="border-y hairline bg-surface py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <section class="border-y hairline bg-surface py-32 sm:py-44">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal variant="clip">
         <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">
           Highlight match
@@ -101,7 +96,7 @@ const timeline = [
       </Reveal>
 
       <Reveal delay={80} class="mt-6 max-w-prose">
-        <p class="text-base/relaxed text-muted">
+        <p class="text-muted">
           One match per event earns this spot: the video, plus why we picked
           it.
         </p>
@@ -117,12 +112,12 @@ const timeline = [
           allowfullscreen
         ></iframe>
         -->
-        <div class="bp-hatch bp-corners flex aspect-video items-center justify-center border hairline">
-          <span class="type-callout text-muted">Match video: TBD (YouTube embed)</span>
+        <div class="slot aspect-video">
+          <span class="type-label text-muted">Match video: TBD (YouTube embed)</span>
         </div>
         <div class="hairline mt-3 flex flex-wrap items-baseline justify-between gap-2 border-t pt-3">
-          <p class="font-mono text-sm text-ink">Match: TBD</p>
-          <p class="font-mono text-sm text-muted">Score: TBD</p>
+          <p class="text-sm text-ink">Match: TBD</p>
+          <p class="text-sm text-muted">Score: TBD</p>
         </div>
       </Placeholder>
     </div>
@@ -130,13 +125,13 @@ const timeline = [
 
   <!-- AWARDS -->
   <section class="bg-bg py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal variant="clip">
         <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Awards</h2>
       </Reveal>
 
       <Reveal delay={80} class="mt-6 max-w-prose">
-        <p class="text-base/relaxed text-muted">
+        <p class="text-muted">
           Anything the judges hand us this season gets logged here, next to
           what it recognized.
         </p>
@@ -147,7 +142,7 @@ const timeline = [
           {
             Array.from({ length: 3 }).map(() => (
               <Reveal class="h-full">
-                <article class="bp-corners flex h-full flex-col gap-4 bg-panel p-6">
+                <article class="flex h-full flex-col gap-4 bg-surface p-6">
                   <svg
                     width="28"
                     height="28"
@@ -161,7 +156,7 @@ const timeline = [
                     <circle cx="12" cy="9" r="5.25"></circle>
                     <path d="M8.5 13.5 7 21l5-2.5L17 21l-1.5-7.5"></path>
                   </svg>
-                  <p class="type-callout text-ink">Award: TBD</p>
+                  <p class="type-label text-ink">Award: TBD</p>
                   <p class="text-sm/relaxed text-muted">
                     Event, division, and what the award was for.
                   </p>
@@ -175,8 +170,8 @@ const timeline = [
   </section>
 
   <!-- GALLERY -->
-  <section class="border-y hairline bg-surface py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <section class="border-y hairline bg-surface py-28 sm:py-36">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal variant="clip">
         <h2 class="type-display text-[clamp(1.75rem,4vw,2.75rem)]">Gallery</h2>
       </Reveal>
@@ -186,8 +181,8 @@ const timeline = [
           {
             Array.from({ length: 6 }).map(() => (
               <Reveal variant="scale">
-                <div class="bp-hatch bp-corners flex aspect-square items-center justify-center border hairline">
-                  <span class="type-callout text-muted">Photo: TBD</span>
+                <div class="slot aspect-square">
+                  <span class="type-label text-muted">Photo: TBD</span>
                 </div>
               </Reveal>
             ))

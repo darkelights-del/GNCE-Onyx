@@ -1,24 +1,27 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------
-   DESIGN TOKENS — "Pit Bay Blueprint"
-   A strict four-color palette. Every value below is one of these four
-   or a transparency of one of them (no new hues):
-     #0A0908 near-black · #1A0F20 dark purple · #6E0D25 crimson · #E8E2DC ink
-   See DESIGN.md for the full visual direction and usage rules.
+   DESIGN TOKENS — "The Forge"
+   Four teams forged into one. Coal, night, ember, ash:
+     #0A0908 coal · #1A0F20 night · #6E0D25 ember · #E8E2DC ash
+   plus transparencies of the ash for rules and muted text.
 
-   Deep crimson (#6E0D25) is THE accent: used both as fills (solid
-   buttons, the current nav bubble, markers) and as accent text directly
-   on the near-black. Ink (#E8E2DC) is reserved for the copy that was
-   always light (headlines, body, labels); hairlines and muted text are
-   that ink at low opacity.
+   Type: Grenze Gotisch (display; blackletter-roman hybrid, ALWAYS
+   mixed case, never uppercase), Vollkorn (text), Vollkorn SC (labels).
+   See DESIGN.md for usage rules.
    ------------------------------------------------------------------ */
 @theme {
   /* Type */
-  --font-display: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Grenze Gotisch Variable', 'Grenze Gotisch', serif;
+  --font-text: 'Vollkorn Variable', 'Vollkorn', Georgia, serif;
+  --font-label: 'Vollkorn SC', serif;
+  /* Real monospace only for code blocks in blog posts. */
+  --font-code: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, monospace;
+  /* Safety net: anything still asking for mono renders in the label
+     face instead of a system monospace. */
+  --font-mono: 'Vollkorn SC', serif;
 
-  /* Color — only #0A0908 / #1A0F20 / #6E0D25 / #E8E2DC and their alphas */
+  /* Color — only the four palette values and ash alphas */
   --color-bg: #0a0908;
   --color-surface: #1a0f20;
   --color-panel: #1a0f20;
@@ -27,8 +30,7 @@
   --color-muted: color-mix(in srgb, #e8e2dc 62%, transparent);
   --color-accent: #6e0d25;
 
-  /* Motion — custom curves per the emil-design-eng skill.
-     Built-in CSS easings are too weak; never use ease-in on UI. */
+  /* Motion — strong curves per the emil-design-eng skill. */
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -41,7 +43,6 @@ html {
   background: var(--color-bg);
   color-scheme: dark;
   overflow-x: clip;
-  /* Fallback smoothness when Lenis is not driving the scroll */
   scroll-behavior: smooth;
 }
 
@@ -54,7 +55,8 @@ html {
 body {
   background: var(--color-bg);
   color: var(--color-ink);
-  font-family: var(--font-display);
+  font-family: var(--font-text);
+  font-size: 1.0625rem;
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
@@ -67,27 +69,24 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 3px;
-  border-radius: 2px;
 }
 
-/* Display type: Archivo pushed wide, like machine-cut lettering */
+/* Display: Grenze Gotisch. Mixed case only — blackletter capitals are
+   illegible in runs. Weight carries the medieval mass. */
 .type-display {
   font-family: var(--font-display);
-  font-stretch: 118%;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 0.92;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 0.95;
   text-wrap: balance;
 }
 
-/* Mono micro-labels: [ 01 / SECTION ] engineering callouts */
-.type-callout {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+/* Labels: Vollkorn small caps. Replaces the old mono callouts. */
+.type-label {
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
 }
 
 .skip-link {
@@ -97,11 +96,10 @@ body {
   z-index: 100;
   padding: 0.5rem 0.875rem;
   background: var(--color-accent);
-  color: var(--color-bg);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--color-ink);
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
   transform: translateY(-200%);
   transition: transform 160ms var(--ease-out-strong);
 }
@@ -111,58 +109,72 @@ body {
 }
 
 /* ------------------------------------------------------------------
-   BLUEPRINT TEXTURES
+   FORGE TEXTURES
    ------------------------------------------------------------------ */
-.bp-grid {
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px);
-  background-size: 72px 72px;
-}
-
-.bp-hatch {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    color-mix(in srgb, var(--color-ink) 5%, transparent) 0 1px,
-    transparent 1px 8px
-  );
-}
-
-/* Corner registration marks, like a technical drawing frame */
-.bp-corners {
+/* Ember: one radial glow, used only where heat belongs (hero, the
+   sponsor band, the open menu). Never stacked, never animated. */
+.ember {
   position: relative;
 }
 
-.bp-corners::before,
-.bp-corners::after {
+.ember::before {
   content: '';
   position: absolute;
-  width: 14px;
-  height: 14px;
-  border-color: var(--color-muted);
-  border-style: solid;
-  opacity: 0.6;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 50% 115%,
+    color-mix(in srgb, var(--color-accent) 38%, transparent) 0%,
+    transparent 60%
+  );
   pointer-events: none;
 }
 
-.bp-corners::before {
-  top: -1px;
-  left: -1px;
-  border-width: 1px 0 0 1px;
+/* Local grain inside ember zones only: breaks gradient banding and
+   reads as heat shimmer. Never applied site-wide. */
+.ember::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.bp-corners::after {
-  bottom: -1px;
-  right: -1px;
-  border-width: 0 1px 1px 0;
+.ember > * {
+  position: relative;
+}
+
+/* Empty slot awaiting real content (photos, video) */
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
+.hairline {
+  border-color: var(--color-line);
+}
+
+/* Heavy anvil rule for section openings */
+.rule-heavy {
+  height: 3px;
+  background: var(--color-accent);
+  border: 0;
+}
+
+/* Inline placeholder mark for small unknowns (team number, handles,
+   dates). Bigger unresolved blocks use <Placeholder> instead. */
+.stub {
+  border-bottom: 1px dashed color-mix(in srgb, var(--color-accent) 60%, transparent);
+  cursor: help;
 }
 
 /* ------------------------------------------------------------------
    SCROLL REVEALS
    Driven by the IntersectionObserver in BaseLayout. Hidden states are
    gated behind html.js so content is never invisible without JS.
-   Durations here are entrance/marketing reveals (may exceed the 300ms
-   UI budget by design); interactive UI stays fast.
    ------------------------------------------------------------------ */
 html.js [data-reveal] {
   opacity: 0;
@@ -236,12 +248,12 @@ html.js [data-reveal].is-revealed {
   display: inline-flex;
   align-items: center;
   gap: 0.625rem;
-  padding: 0.875rem 1.5rem;
+  padding: 0.875rem 1.75rem;
   border: 1px solid var(--color-line);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--font-label);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   color: var(--color-ink);
   background: transparent;
   cursor: pointer;
@@ -264,29 +276,15 @@ html.js [data-reveal].is-revealed {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  /* Outline button fills on hover (crimson text on dark is too low
-     contrast; the fill keeps the label readable). */
   .btn:hover {
     background: var(--color-accent);
     border-color: var(--color-accent);
     color: var(--color-ink);
   }
 
-  /* Lift the crimson on hover without introducing a new palette color. */
   .btn-solid:hover {
     filter: brightness(1.22);
   }
-}
-
-.hairline {
-  border-color: var(--color-line);
-}
-
-/* Inline placeholder mark for small unknowns (team number, handles,
-   dates). Bigger unresolved blocks use <Placeholder> instead. */
-.stub {
-  border-bottom: 1px dashed color-mix(in srgb, var(--color-accent) 60%, transparent);
-  cursor: help;
 }
 
 /* ------------------------------------------------------------------
@@ -294,7 +292,7 @@ html.js [data-reveal].is-revealed {
    ------------------------------------------------------------------ */
 .post-body {
   color: var(--color-ink);
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   line-height: 1.75;
 }
 
@@ -305,20 +303,17 @@ html.js [data-reveal].is-revealed {
 .post-body h2,
 .post-body h3 {
   font-family: var(--font-display);
-  font-stretch: 118%;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  text-transform: uppercase;
+  font-weight: 600;
+  line-height: 1.05;
   margin-top: 2em;
 }
 
 .post-body h2 {
-  font-size: 1.5rem;
+  font-size: 2rem;
 }
 
 .post-body h3 {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
 }
 
 .post-body a {
@@ -352,8 +347,8 @@ html.js [data-reveal].is-revealed {
 }
 
 .post-body code {
-  font-family: var(--font-mono);
-  font-size: 0.875em;
+  font-family: var(--font-code);
+  font-size: 0.85em;
   background: var(--color-surface);
   padding: 0.15em 0.4em;
 }

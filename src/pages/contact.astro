@@ -1,8 +1,8 @@
 ---
 /**
- * Contact + Donate — how to reach the team, and how to sponsor it.
- * Header → Contact (form link + direct channels) → Sponsor us
- * (pitch, STEM partnerships, recognition ladder).
+ * Contact + Donate — how to reach the team, and how to support it.
+ * Header → Contact (form link + channels) → Sponsor us (money +
+ * recognition ladder) → Partner with us (STEM partnerships).
  * Form link / email / Instagram are pending: marked with .stub or <Placeholder>.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -43,8 +43,8 @@ const tiers = [
   description="Contact GNCE Onyx or sponsor our 2026-2027 BIOBUZZ season. Sponsorship covers parts, tools, registration, and travel, and the best partnerships add mentorship and community STEM events."
 >
   <!-- =================================================== PAGE HEADER -->
-  <header class="bp-grid bg-bg pt-36 pb-20 sm:pt-44">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <header class="bg-bg pt-36 pb-20 sm:pt-44">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal variant="clip">
         <h1 class="type-display text-[clamp(2.75rem,9vw,8rem)]">
           Get in <span class="text-accent">touch</span>
@@ -52,30 +52,25 @@ const tiers = [
       </Reveal>
 
       <Reveal variant="up" delay={160} class="mt-8 max-w-prose">
-        <p class="text-base/relaxed text-muted">
-          Sponsorship, questions, or joining the team: email is fastest, and
-          the short form below reaches everyone at once.
+        <p class="text-muted">
+          Sponsorship, questions, or joining the team: email is fastest.
         </p>
       </Reveal>
     </div>
   </header>
 
   <!-- ======================================================= CONTACT -->
-  <section class="bg-bg py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <section class="bg-bg py-24 sm:py-28">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <div class="grid gap-12 md:grid-cols-2">
         <!-- Contact form link (form itself lives off-site) -->
         <Reveal variant="left">
           <Placeholder name="contact-form-link" class="flex h-full flex-col p-6 sm:p-8">
-            <h2 class="type-callout text-muted">Contact form</h2>
-            <p class="mt-5 max-w-prose text-base/relaxed text-muted">
+            <h2 class="type-label text-muted">Contact form</h2>
+            <p class="mt-5 max-w-prose text-muted">
               One short form for everything. It goes to the whole team.
             </p>
-            <p
-              class="hairline mt-6 inline-block self-start border bg-surface px-3 py-1.5 font-mono text-[11px] tracking-wide text-accent"
-            >
-              // Link not wired up yet
-            </p>
+            <p class="type-label mt-6 text-muted">Link not wired up yet</p>
             <div class="mt-auto pt-8">
               <a href="#" class="btn btn-solid" title="Form link pending">Open the form</a>
             </div>
@@ -84,24 +79,24 @@ const tiers = [
 
         <!-- Direct channels panel -->
         <Reveal variant="right" delay={120}>
-          <Placeholder name="contact-channels" class="h-full bg-panel p-6">
-            <h2 class="type-callout text-muted">Direct channels</h2>
+          <Placeholder name="contact-channels" class="h-full bg-surface p-6">
+            <h2 class="type-label text-muted">Direct channels</h2>
             <dl class="hairline mt-5 border-t">
               <div class="hairline flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b py-3">
-                <dt class="type-callout text-muted">Email</dt>
-                <dd class="font-mono text-sm text-ink">
+                <dt class="type-label text-muted">Email</dt>
+                <dd class="text-[0.9375rem]">
                   <span class="stub" title="Email pending">[placeholder]@gmail.com</span>
                 </dd>
               </div>
               <div class="hairline flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b py-3">
-                <dt class="type-callout text-muted">Instagram</dt>
-                <dd class="font-mono text-sm text-ink">
+                <dt class="type-label text-muted">Instagram</dt>
+                <dd class="text-[0.9375rem]">
                   <span class="stub" title="Instagram handle pending">@placeholder</span>
                 </dd>
               </div>
               <div class="hairline flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b py-3">
-                <dt class="type-callout text-muted">Find us</dt>
-                <dd class="font-mono text-sm text-ink">Weston High School, Weston, MA</dd>
+                <dt class="type-label text-muted">Find us</dt>
+                <dd class="text-[0.9375rem]">Weston High School, Weston, MA</dd>
               </div>
             </dl>
           </Placeholder>
@@ -111,32 +106,28 @@ const tiers = [
   </section>
 
   <!-- ==================================================== SPONSOR US -->
-  <section class="hairline border-t bg-surface py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <section class="ember bg-surface py-28 sm:py-36">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <SectionLabel title="Sponsor us" class="mb-12 sm:mb-16" />
 
       <Reveal variant="clip">
-        <h2 class="type-display max-w-5xl text-[clamp(2.5rem,7vw,6rem)]">
+        <h2 class="type-display max-w-4xl text-[clamp(2.5rem,7vw,6rem)]">
           Every dollar builds robots
         </h2>
       </Reveal>
 
       <Reveal variant="up" delay={120} class="mt-10 max-w-2xl">
-        <p class="text-base/relaxed text-muted">
+        <p class="text-muted">
           GNCE Onyx is a rookie FTC team built from championship-level
           veterans, competing in the 2026-2027 BIOBUZZ season out of Weston
           High School. Sponsorship covers what a season costs: parts, tools,
           registration, and travel to regional and championship events.
         </p>
-        <p class="mt-4 text-base/relaxed text-muted">
-          Every dollar goes into building robots and running outreach that
-          pulls younger students into STEM.
-        </p>
       </Reveal>
 
       <Reveal variant="up" delay={200} class="mt-14 max-w-2xl">
-        <h3 class="type-callout text-muted">What sponsors get</h3>
-        <p class="mt-4 max-w-prose text-base/relaxed text-muted">
+        <h3 class="type-label text-muted">What sponsors get</h3>
+        <p class="mt-4 max-w-prose text-muted">
           Every sponsor, at any amount, is named in the engineering
           portfolio judges read at every event, and listed on this site.
           From there it stacks:
@@ -145,10 +136,8 @@ const tiers = [
           {
             tiers.map((tier) => (
               <Reveal as="li" class="hairline flex flex-wrap items-baseline gap-x-6 gap-y-1 border-b py-4">
-                <span class="w-28 shrink-0 font-mono text-sm font-bold text-accent">
-                  {tier.range}
-                </span>
-                <span class="flex-1 text-sm/relaxed text-muted">{tier.adds}</span>
+                <span class="type-label w-28 shrink-0 text-accent">{tier.range}</span>
+                <span class="flex-1 text-[0.9375rem] text-muted">{tier.adds}</span>
               </Reveal>
             ))
           }
@@ -156,22 +145,22 @@ const tiers = [
       </Reveal>
 
       <Placeholder name="contact-sponsor-packet" class="mt-12 inline-block px-4 py-3">
-        <p class="font-mono text-xs text-muted">// Sponsor packet: PDF TBD</p>
+        <p class="type-label text-muted">Sponsor packet: PDF TBD</p>
       </Placeholder>
     </div>
   </section>
 
   <!-- ================================================ PARTNER WITH US -->
-  <section class="bg-bg py-24 sm:py-32">
-    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <section class="bg-bg py-28 sm:py-36">
+    <div class="mx-auto max-w-5xl px-5 sm:px-8">
       <Reveal variant="clip">
-        <h2 class="type-display max-w-5xl text-[clamp(2rem,5.5vw,4.5rem)]">
+        <h2 class="type-display max-w-4xl text-[clamp(2rem,5.5vw,4.5rem)]">
           Partner with us
         </h2>
       </Reveal>
 
       <Reveal variant="up" delay={120} class="mt-8 max-w-2xl">
-        <p class="text-base/relaxed text-muted">
+        <p class="text-muted">
           Not every partnership starts with a check. We want local companies
           in the room:
         </p>
@@ -182,12 +171,10 @@ const tiers = [
           stemTies.map((tie, i) => (
             <Reveal class="hairline border-b py-4">
               <div class="flex items-baseline gap-5">
-                <span class="font-mono text-sm font-bold text-accent">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
+                <span class="type-label text-accent">{String(i + 1).padStart(2, '0')}</span>
                 <div>
-                  <p class="font-display text-lg text-ink">{tie.name}</p>
-                  <p class="mt-1 text-sm/relaxed text-muted">{tie.desc}</p>
+                  <p class="text-lg font-semibold">{tie.name}</p>
+                  <p class="mt-1 text-[0.9375rem] text-muted">{tie.desc}</p>
                 </div>
               </div>
             </Reveal>

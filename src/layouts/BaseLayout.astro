@@ -2,12 +2,14 @@
 /**
  * BaseLayout — the single shared shell for every page.
  *
- * Owns: fonts, global styles, the GearNav hub, footer, Lenis smooth
- * scrolling, and the IntersectionObserver that drives [data-reveal]
- * entrances (see Reveal.astro / global.css).
+ * Owns: fonts, global styles, the forge loader (once per session), the
+ * scroll heat rail, cross-page view transitions, GearNav, footer, Lenis
+ * smooth scrolling, and the IntersectionObserver that drives
+ * [data-reveal] entrances (see Reveal.astro / global.css).
  */
-import '@fontsource-variable/archivo/wdth.css';
-import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/grenze-gotisch';
+import '@fontsource-variable/vollkorn';
+import '@fontsource/vollkorn-sc/600.css';
 import '../styles/global.css';
 import Footer from '../components/Footer.astro';
 import GearNav from '../components/GearNav.astro';
@@ -34,10 +36,37 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
     <title>{title} · GNCE Onyx</title>
     <script is:inline>
       document.documentElement.classList.replace('no-js', 'js');
+      // Forge loader: once per session, never under reduced motion.
+      try {
+        if (
+          !sessionStorage.getItem('forged') &&
+          !matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) {
+          document.documentElement.classList.add('loading');
+          // Failsafe: never leave the cover up if the module never runs.
+          setTimeout(function () {
+            document.documentElement.classList.remove('loading');
+          }, 2000);
+        }
+      } catch (e) {
+        /* storage blocked: skip the loader */
+      }
     </script>
   </head>
-  <body class="min-h-svh bg-bg font-display text-ink antialiased">
+  <body class="min-h-svh bg-bg text-ink antialiased">
     <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Forge loader: the wordmark is struck once, then the cover lifts
+         into the hero's entrance. Skipped after first view. -->
+    <div class="forge-loader" data-loader aria-hidden="true">
+      <p class="forge-loader-mark type-display">
+        <span class="forge-loader-line">GNCE Onyx</span>
+      </p>
+    </div>
+
+    <!-- Heat rail: fills with scroll like a gauge. Scroll-driven CSS;
+         browsers without support simply never show it. -->
+    <div class="heat-rail" aria-hidden="true"></div>
 
     <main id="main"><slot /></main>
 
@@ -60,31 +89,174 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
         requestAnimationFrame(raf);
       }
 
-      // Auto-stagger reveals inside any [data-reveal-group] (60ms apart,
-      // capped so long lists never feel slow).
-      document.querySelectorAll('[data-reveal-group]').forEach((group) => {
-        group.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el, i) => {
-          if (!el.style.getPropertyValue('--reveal-delay')) {
-            el.style.setProperty('--reveal-delay', `${Math.min(i * 60, 360)}ms`);
-          }
-        });
-      });
+      // Loader: hold ~0.9s, then the cover lifts (CSS transition on
+      // html.loading removal). Reveals start with the lift so the hero
+      // entrance reads as the loader's exit.
+      const loading = document.documentElement.classList.contains('loading');
+      if (loading) {
+        try {
+          sessionStorage.setItem('forged', '1');
+        } catch (e) {
+          /* fine */
+        }
+        setTimeout(() => document.documentElement.classList.remove('loading'), 950);
+      }
 
-      // Huge top margin: anything at or above the viewport counts as seen,
-      // so fast scrolls (scrollbar drags, anchor jumps) can't strand
-      // skipped elements in their hidden state above the reader.
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-revealed');
-              io.unobserve(entry.target);
+      const startReveals = () => {
+        // Auto-stagger reveals inside any [data-reveal-group] (60ms apart,
+        // capped so long lists never feel slow).
+        document.querySelectorAll('[data-reveal-group]').forEach((group) => {
+          group.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el, i) => {
+            if (!el.style.getPropertyValue('--reveal-delay')) {
+              el.style.setProperty('--reveal-delay', `${Math.min(i * 60, 360)}ms`);
             }
-          }
-        },
-        { threshold: 0.12, rootMargin: '2000% 0px -8% 0px' }
-      );
-      document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+          });
+        });
+
+        // Huge top margin: anything at or above the viewport counts as
+        // seen, so fast scrolls (scrollbar drags, anchor jumps) can't
+        // strand skipped elements in their hidden state above the reader.
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-revealed');
+                io.unobserve(entry.target);
+              }
+            }
+          },
+          { threshold: 0.12, rootMargin: '2000% 0px -8% 0px' }
+        );
+        document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+      };
+
+      if (loading) {
+        setTimeout(startReveals, 950);
+      } else {
+        startReveals();
+      }
     </script>
+
+    <style>
+      /* ---- Forge loader ------------------------------------------- */
+      /* Sits offscreen by default; html.loading holds it down over the
+         page, and removing the class lifts it into the hero entrance. */
+      .forge-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 120;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-bg);
+        transform: translateY(-101%);
+        transition: transform 560ms var(--ease-in-out-strong);
+        pointer-events: none;
+      }
+
+      :global(html.loading) .forge-loader {
+        transform: none;
+        transition: none;
+        pointer-events: auto;
+      }
+
+      :global(html.no-js) .forge-loader {
+        display: none;
+      }
+
+      .forge-loader-mark {
+        overflow: hidden;
+        font-size: clamp(2.5rem, 8vw, 5rem);
+        color: var(--color-ink);
+      }
+
+      .forge-loader-line {
+        display: block;
+        transform: translateY(115%);
+      }
+
+      :global(html.loading) .forge-loader-line {
+        animation: forge-strike 620ms var(--ease-out-strong) 120ms both;
+      }
+
+      @keyframes forge-strike {
+        to {
+          transform: translateY(0);
+        }
+      }
+
+      /* ---- Heat rail ---------------------------------------------- */
+      .heat-rail {
+        display: none;
+      }
+
+      @supports (animation-timeline: scroll()) {
+        .heat-rail {
+          display: block;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 3px;
+          height: 100svh;
+          z-index: 80;
+          background: var(--color-accent);
+          transform-origin: 0 0;
+          transform: scaleY(0);
+          animation: heat-fill linear both;
+          animation-timeline: scroll(root);
+          pointer-events: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .heat-rail {
+            display: none;
+          }
+        }
+      }
+
+      @keyframes heat-fill {
+        from {
+          transform: scaleY(0);
+        }
+        to {
+          transform: scaleY(1);
+        }
+      }
+    </style>
+
+    <style is:global>
+      /* ---- Cross-page continuity (View Transitions, progressive) --- */
+      @view-transition {
+        navigation: auto;
+      }
+
+      ::view-transition-old(root) {
+        animation: vt-leave 200ms var(--ease-out-strong) both;
+      }
+
+      ::view-transition-new(root) {
+        animation: vt-enter 320ms var(--ease-out-strong) both;
+      }
+
+      @keyframes vt-leave {
+        to {
+          opacity: 0;
+        }
+      }
+
+      @keyframes vt-enter {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+          animation: none;
+        }
+      }
+    </style>
   </body>
 </html>

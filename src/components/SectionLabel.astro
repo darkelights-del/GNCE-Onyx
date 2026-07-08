@@ -1,11 +1,8 @@
 ---
 /**
- * SectionLabel — engineering-drawing callout that opens a section:
- * [ THE ROBOT ] ———————————————— or, where order is real content
- * (e.g. a timeline), [ 01 / KICKOFF ] ————————————————
- *
- * Use sparingly (not on every section) and only pass `index` when the
- * sequence itself carries information.
+ * SectionLabel — a small-caps label with a short ember rule, used to
+ * open at most a couple of sections per page. Pass `index` only when
+ * the order itself is content (e.g. the season timeline).
  */
 interface Props {
   title: string;
@@ -15,24 +12,22 @@ interface Props {
 const { index, title, class: cls } = Astro.props;
 ---
 
-<p class:list={['section-label type-callout', cls]}>
-  <span class="text-accent" aria-hidden="true">[</span>
-  <span>{index ? `${index} / ${title}` : title}</span>
-  <span class="text-accent" aria-hidden="true">]</span>
+<p class:list={['section-label type-label', cls]}>
   <span class="section-label-rule" aria-hidden="true"></span>
+  <span>{index ? `${index} · ${title}` : title}</span>
 </p>
 
 <style>
   .section-label {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
+    gap: 0.875rem;
     color: var(--color-muted);
   }
 
   .section-label-rule {
-    flex: 1;
-    height: 1px;
-    background: var(--color-line);
+    width: 2.25rem;
+    height: 3px;
+    background: var(--color-accent);
   }
 </style>
