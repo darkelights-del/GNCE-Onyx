@@ -17,9 +17,14 @@
 import * as THREE from 'three';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { Text as TroikaText } from 'troika-three-text';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { GLYPHS } from '../data/onyx-glyphs';
+// Self-hosted TTFs, bundled to same-origin hashed URLs by Vite (no CDN).
+import uncialUrl from '../fonts/UncialAntiqua-Regular.ttf?url';
+import cardoUrl from '../fonts/Cardo-Regular.ttf?url';
+import greyUrl from '../fonts/GreyQo-Regular.ttf?url';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -198,21 +203,85 @@ function boot(canvas: HTMLCanvasElement) {
     group.add(m);
     return m;
   });
-  const centerX = 0;
 
-  // ---- Camera framing ------------------------------------------------
-  // A proxy holds the camera position + look target so the timeline can
-  // interpolate both smoothly; the render loop applies it.
-  const cam = { x: centerX, y: 3, z: 44, tx: centerX, ty: 0, tz: 0 };
-  const OVERVIEW = { x: centerX, y: 3, z: 44, tx: centerX, ty: 0, tz: 0 };
-  const focus = (i: number) => ({ x: letterX[i] + 3.4, y: 2.3, z: 14, tx: letterX[i], ty: 0, tz: 0.4 });
+  // ---- Depth-woven words: real troika text that shares the depth buffer,
+  // so the letters occlude it — it goes behind, in front, and through the O
+  // hole. One short word per letter, faded in as the camera reaches it.
+  const L = letterX; // [O, N, Y, X] centres
+  const woven: { mesh: TroikaText; a: number; b: number }[] = [];
+  const addWoven = (
+    str: string, font: string, size: number, color: number,
+    x: number, y: number, z: number, a: number, b: number, ry = 0,
+  ) => {
+    const tx = new TroikaText();
+    tx.text = str;
+    tx.font = font;
+    tx.fontSize = size;
+    tx.color = color;
+    tx.anchorX = 'center';
+    tx.anchorY = 'middle';
+    tx.outlineWidth = size * 0.04;
+    tx.outlineColor = 0x0a0908;
+    tx.material.transparent = true;
+    tx.position.set(x, y, z);
+    tx.rotation.y = ry;
+    tx.fillOpacity = 0;
+    scene.add(tx);
+    tx.sync();
+    woven.push({ mesh: tx, a, b });
+  };
+  addWoven('veterans', uncialUrl, 1.5, 0xe8e2dc, L[0], 0, -6, 0.14, 0.38); // seen through the O hole
+  addWoven('our roots', cardoUrl, 1.7, 0xe8e2dc, L[1], -0.4, -2.6, 0.40, 0.62); // N strokes cut across it
+  addWoven('the robot', cardoUrl, 1.5, 0xe8e2dc, L[2], -1.6, 3.4, 0.63, 0.83); // in front of Y
+  addWoven('the crew', greyUrl, 2.6, 0xc21a3c, L[3], 1.4, 2.8, 0.84, 1.0); // crimson flourish around X
+
+  // ---- Camera journey: a keyframe path threaded through the letters ---
+  type KF = { t: number; px: number; py: number; pz: number; lx: number; ly: number; lz: number; roll: number };
+  const KEYS: KF[] = [
+    { t: 0.00, px: 0, py: 2.6, pz: 30, lx: 0, ly: 0, lz: 0, roll: 0 }, // overview
+    { t: 0.09, px: 0, py: 2.3, pz: 26, lx: 0, ly: 0, lz: 0, roll: 0 },
+    { t: 0.16, px: L[0], py: 1.1, pz: 9, lx: L[0], ly: 0, lz: -1, roll: 0 }, // approach O
+    { t: 0.21, px: L[0], py: 0.3, pz: 3, lx: L[0], ly: 0, lz: -6, roll: 0 }, // at the hole
+    { t: 0.26, px: L[0], py: 0, pz: 0, lx: L[0], ly: 0, lz: -6, roll: 0 }, // inside the ring
+    { t: 0.33, px: L[0], py: 0, pz: -3.4, lx: L[0], ly: 0, lz: -6.5, roll: 0 }, // exit, word framed by ring
+    { t: 0.42, px: L[1] - 4.5, py: 0.9, pz: -6.5, lx: L[1], ly: 0, lz: -0.5, roll: 0.16 }, // swing behind N
+    { t: 0.49, px: L[1] - 6, py: 0.7, pz: -1.2, lx: L[1], ly: 0, lz: 0, roll: 0.32 }, // orbit N
+    { t: 0.57, px: L[1], py: 0.8, pz: 8.5, lx: L[1], ly: 0, lz: 0, roll: 0 }, // front N
+    { t: 0.66, px: L[2] - 3.5, py: 0.8, pz: -6.5, lx: L[2], ly: 0, lz: 0, roll: -0.2 }, // around Y
+    { t: 0.72, px: L[2] + 5.5, py: 0.7, pz: -1.5, lx: L[2], ly: 0, lz: 0, roll: -0.34 }, // orbit Y
+    { t: 0.80, px: L[2] + 1, py: 0.8, pz: 8.5, lx: L[2], ly: 0, lz: 0, roll: 0 }, // front Y
+    { t: 0.90, px: L[3], py: 0.2, pz: 5, lx: L[3], ly: 0, lz: 0, roll: 0.12 }, // into X crossing
+    { t: 1.00, px: 0, py: 2.6, pz: 29, lx: 0, ly: 0, lz: 0, roll: 0 }, // pull back
+  ];
+  const evalKF = (p: number) => {
+    let a = KEYS[0], b = KEYS[KEYS.length - 1];
+    for (let i = 0; i < KEYS.length - 1; i++) {
+      if (p >= KEYS[i].t && p <= KEYS[i + 1].t) { a = KEYS[i]; b = KEYS[i + 1]; break; }
+    }
+    let u = (p - a.t) / (b.t - a.t || 1);
+    u = u < 0 ? 0 : u > 1 ? 1 : u;
+    u = u * u * (3 - 2 * u); // smoothstep
+    const lp = (x: number, y: number) => x + (y - x) * u;
+    return { px: lp(a.px, b.px), py: lp(a.py, b.py), pz: lp(a.pz, b.pz), lx: lp(a.lx, b.lx), ly: lp(a.ly, b.ly), lz: lp(a.lz, b.lz), roll: lp(a.roll, b.roll) };
+  };
+
+  // Content dwell windows: the readable HTML for each letter reveals while the
+  // camera holds on it (O framed through the hole; N/Y/X front; X close).
+  const DWELL = [
+    { a: 0.22, b: 0.37 },
+    { a: 0.53, b: 0.63 },
+    { a: 0.76, b: 0.83 },
+    { a: 0.89, b: 1.01 },
+  ];
+  const flowState = [false, false, false, false];
 
   let pointerX = 0, pointerY = 0; // -1..1
-  let leanK = 1; // cursor-lean strength, fades as tracking begins
+  let leanK = 1; // cursor-lean, fades once the journey starts
   let scrollVel = 0; // |scroll velocity|, drives ember turbulence
+  let targetP = 0, scrollP = 0; // scroll progress, smoothed
   const clock = new THREE.Clock();
   let elapsed = 0;
-  let alive = false; // idle motion begins after the assemble
+  let alive = false; // idle breathing runs only after the assemble
 
   function resize() {
     const w = stage.clientWidth || innerWidth;
@@ -224,20 +293,49 @@ function boot(canvas: HTMLCanvasElement) {
   resize();
   addEventListener('resize', () => { resize(); ScrollTrigger.refresh(); }, { passive: true });
 
+  // ---- Content flow (HTML overlay, readable + interactive) -----------
+  const SHOWN = 'inset(-8% -8% -14% -8%)';
+  const HID_BELOW = 'inset(100% -8% -14% -8%)';
+  const HID_ABOVE = 'inset(-8% -8% 100% -8%)';
+  const FLOW = [
+    { ix: 0, iy: 34, ox: 0, oy: -46 },
+    { ix: -58, iy: 52, ox: 80, oy: -66 },
+    { ix: 0, iy: -50, ox: 0, oy: 62 },
+    { ix: -60, iy: -44, ox: 78, oy: 54 },
+  ];
+  const allLines = groupsEl.flatMap((g) => gsap.utils.toArray<HTMLElement>('.flow-line', g));
+  gsap.set(groupsEl, { opacity: 1, visibility: 'hidden' });
+  gsap.set(allLines, { clipPath: HID_BELOW });
+  const flowIn = (i: number) => {
+    const ln = gsap.utils.toArray<HTMLElement>('.flow-line', groupsEl[i]);
+    gsap.set(groupsEl[i], { visibility: 'visible' });
+    gsap.fromTo(ln, { clipPath: HID_BELOW, x: FLOW[i].ix, y: FLOW[i].iy },
+      { clipPath: SHOWN, x: 0, y: 0, ease: 'power3.out', duration: 0.85, stagger: 0.08, overwrite: true });
+  };
+  const flowOut = (i: number) => {
+    const ln = gsap.utils.toArray<HTMLElement>('.flow-line', groupsEl[i]);
+    gsap.to(ln, { clipPath: HID_ABOVE, x: FLOW[i].ox, y: FLOW[i].oy, ease: 'power2.in', duration: 0.5, stagger: 0.04, overwrite: true,
+      onComplete: () => { if (!flowState[i]) gsap.set(groupsEl[i], { visibility: 'hidden' }); } });
+  };
+
   // ---- Render loop ---------------------------------------------------
   const render = () => {
     const dt = Math.min(clock.getDelta(), 0.05);
     elapsed += dt;
     const t = elapsed;
+    scrollP += (targetP - scrollP) * 0.09;
+    const idleK = 1 - Math.min(1, scrollP / 0.06);
+
     if (alive) {
-      // Idle: each letter breathes on its own axis (real 3D turn + bob).
+      // Idle: each letter breathes on its own axis; fades as the journey starts.
       for (let i = 0; i < meshes.length; i++) {
         const m = meshes[i];
-        m.rotation.y = Math.sin(t * 0.5 + i * 1.3) * 0.09;
-        m.rotation.x = Math.sin(t * 0.42 + i * 0.7) * 0.05;
-        m.position.y = Math.sin(t * 0.6 + i * 1.1) * 0.12;
+        m.rotation.y = Math.sin(t * 0.5 + i * 1.3) * 0.09 * idleK;
+        m.rotation.x = Math.sin(t * 0.42 + i * 0.7) * 0.05 * idleK;
+        m.position.y = Math.sin(t * 0.6 + i * 1.1) * 0.12 * idleK;
       }
     }
+
     // Embers rise; sway and speed swell with scroll velocity.
     const speedMul = 1 + scrollVel * 6;
     for (let i = 0; i < EMBERS; i++) {
@@ -252,12 +350,30 @@ function boot(canvas: HTMLCanvasElement) {
       }
     }
     emberGeo.attributes.position.needsUpdate = true;
-    scrollVel *= 0.9; // decay between scroll updates
+    scrollVel *= 0.9;
 
-    // Cursor parallax: nudge the camera opposite the pointer for depth.
+    // Woven words fade in near their letter (triangle window, smoothed).
+    for (const w of woven) {
+      const mid = (w.a + w.b) / 2, half = (w.b - w.a) / 2 || 1;
+      let k = Math.max(0, 1 - Math.abs(scrollP - mid) / half);
+      k = k * k * (3 - 2 * k);
+      w.mesh.fillOpacity = k;
+      w.mesh.outlineOpacity = k;
+    }
+
+    // Content HTML reveals during its dwell window.
+    for (let i = 0; i < DWELL.length; i++) {
+      const inside = scrollP >= DWELL[i].a && scrollP <= DWELL[i].b;
+      if (inside && !flowState[i]) { flowState[i] = true; flowIn(i); }
+      else if (!inside && flowState[i]) { flowState[i] = false; flowOut(i); }
+    }
+
+    // Camera from the keyframe path, with roll and a little cursor parallax.
+    const s = evalKF(scrollP);
     const px = pointerX * leanK, py = pointerY * leanK;
-    camera.position.set(cam.x - px * 2.4, cam.y + py * 1.6, cam.z);
-    camera.lookAt(cam.tx + px * 0.8, cam.ty - py * 0.5, cam.tz);
+    camera.up.set(Math.sin(s.roll), Math.cos(s.roll), 0);
+    camera.position.set(s.px - px * 1.4, s.py + py * 0.9, s.pz);
+    camera.lookAt(s.lx + px * 0.5, s.ly - py * 0.35, s.lz);
     renderer.render(scene, camera);
   };
   gsap.ticker.add(render);
@@ -270,36 +386,6 @@ function boot(canvas: HTMLCanvasElement) {
     });
     stage.addEventListener('pointerleave', () => { pointerX = 0; pointerY = 0; });
   }
-
-  // ---- Content flow (HTML overlay) -----------------------------------
-  const SHOWN = 'inset(-8% -8% -14% -8%)';
-  const HID_BELOW = 'inset(100% -8% -14% -8%)';
-  const HID_ABOVE = 'inset(-8% -8% 100% -8%)';
-  const FLOW = [
-    { ix: 0, iy: 34, ox: 0, oy: -46 },
-    { ix: -58, iy: 52, ox: 80, oy: -66 },
-    { ix: 0, iy: -50, ox: 0, oy: 62 },
-    { ix: -60, iy: -44, ox: 78, oy: 54 },
-  ];
-  const allLines = groupsEl.flatMap((g) => gsap.utils.toArray<HTMLElement>('.flow-line', g));
-  gsap.set(groupsEl, { opacity: 1, visibility: 'hidden' });
-  gsap.set(allLines, { clipPath: HID_BELOW });
-
-  const flowIn = (i: number) => {
-    const tl = gsap.timeline();
-    const ln = gsap.utils.toArray<HTMLElement>('.flow-line', groupsEl[i]);
-    tl.set(groupsEl[i], { visibility: 'visible' });
-    tl.fromTo(ln, { clipPath: HID_BELOW, x: FLOW[i].ix, y: FLOW[i].iy },
-      { clipPath: SHOWN, x: 0, y: 0, ease: 'power3.out', duration: 0.85, stagger: 0.08 });
-    return tl;
-  };
-  const flowOut = (i: number) => {
-    const tl = gsap.timeline();
-    const ln = gsap.utils.toArray<HTMLElement>('.flow-line', groupsEl[i]);
-    tl.to(ln, { clipPath: HID_ABOVE, x: FLOW[i].ox, y: FLOW[i].oy, ease: 'power2.in', duration: 0.6, stagger: 0.05 });
-    tl.set(groupsEl[i], { visibility: 'hidden' });
-    return tl;
-  };
 
   // ---- Assemble intro (once, at the top) -----------------------------
   const startAlive = () => { alive = true; };
@@ -316,33 +402,22 @@ function boot(canvas: HTMLCanvasElement) {
     startAlive();
   }
 
-  // ---- Scroll timeline: track across the word ------------------------
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: section,
-      start: 'top top',
-      end: '+=720%',
-      pin: stage,
-      scrub: 0.9,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        leanK = 1 - Math.min(1, self.progress / 0.05);
-        scrollVel = Math.min(3, Math.abs(self.getVelocity()) / 1400);
-      },
+  // ---- Scroll driver: pins the stage and feeds scroll progress --------
+  ScrollTrigger.create({
+    trigger: section,
+    start: 'top top',
+    end: '+=900%',
+    pin: stage,
+    scrub: 0.6,
+    anticipatePin: 1,
+    invalidateOnRefresh: true,
+    onUpdate: (self) => {
+      targetP = self.progress;
+      leanK = 1 - Math.min(1, self.progress / 0.05);
+      scrollVel = Math.min(3, Math.abs(self.getVelocity()) / 1400);
+      if (cue) cue.style.opacity = String(Math.max(0, 1 - self.progress / 0.04));
     },
   });
-
-  if (cue) tl.to(cue, { autoAlpha: 0, duration: 0.3 }, 0);
-
-  groupsEl.forEach((_, i) => {
-    const f = focus(i);
-    tl.to(cam, { x: f.x, y: f.y, z: f.z, tx: f.tx, ty: f.ty, tz: f.tz, ease: 'power1.inOut', duration: 1.5 });
-    tl.add(flowIn(i), '<0.55');
-    tl.to({}, { duration: 0.95 });
-    if (i < groupsEl.length - 1) tl.add(flowOut(i));
-  });
-  tl.to(cam, { x: OVERVIEW.x, y: OVERVIEW.y, z: OVERVIEW.z, tx: OVERVIEW.tx, ty: OVERVIEW.ty, tz: OVERVIEW.tz, ease: 'power1.inOut', duration: 1.6 });
 
   document.documentElement.classList.add('onyx-live');
   ScrollTrigger.refresh();
