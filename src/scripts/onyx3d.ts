@@ -16,6 +16,7 @@
  */
 import * as THREE from 'three';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
+import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { GLYPHS } from '../data/onyx-glyphs';
@@ -67,14 +68,16 @@ function boot(canvas: HTMLCanvasElement) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.45;
+  renderer.toneMappingExposure = 1.5;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 500);
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 100);
 
   // Custom onyx environment: a dark room lit only by palette-colored panels,
-  // so the polished metal reflects crimson / purple / off-white glints — not
-  // the neutral studio gray of RoomEnvironment (which read as cheap chrome).
+  // so the polished clearcoat reflects crimson / purple / off-white glints,
+  // not the neutral studio gray of RoomEnvironment (which reads as chrome).
   const envScene = new THREE.Scene();
   const panel = (color: number, intensity: number, x: number, y: number, z: number, w: number, h: number) => {
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color }));
@@ -83,28 +86,47 @@ function boot(canvas: HTMLCanvasElement) {
     mesh.lookAt(0, 0, 0);
     envScene.add(mesh);
   };
-  panel(0xe8e2dc, 3.6, -9, 8, 7, 18, 18); // off-white key, upper-left
+  panel(0xe8e2dc, 4.4, -9, 8, 7, 18, 18); // off-white key, upper-left
   panel(0xc21a3c, 4.2, 12, 1, 5, 12, 14); // crimson, right
-  panel(0x5a3578, 2.4, -6, -5, -9, 13, 13); // purple, lower-back
-  panel(0x8a8088, 1.4, 0, 1, 13, 24, 24); // soft silver fill, front (metallic body sheen)
+  panel(0x5a3578, 2.6, -6, -5, -9, 13, 13); // purple, lower-back
+  panel(0x9a9098, 2.0, 0, 1, 13, 24, 24); // soft silver fill, front (clearcoat sheen)
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(envScene, 0.05).texture;
 
-  // Real polished onyx: a near-black metal. With metalness this high there is
-  // almost no diffuse — the look is all reflection + sharp specular glint.
-  const material = new THREE.MeshStandardMaterial({
-    color: 0x4a4450, // dark gunmetal-purple: reflections read as silver, not black
-    metalness: 0.9,
-    roughness: 0.34,
-    envMapIntensity: 1.25,
+  // Real polished onyx: a near-black metal body with a clearcoat lacquer. The
+  // metal reflection stays dark (onyx), the clearcoat adds the white/silver
+  // sheen on top — a metallic body with white/silver, done for real.
+  const material = new THREE.MeshPhysicalMaterial({
+    color: 0x0a0908,
+    metalness: 0.92,
+    roughness: 0.3,
+    envMapIntensity: 1.1,
+    clearcoat: 0.65,
+    clearcoatRoughness: 0.18,
   });
 
-  // Direct lights add sharp glints over the environment reflection.
-  scene.add(new THREE.AmbientLight(0x140a18, 0.1));
-  const key = new THREE.DirectionalLight(0xf1ece4, 1.5); key.position.set(-12, 11, 8); scene.add(key);
-  const rim = new THREE.DirectionalLight(0xc21a3c, 2.6); rim.position.set(13, 1, 4); scene.add(rim);
-  const rim2 = new THREE.DirectionalLight(0x6a3f8f, 1.5); rim2.position.set(-10, 3, -6); scene.add(rim2);
-  const fill = new THREE.DirectionalLight(0x241531, 0.6); fill.position.set(2, -12, 6); scene.add(fill);
+  // One shadow-casting key (warm), a cool purple back-rim, a crimson rim, and
+  // a low hemisphere fill so the shadows never go pure black.
+  const key = new THREE.SpotLight(0xfff4e8, 280, 60, Math.PI / 6, 0.45, 2);
+  key.position.set(-7, 13, 10);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.bias = -0.0002;
+  key.shadow.normalBias = 0.02;
+  key.shadow.camera.near = 1;
+  key.shadow.camera.far = 46;
+  scene.add(key);
+  const backRim = new THREE.DirectionalLight(0x4a2f70, 1.6); backRim.position.set(6, 4, -8); scene.add(backRim);
+  const crimsonRim = new THREE.DirectionalLight(0x8a1030, 2.0); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
+  const hemi = new THREE.HemisphereLight(0x2b1b2f, 0x0a0908, 0.4); scene.add(hemi);
+
+  // Shadow catcher: a plane below the letters so the cast shadow reads over
+  // coal without an off-brand bright floor.
+  const catcher = new THREE.Mesh(new THREE.PlaneGeometry(90, 44), new THREE.ShadowMaterial({ opacity: 0.55 }));
+  catcher.rotation.x = -Math.PI / 2;
+  catcher.position.y = -4.0;
+  catcher.receiveShadow = true;
+  scene.add(catcher);
 
   // ---- Embers: additive points drifting up through the scene ----------
   // Crimson + off-white, rising, turbulence scaling with scroll velocity.
@@ -149,12 +171,13 @@ function boot(canvas: HTMLCanvasElement) {
     const shapes: THREE.Shape[] = [];
     for (const p of parsed.paths) shapes.push(...SVGLoader.createShapes(p));
     const geo = new THREE.ExtrudeGeometry(shapes, {
-      depth: 240, bevelEnabled: true, bevelThickness: 18, bevelSize: 9, bevelSegments: 4, curveSegments: 12,
+      depth: 240, bevelEnabled: true, bevelThickness: 10, bevelSize: 6, bevelOffset: 0, bevelSegments: 3, curveSegments: 10,
     });
     geo.scale(GLYPH_SCALE, -GLYPH_SCALE, GLYPH_SCALE); // flip y (glyph is y-down) -> upright
     geo.center();
-    geo.computeVertexNormals();
-    return geo;
+    const welded = mergeVertices(geo, 1e-4); // weld coincident verts -> kills normal-flip seams
+    welded.computeVertexNormals();
+    return welded;
   }
 
   const group = new THREE.Group();
@@ -166,6 +189,8 @@ function boot(canvas: HTMLCanvasElement) {
   let x = -total / 2;
   const meshes: THREE.Mesh[] = CHARS.map((c, i) => {
     const m = new THREE.Mesh(buildGeometry(GLYPHS[c].d), material);
+    m.castShadow = true;
+    m.receiveShadow = true;
     x += widths[i] / 2;
     m.position.x = x;
     letterX.push(x);
