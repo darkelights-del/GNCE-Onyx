@@ -17,6 +17,10 @@
 import * as THREE from 'three';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { Text as TroikaText } from 'troika-three-text';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -286,10 +290,19 @@ function boot(canvas: HTMLCanvasElement) {
   let elapsed = 0;
   let alive = false; // idle breathing runs only after the assemble
 
+  // Post: a low, tight bloom so only the brightest speculars and embers glow
+  // (cinematic, not a wash). OutputPass applies tone mapping + colour space.
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.26, 0.5, 0.82);
+  composer.addPass(bloomPass);
+  composer.addPass(new OutputPass());
+
   function resize() {
     const w = stage.clientWidth || innerWidth;
     const h = stage.clientHeight || innerHeight;
     renderer.setSize(w, h, false);
+    composer.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
   }
@@ -377,7 +390,7 @@ function boot(canvas: HTMLCanvasElement) {
     camera.up.set(Math.sin(s.roll), Math.cos(s.roll), 0);
     camera.position.set(s.px - px * 1.4, s.py + py * 0.9, s.pz);
     camera.lookAt(s.lx + px * 0.5, s.ly - py * 0.35, s.lz);
-    renderer.render(scene, camera);
+    composer.render();
   };
   gsap.ticker.add(render);
 
