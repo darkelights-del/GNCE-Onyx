@@ -35,6 +35,8 @@ gsap.registerPlugin(ScrollTrigger);
 const CHARS = ['O', 'N', 'Y', 'X'] as const;
 const GLYPH_SCALE = 0.01; // glyph em units -> world units
 const FINE = matchMedia('(hover: hover) and (pointer: fine)').matches;
+// Touch / low-power devices: drop shadows, bloom, DPR and particle count.
+const LOWPERF = matchMedia('(pointer: coarse)').matches;
 
 function webglOK(): boolean {
   try {
@@ -75,10 +77,10 @@ function boot(canvas: HTMLCanvasElement) {
   const cue = document.querySelector<HTMLElement>('[data-onyx-cue]');
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, LOWPERF ? 1 : 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.65;
-  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.enabled = !LOWPERF;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
@@ -120,7 +122,7 @@ function boot(canvas: HTMLCanvasElement) {
   scene.add(new THREE.AmbientLight(0x2a2036, 0.32));
   const key = new THREE.SpotLight(0xfff4e8, 340, 60, Math.PI / 6, 0.45, 2);
   key.position.set(-7, 13, 10);
-  key.castShadow = true;
+  key.castShadow = !LOWPERF;
   key.shadow.mapSize.set(2048, 2048);
   key.shadow.bias = -0.0002;
   key.shadow.normalBias = 0.02;
@@ -153,7 +155,7 @@ function boot(canvas: HTMLCanvasElement) {
     g.fillRect(0, 0, 32, 32);
     return new THREE.CanvasTexture(c);
   }
-  const EMBERS = 340;
+  const EMBERS = LOWPERF ? 180 : 340;
   const emberData: { sx: number; sy: number; sz: number; sway: number; swayR: number; phase: number }[] = [];
   const emberPos = new Float32Array(EMBERS * 3);
   const emberCol = new Float32Array(EMBERS * 3);
@@ -294,8 +296,9 @@ function boot(canvas: HTMLCanvasElement) {
   // (cinematic, not a wash). OutputPass applies tone mapping + colour space.
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.26, 0.5, 0.82);
-  composer.addPass(bloomPass);
+  if (!LOWPERF) {
+    composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.26, 0.5, 0.82));
+  }
   composer.addPass(new OutputPass());
 
   function resize() {
