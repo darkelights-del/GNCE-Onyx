@@ -224,10 +224,11 @@ function boot(canvas: HTMLCanvasElement) {
   // so the letters occlude it — it goes behind, in front, and through the O
   // hole. One short word per letter, faded in as the camera reaches it.
   const L = letterX; // [O, N, Y, X] centres
-  const woven: { mesh: TroikaText; a: number; b: number }[] = [];
+  const woven: { mesh: TroikaText; a: number; b: number; bx: number; by: number; bz: number; fly?: { x: number; y: number; z: number } }[] = [];
   const addWoven = (
     str: string, font: string, size: number, color: number,
     x: number, y: number, z: number, a: number, b: number, ry = 0,
+    fly?: { x: number; y: number; z: number },
   ) => {
     const tx = new TroikaText();
     tx.text = str;
@@ -244,15 +245,16 @@ function boot(canvas: HTMLCanvasElement) {
     tx.fillOpacity = 0;
     scene.add(tx);
     tx.sync();
-    woven.push({ mesh: tx, a, b });
+    woven.push({ mesh: tx, a, b, bx: x, by: y, bz: z, fly });
   };
-  // Off-white words flow through / around their letter during the transit.
-  // The crimson script on X is the signature: it settles in front, lower-left,
-  // as the camera faces X head-on and the roster reads on the right.
-  addWoven('veterans', uncialUrl, 1.4, 0xe8e2dc, L[0], 0, -6.5, 0.31, 0.41); // flashes through the O hole
-  addWoven('our roots', cardoUrl, 1.6, 0xe8e2dc, L[1], -0.4, -2.6, 0.37, 0.50); // N strokes cut across it
-  addWoven('the robot', cardoUrl, 1.5, 0xe8e2dc, L[2], -1.6, 3.4, 0.61, 0.74); // sweeps in front of Y
-  addWoven('our team', greyUrl, 2.4, 0x6e0d25, L[3] - 2.1, -2.7, 3.4, 0.88, 1.02); // crimson script signature on X
+  // All behind-the-letter words share one style: off-white Cardo, whispered
+  // context the letters occlude as the camera passes. The X word rides along
+  // the letter (seen on the flip), then flies out as the roster appears.
+  // Each word appears and flies clear BEFORE its letter's info text reads.
+  addWoven('veterans', cardoUrl, 1.5, 0xe8e2dc, L[0], 0.4, 3, 0.10, 0.18, 0, { x: 0, y: 3, z: 6 }); // on approach, before the O identity
+  addWoven('our roots', cardoUrl, 1.6, 0xe8e2dc, L[1], -0.4, -2.6, 0.37, 0.50); // behind N, before the N info
+  addWoven('the robot', cardoUrl, 1.5, 0xe8e2dc, L[2], -1.6, 3.4, 0.61, 0.74); // in front of Y, before the Y info
+  addWoven('our team', cardoUrl, 1.7, 0xe8e2dc, L[3], 0.2, -2.4, 0.81, 0.90, 0, { x: 0, y: 2.8, z: 7 }); // along X on the flip, flies clear before the roster
 
   // ---- Camera journey: a keyframe path threaded through the letters ---
   type KF = { t: number; px: number; py: number; pz: number; lx: number; ly: number; lz: number; roll: number };
@@ -288,10 +290,10 @@ function boot(canvas: HTMLCanvasElement) {
   // Content dwell windows: the readable HTML for each letter reveals while the
   // camera holds on it (O framed through the hole; N/Y/X front; X close).
   const DWELL = [
-    { a: 0.17, b: 0.29 },
+    { a: 0.20, b: 0.31 }, // O identity, after 'veterans' has flown clear
     { a: 0.53, b: 0.63 },
     { a: 0.76, b: 0.83 },
-    { a: 0.89, b: 1.01 },
+    { a: 0.91, b: 0.98 }, // roster reads on front-X after 'our team' clears, then falls away as the camera pulls back
   ];
   const flowState = [false, false, false, false];
 
@@ -382,13 +384,20 @@ function boot(canvas: HTMLCanvasElement) {
     emberGeo.attributes.position.needsUpdate = true;
     scrollVel *= 0.9;
 
-    // Woven words fade in near their letter (triangle window, smoothed).
+    // Woven words fade in near their letter (triangle window, smoothed). A word
+    // with a fly vector also drifts outward on its exit side, clearing the frame
+    // as the letter's HTML takes over.
     for (const w of woven) {
       const mid = (w.a + w.b) / 2, half = (w.b - w.a) / 2 || 1;
       let k = Math.max(0, 1 - Math.abs(scrollP - mid) / half);
       k = k * k * (3 - 2 * k);
       w.mesh.fillOpacity = k;
       w.mesh.outlineOpacity = k;
+      if (w.fly) {
+        const exit = Math.max(0, Math.min(1, (scrollP - mid) / half)); // 0 at peak -> 1 at window end
+        const e = exit * exit; // ease-in the launch
+        w.mesh.position.set(w.bx + w.fly.x * e, w.by + w.fly.y * e, w.bz + w.fly.z * e);
+      }
     }
 
     // Content HTML reveals during its dwell window.
