@@ -83,15 +83,9 @@ function boot(canvas: HTMLCanvasElement) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  // Purple depth-haze + a deep-violet backdrop so the void is atmospheric, never
-  // a flat black gap: distant geometry and the empty transit beats recede into
-  // onyx-violet, and the letters dissolve into / emerge from the haze.
+  // Purple depth-haze so distant geometry and the empty transit beats recede
+  // into onyx-violet; the crepuscular light shafts (below) carry the atmosphere.
   scene.fog = new THREE.FogExp2(0x0f0814, 0.012);
-  const backdrop = new THREE.Mesh(
-    new THREE.SphereGeometry(72, 64, 40),
-    new THREE.MeshBasicMaterial({ color: 0x0f0814, side: THREE.BackSide, fog: false }),
-  );
-  scene.add(backdrop);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 100);
 
   // Custom onyx environment: a dark room lit only by palette-colored panels,
@@ -172,7 +166,7 @@ function boot(canvas: HTMLCanvasElement) {
     g.fillRect(0, 0, 32, 32);
     return new THREE.CanvasTexture(c);
   }
-  const EMBERS = LOWPERF ? 180 : 340;
+  const EMBERS = LOWPERF ? 260 : 520;
   const emberData: { sx: number; sy: number; sz: number; sway: number; swayR: number; phase: number }[] = [];
   const emberPos = new Float32Array(EMBERS * 3);
   const emberCol = new Float32Array(EMBERS * 3);
@@ -237,19 +231,44 @@ function boot(canvas: HTMLCanvasElement) {
 
   const L = letterX; // [O, N, Y, X] centres
 
-  // Distant crimson glows deep in the haze behind the word: the behind-letter
-  // transits (through the O, around N/Y/X) fly toward soft warmth instead of a
-  // black void. Additive, so they bloom; occluded by the letters from the front.
-  const glowPos = new Float32Array([
-    L[0], 0.4, -11, L[1], -1.2, -13, L[2], 1.6, -12.5, L[3], -0.4, -13, -3, 4, -16, 5, -3.5, -15.5,
-  ]);
-  const glowGeo = new THREE.BufferGeometry();
-  glowGeo.setAttribute('position', new THREE.BufferAttribute(glowPos, 3));
-  const glows = new THREE.Points(glowGeo, new THREE.PointsMaterial({
-    color: 0x6e0d25, size: 10, transparent: true, opacity: 0.42,
-    blending: THREE.AdditiveBlending, depthWrite: false, map: emberTexture(), sizeAttenuation: true,
-  }));
-  scene.add(glows);
+  // Crepuscular light shafts raking behind the word (from the key-light
+  // direction). They sit deep in the haze, so the letters occlude them and the
+  // light streams PAST the ONYX silhouettes, with dust drifting through it.
+  // Additive + soft-edged, so they read as light in fog, not glowing orbs.
+  function shaftTexture() {
+    const c = document.createElement('canvas');
+    c.width = 64; c.height = 256;
+    const g = c.getContext('2d')!;
+    const across = g.createLinearGradient(0, 0, 64, 0); // soft side falloff
+    across.addColorStop(0, 'rgba(255,255,255,0)');
+    across.addColorStop(0.5, 'rgba(255,255,255,1)');
+    across.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = across; g.fillRect(0, 0, 64, 256);
+    g.globalCompositeOperation = 'destination-in'; // fade the ends
+    const along = g.createLinearGradient(0, 0, 0, 256);
+    along.addColorStop(0, 'rgba(0,0,0,0)');
+    along.addColorStop(0.5, 'rgba(0,0,0,1)');
+    along.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = along; g.fillRect(0, 0, 64, 256);
+    return new THREE.CanvasTexture(c);
+  }
+  const shaftTex = shaftTexture();
+  const shafts: { mesh: THREE.Mesh; base: number; phase: number }[] = [];
+  const addShaft = (color: number, opacity: number, x: number, y: number, z: number, w: number, h: number, rot: number, phase: number) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({
+      map: shaftTex, color, transparent: true, opacity, blending: THREE.AdditiveBlending,
+      depthWrite: false, side: THREE.DoubleSide, fog: false, toneMapped: false,
+    }));
+    m.position.set(x, y, z);
+    m.rotation.z = rot;
+    scene.add(m);
+    shafts.push({ mesh: m, base: opacity, phase });
+  };
+  const RAKE = 0.5; // one coherent light direction (upper-left key)
+  addShaft(0xe8e2dc, LOWPERF ? 0.08 : 0.11, L[0] - 2, 3, -12, 6.5, 48, RAKE, 0.0); // off-white, over the O
+  addShaft(0xe8e2dc, LOWPERF ? 0.05 : 0.07, L[1] + 2, 1, -14, 5.5, 48, RAKE, 1.7); // off-white, mid
+  addShaft(0x6e0d25, LOWPERF ? 0.06 : 0.09, L[3] - 1, -1, -13, 6, 46, RAKE, 3.1); // crimson, right
+  if (!LOWPERF) addShaft(0x6e0d25, 0.06, L[2] + 1, 2, -15, 5, 46, RAKE, 4.4); // crimson, over Y
 
   // ---- Depth-woven words: real troika text that shares the depth buffer,
   // so the letters occlude it — it goes behind, in front, and through the O
@@ -415,6 +434,13 @@ function boot(canvas: HTMLCanvasElement) {
       }
     }
     emberGeo.attributes.position.needsUpdate = true;
+
+    // Light shafts breathe slowly (living light in the haze) and brighten a
+    // touch with scroll velocity, so moving through the letters stirs the light.
+    for (const s of shafts) {
+      (s.mesh.material as THREE.MeshBasicMaterial).opacity =
+        s.base * (0.72 + 0.28 * Math.sin(t * 0.35 + s.phase)) * (1 + Math.min(0.9, scrollVel * 0.8));
+    }
     scrollVel *= 0.9;
 
     // Woven words fade in near their letter (triangle window, smoothed). A word
@@ -431,7 +457,6 @@ function boot(canvas: HTMLCanvasElement) {
         const e = exit * exit; // ease-in the launch
         w.mesh.position.set(w.bx + w.fly.x * e, w.by + w.fly.y * e, w.bz + w.fly.z * e);
       }
-      if (k > 0.001) w.mesh.quaternion.copy(camera.quaternion); // billboard: always reads forward, never mirrored
     }
 
     // Content HTML reveals during its dwell window.
