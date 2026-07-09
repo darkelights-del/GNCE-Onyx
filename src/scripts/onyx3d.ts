@@ -73,7 +73,7 @@ function boot(canvas: HTMLCanvasElement) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.5;
+  renderer.toneMappingExposure = 1.65;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -92,8 +92,8 @@ function boot(canvas: HTMLCanvasElement) {
     envScene.add(mesh);
   };
   panel(0xe8e2dc, 4.4, -9, 8, 7, 18, 18); // off-white key, upper-left
-  panel(0xc21a3c, 4.2, 12, 1, 5, 12, 14); // crimson, right
-  panel(0x5a3578, 2.6, -6, -5, -9, 13, 13); // purple, lower-back
+  panel(0x7a0f26, 2.6, 12, 1, 5, 12, 14); // deep crimson, right (wine, not hot pink)
+  panel(0x4a2c64, 2.4, -6, -5, -9, 13, 13); // purple, lower-back
   panel(0x9a9098, 2.0, 0, 1, 13, 24, 24); // soft silver fill, front (clearcoat sheen)
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(envScene, 0.05).texture;
@@ -102,17 +102,19 @@ function boot(canvas: HTMLCanvasElement) {
   // metal reflection stays dark (onyx), the clearcoat adds the white/silver
   // sheen on top — a metallic body with white/silver, done for real.
   const material = new THREE.MeshPhysicalMaterial({
-    color: 0x0a0908,
-    metalness: 0.92,
+    color: 0x17121c,
+    metalness: 0.9,
     roughness: 0.3,
-    envMapIntensity: 1.1,
-    clearcoat: 0.65,
-    clearcoatRoughness: 0.18,
+    envMapIntensity: 1.35,
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.16,
   });
 
-  // One shadow-casting key (warm), a cool purple back-rim, a crimson rim, and
-  // a low hemisphere fill so the shadows never go pure black.
-  const key = new THREE.SpotLight(0xfff4e8, 280, 60, Math.PI / 6, 0.45, 2);
+  // One shadow-casting key (warm), a cool purple back-rim, a crimson rim, a
+  // hemisphere fill, and a low ambient so faces never fall to pure black when
+  // the camera swings behind a letter.
+  scene.add(new THREE.AmbientLight(0x2a2036, 0.32));
+  const key = new THREE.SpotLight(0xfff4e8, 340, 60, Math.PI / 6, 0.45, 2);
   key.position.set(-7, 13, 10);
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
@@ -121,9 +123,9 @@ function boot(canvas: HTMLCanvasElement) {
   key.shadow.camera.near = 1;
   key.shadow.camera.far = 46;
   scene.add(key);
-  const backRim = new THREE.DirectionalLight(0x4a2f70, 1.6); backRim.position.set(6, 4, -8); scene.add(backRim);
-  const crimsonRim = new THREE.DirectionalLight(0x8a1030, 2.0); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
-  const hemi = new THREE.HemisphereLight(0x2b1b2f, 0x0a0908, 0.4); scene.add(hemi);
+  const backRim = new THREE.DirectionalLight(0x5a3a86, 2.0); backRim.position.set(6, 4, -8); scene.add(backRim);
+  const crimsonRim = new THREE.DirectionalLight(0x6e0d25, 2.2); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
+  const hemi = new THREE.HemisphereLight(0x3a2846, 0x0a0908, 0.5); scene.add(hemi);
 
   // Shadow catcher: a plane below the letters so the cast shadow reads over
   // coal without an off-brand bright floor.
@@ -238,8 +240,8 @@ function boot(canvas: HTMLCanvasElement) {
   // ---- Camera journey: a keyframe path threaded through the letters ---
   type KF = { t: number; px: number; py: number; pz: number; lx: number; ly: number; lz: number; roll: number };
   const KEYS: KF[] = [
-    { t: 0.00, px: 0, py: 2.6, pz: 30, lx: 0, ly: 0, lz: 0, roll: 0 }, // overview
-    { t: 0.09, px: 0, py: 2.3, pz: 26, lx: 0, ly: 0, lz: 0, roll: 0 },
+    { t: 0.00, px: 0, py: 2.4, pz: 27, lx: 0, ly: 0, lz: 0, roll: 0 }, // overview
+    { t: 0.09, px: 0, py: 2.1, pz: 23, lx: 0, ly: 0, lz: 0, roll: 0 },
     { t: 0.16, px: L[0], py: 1.1, pz: 9, lx: L[0], ly: 0, lz: -1, roll: 0 }, // approach O
     { t: 0.21, px: L[0], py: 0.3, pz: 3, lx: L[0], ly: 0, lz: -6, roll: 0 }, // at the hole
     { t: 0.26, px: L[0], py: 0, pz: 0, lx: L[0], ly: 0, lz: -6, roll: 0 }, // inside the ring
@@ -250,8 +252,9 @@ function boot(canvas: HTMLCanvasElement) {
     { t: 0.66, px: L[2] - 3.5, py: 0.8, pz: -6.5, lx: L[2], ly: 0, lz: 0, roll: -0.2 }, // around Y
     { t: 0.72, px: L[2] + 5.5, py: 0.7, pz: -1.5, lx: L[2], ly: 0, lz: 0, roll: -0.34 }, // orbit Y
     { t: 0.80, px: L[2] + 1, py: 0.8, pz: 8.5, lx: L[2], ly: 0, lz: 0, roll: 0 }, // front Y
-    { t: 0.90, px: L[3], py: 0.2, pz: 5, lx: L[3], ly: 0, lz: 0, roll: 0.12 }, // into X crossing
-    { t: 1.00, px: 0, py: 2.6, pz: 29, lx: 0, ly: 0, lz: 0, roll: 0 }, // pull back
+    { t: 0.87, px: L[3] - 4.5, py: 0.8, pz: -5, lx: L[3], ly: 0, lz: 0, roll: -0.2 }, // swing behind X
+    { t: 0.93, px: L[3] + 1, py: 0.7, pz: 9, lx: L[3], ly: 0, lz: 0, roll: 0 }, // front X, crew reads
+    { t: 1.00, px: 0, py: 2.4, pz: 26, lx: 0, ly: 0, lz: 0, roll: 0 }, // pull back
   ];
   const evalKF = (p: number) => {
     let a = KEYS[0], b = KEYS[KEYS.length - 1];
@@ -323,7 +326,7 @@ function boot(canvas: HTMLCanvasElement) {
     const dt = Math.min(clock.getDelta(), 0.05);
     elapsed += dt;
     const t = elapsed;
-    scrollP += (targetP - scrollP) * 0.09;
+    scrollP += (targetP - scrollP) * 0.16;
     const idleK = 1 - Math.min(1, scrollP / 0.06);
 
     if (alive) {
@@ -408,7 +411,7 @@ function boot(canvas: HTMLCanvasElement) {
     start: 'top top',
     end: '+=900%',
     pin: stage,
-    scrub: 0.6,
+    scrub: 0.25,
     anticipatePin: 1,
     invalidateOnRefresh: true,
     onUpdate: (self) => {
