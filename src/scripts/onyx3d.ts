@@ -106,6 +106,41 @@ function boot(canvas: HTMLCanvasElement) {
   const rim2 = new THREE.DirectionalLight(0x6a3f8f, 1.5); rim2.position.set(-10, 3, -6); scene.add(rim2);
   const fill = new THREE.DirectionalLight(0x241531, 0.6); fill.position.set(2, -12, 6); scene.add(fill);
 
+  // ---- Embers: additive points drifting up through the scene ----------
+  // Crimson + off-white, rising, turbulence scaling with scroll velocity.
+  function emberTexture() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 32;
+    const g = c.getContext('2d')!;
+    const grd = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+    grd.addColorStop(0, 'rgba(255,255,255,1)');
+    grd.addColorStop(0.3, 'rgba(255,255,255,0.55)');
+    grd.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 32, 32);
+    return new THREE.CanvasTexture(c);
+  }
+  const EMBERS = 340;
+  const emberData: { sx: number; sy: number; sz: number; sway: number; swayR: number; phase: number }[] = [];
+  const emberPos = new Float32Array(EMBERS * 3);
+  const emberCol = new Float32Array(EMBERS * 3);
+  for (let i = 0; i < EMBERS; i++) {
+    emberPos[i * 3] = (Math.random() - 0.5) * 42;
+    emberPos[i * 3 + 1] = (Math.random() - 0.5) * 32;
+    emberPos[i * 3 + 2] = (Math.random() - 0.5) * 26 - 4;
+    if (Math.random() < 0.72) { emberCol[i * 3] = 0.78; emberCol[i * 3 + 1] = 0.1; emberCol[i * 3 + 2] = 0.18; }
+    else { emberCol[i * 3] = 0.91; emberCol[i * 3 + 1] = 0.886; emberCol[i * 3 + 2] = 0.86; }
+    emberData.push({ sx: (Math.random() - 0.5) * 0.6, sy: 0.3 + Math.random() * 0.7, sz: (Math.random() - 0.5) * 0.5, sway: 0.5 + Math.random() * 1.5, swayR: 0.08 + Math.random() * 0.22, phase: Math.random() * Math.PI * 2 });
+  }
+  const emberGeo = new THREE.BufferGeometry();
+  emberGeo.setAttribute('position', new THREE.BufferAttribute(emberPos, 3));
+  emberGeo.setAttribute('color', new THREE.BufferAttribute(emberCol, 3));
+  const embers = new THREE.Points(emberGeo, new THREE.PointsMaterial({
+    size: 0.085, vertexColors: true, transparent: true, opacity: 0.8,
+    blending: THREE.AdditiveBlending, depthWrite: false, map: emberTexture(),
+  }));
+  scene.add(embers);
+
   // ---- Build the letters from the Uncial outlines --------------------
   // Small bevel: a fat bevel self-intersects on the tight concave corners of
   // N / X / Y and z-fights into visible seams. Keep it tight and smooth.
@@ -149,7 +184,9 @@ function boot(canvas: HTMLCanvasElement) {
 
   let pointerX = 0, pointerY = 0; // -1..1
   let leanK = 1; // cursor-lean strength, fades as tracking begins
+  let scrollVel = 0; // |scroll velocity|, drives ember turbulence
   const clock = new THREE.Clock();
+  let elapsed = 0;
   let alive = false; // idle motion begins after the assemble
 
   function resize() {
@@ -164,7 +201,9 @@ function boot(canvas: HTMLCanvasElement) {
 
   // ---- Render loop ---------------------------------------------------
   const render = () => {
-    const t = clock.getElapsedTime();
+    const dt = Math.min(clock.getDelta(), 0.05);
+    elapsed += dt;
+    const t = elapsed;
     if (alive) {
       // Idle: each letter breathes on its own axis (real 3D turn + bob).
       for (let i = 0; i < meshes.length; i++) {
@@ -174,6 +213,22 @@ function boot(canvas: HTMLCanvasElement) {
         m.position.y = Math.sin(t * 0.6 + i * 1.1) * 0.12;
       }
     }
+    // Embers rise; sway and speed swell with scroll velocity.
+    const speedMul = 1 + scrollVel * 6;
+    for (let i = 0; i < EMBERS; i++) {
+      const d = emberData[i], idx = i * 3;
+      emberPos[idx] += d.sx * dt * speedMul + Math.sin(t * d.sway + d.phase) * d.swayR * dt * (1 + scrollVel * 3);
+      emberPos[idx + 1] += d.sy * dt * speedMul;
+      emberPos[idx + 2] += d.sz * dt * speedMul;
+      if (emberPos[idx + 1] > 16 || Math.abs(emberPos[idx]) > 24) {
+        emberPos[idx + 1] = -16;
+        emberPos[idx] = (Math.random() - 0.5) * 34;
+        emberPos[idx + 2] = (Math.random() - 0.5) * 24 - 4;
+      }
+    }
+    emberGeo.attributes.position.needsUpdate = true;
+    scrollVel *= 0.9; // decay between scroll updates
+
     // Cursor parallax: nudge the camera opposite the pointer for depth.
     const px = pointerX * leanK, py = pointerY * leanK;
     camera.position.set(cam.x - px * 2.4, cam.y + py * 1.6, cam.z);
@@ -246,7 +301,10 @@ function boot(canvas: HTMLCanvasElement) {
       scrub: 0.9,
       anticipatePin: 1,
       invalidateOnRefresh: true,
-      onUpdate: (self) => { leanK = 1 - Math.min(1, self.progress / 0.05); },
+      onUpdate: (self) => {
+        leanK = 1 - Math.min(1, self.progress / 0.05);
+        scrollVel = Math.min(3, Math.abs(self.getVelocity()) / 1400);
+      },
     },
   });
 
