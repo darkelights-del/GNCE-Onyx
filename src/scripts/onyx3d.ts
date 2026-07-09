@@ -88,7 +88,7 @@ function boot(canvas: HTMLCanvasElement) {
   // onyx-violet, and the letters dissolve into / emerge from the haze.
   scene.fog = new THREE.FogExp2(0x0f0814, 0.012);
   const backdrop = new THREE.Mesh(
-    new THREE.SphereGeometry(72, 24, 16),
+    new THREE.SphereGeometry(72, 64, 40),
     new THREE.MeshBasicMaterial({ color: 0x0f0814, side: THREE.BackSide, fog: false }),
   );
   scene.add(backdrop);
@@ -148,6 +148,7 @@ function boot(canvas: HTMLCanvasElement) {
   const backRim = new THREE.DirectionalLight(0x5a2440, 1.9); backRim.position.set(6, 4, -8); scene.add(backRim); // purple-crimson (no blue fringe)
   const crimsonRim = new THREE.DirectionalLight(0x6e0d25, 1.8); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
   const hemi = new THREE.HemisphereLight(0x3a2440, 0x0a0908, 0.8); scene.add(hemi); // purple sky, coal ground
+  const fill = new THREE.DirectionalLight(0x4a2c50, 0.8); fill.position.set(0, 2, 16); scene.add(fill); // gentle violet front-fill so faces read at the wide overview
 
   // Shadow catcher: a plane below the letters so the cast shadow reads over
   // coal without an off-brand bright floor.
@@ -234,10 +235,25 @@ function boot(canvas: HTMLCanvasElement) {
     return m;
   });
 
+  const L = letterX; // [O, N, Y, X] centres
+
+  // Distant crimson glows deep in the haze behind the word: the behind-letter
+  // transits (through the O, around N/Y/X) fly toward soft warmth instead of a
+  // black void. Additive, so they bloom; occluded by the letters from the front.
+  const glowPos = new Float32Array([
+    L[0], 0.4, -11, L[1], -1.2, -13, L[2], 1.6, -12.5, L[3], -0.4, -13, -3, 4, -16, 5, -3.5, -15.5,
+  ]);
+  const glowGeo = new THREE.BufferGeometry();
+  glowGeo.setAttribute('position', new THREE.BufferAttribute(glowPos, 3));
+  const glows = new THREE.Points(glowGeo, new THREE.PointsMaterial({
+    color: 0x6e0d25, size: 10, transparent: true, opacity: 0.42,
+    blending: THREE.AdditiveBlending, depthWrite: false, map: emberTexture(), sizeAttenuation: true,
+  }));
+  scene.add(glows);
+
   // ---- Depth-woven words: real troika text that shares the depth buffer,
   // so the letters occlude it — it goes behind, in front, and through the O
   // hole. One short word per letter, faded in as the camera reaches it.
-  const L = letterX; // [O, N, Y, X] centres
   const woven: { mesh: TroikaText; a: number; b: number; bx: number; by: number; bz: number; fly?: { x: number; y: number; z: number } }[] = [];
   const addWoven = (
     str: string, font: string, size: number, color: number,
