@@ -65,7 +65,7 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
         <div class="flow flow-right" data-flow="3">
           <div class="flow-inner">
             <p class="flow-line flow-eyebrow type-label text-muted">Our team</p>
-            <h2 class="flow-line flow-hero type-display flow-hero-sm">{roster}</h2>
+            <h2 class="flow-line flow-roster">{roster}</h2>
             <p class="flow-line flow-support">Two or three more, joining soon.</p>
             <p class="flow-line flow-cta">
               <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Back the build</a>
@@ -192,6 +192,16 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
     font-size: clamp(1.4rem, 3vw, 2.1rem);
     line-height: 1.25;
     max-width: 26ch;
+  }
+
+  /* Roster names: the cleaner body serif, not the distressed display face, so
+     seven names read cleanly at a glance. */
+  .flow-roster {
+    font-family: var(--font-text);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3.2vw, 2.15rem);
+    line-height: 1.3;
+    max-width: 24ch;
   }
 
   .flow-support {

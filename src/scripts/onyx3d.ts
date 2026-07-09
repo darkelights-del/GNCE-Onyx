@@ -83,9 +83,15 @@ function boot(canvas: HTMLCanvasElement) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  // Purple depth-haze: distant geometry recedes into onyx-violet instead of a
-  // flat black void, and the letters emerge from atmosphere on approach.
-  scene.fog = new THREE.FogExp2(0x100a16, 0.016);
+  // Purple depth-haze + a deep-violet backdrop so the void is atmospheric, never
+  // a flat black gap: distant geometry and the empty transit beats recede into
+  // onyx-violet, and the letters dissolve into / emerge from the haze.
+  scene.fog = new THREE.FogExp2(0x0f0814, 0.012);
+  const backdrop = new THREE.Mesh(
+    new THREE.SphereGeometry(72, 24, 16),
+    new THREE.MeshBasicMaterial({ color: 0x0f0814, side: THREE.BackSide, fog: false }),
+  );
+  scene.add(backdrop);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 100);
 
   // Custom onyx environment: a dark room lit only by palette-colored panels,
@@ -104,7 +110,7 @@ function boot(canvas: HTMLCanvasElement) {
   // Purple + crimson dominate the reflections so the metal reads as violet
   // onyx; off-white is a COMPACT specular key (a glint), never a broad wash.
   panel(0xe8e2dc, 3.2, -8, 9, 8, 8, 8); // compact off-white specular key
-  panel(0x6e0d25, 3.4, 12, 1, 5, 15, 16); // crimson, right — the onyx catches wine-red
+  panel(0x6e0d25, 2.6, 12, 1, 5, 15, 16); // crimson, right — deep wine, kept below the hot-pink blowout
   panel(0x2b1b2f, 3.6, -6, -4, -9, 16, 16); // purple fill, lower-back
   panel(0x1a0f20, 2.8, 0, 0, 12, 26, 26); // deep-purple front fill (purple, not white — keeps faces violet)
   panel(0x6e0d25, 1.8, 9, 2, -11, 18, 18); // crimson back-fill so orbits read wine, never gray
@@ -117,7 +123,7 @@ function boot(canvas: HTMLCanvasElement) {
   const material = new THREE.MeshPhysicalMaterial({
     color: 0x2b1b2f, // palette panel purple — the lit onyx body reads violet, not gray
     metalness: 0.5, // lower: violet diffuse reads instead of a gray mirror
-    roughness: 0.3, // tighter, wetter specular for polished stone
+    roughness: 0.36, // softens the specular so highlights read as sheen, not chrome
     envMapIntensity: 1.25,
     clearcoat: 0.7, // off-white clearcoat glint on top
     clearcoatRoughness: 0.2,
@@ -130,7 +136,7 @@ function boot(canvas: HTMLCanvasElement) {
   // hemisphere fill, and a low ambient so faces never fall to pure black when
   // the camera swings behind a letter.
   scene.add(new THREE.AmbientLight(0x2a2036, 0.5));
-  const key = new THREE.SpotLight(0xfff4e8, 340, 60, Math.PI / 6, 0.45, 2);
+  const key = new THREE.SpotLight(0xf3e4cc, 320, 60, Math.PI / 6, 0.45, 2); // warm off-white key: sheen reads cream, not neutral silver
   key.position.set(-7, 13, 10);
   key.castShadow = !LOWPERF;
   key.shadow.mapSize.set(2048, 2048);
@@ -140,7 +146,7 @@ function boot(canvas: HTMLCanvasElement) {
   key.shadow.camera.far = 46;
   scene.add(key);
   const backRim = new THREE.DirectionalLight(0x5a2440, 1.9); backRim.position.set(6, 4, -8); scene.add(backRim); // purple-crimson (no blue fringe)
-  const crimsonRim = new THREE.DirectionalLight(0x6e0d25, 2.2); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
+  const crimsonRim = new THREE.DirectionalLight(0x6e0d25, 1.8); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
   const hemi = new THREE.HemisphereLight(0x3a2440, 0x0a0908, 0.8); scene.add(hemi); // purple sky, coal ground
 
   // Shadow catcher: a plane below the letters so the cast shadow reads over
@@ -268,8 +274,8 @@ function boot(canvas: HTMLCanvasElement) {
   // ---- Camera journey: a keyframe path threaded through the letters ---
   type KF = { t: number; px: number; py: number; pz: number; lx: number; ly: number; lz: number; roll: number };
   const KEYS: KF[] = [
-    { t: 0.00, px: 0, py: 2.6, pz: 34, lx: 0, ly: 0, lz: 0, roll: 0 }, // overview (zoomed out for legibility)
-    { t: 0.09, px: 0, py: 2.3, pz: 29, lx: 0, ly: 0, lz: 0, roll: 0 },
+    { t: 0.00, px: 0, py: 2.5, pz: 32, lx: 0, ly: 0, lz: 0, roll: 0 }, // overview (zoomed out, whole word)
+    { t: 0.09, px: 0, py: 2.3, pz: 28, lx: 0, ly: 0, lz: 0, roll: 0 },
     { t: 0.14, px: L[0] - 1, py: 1.0, pz: 10, lx: L[0], ly: 0, lz: 0, roll: 0 }, // approach O, framed
     { t: 0.22, px: L[0] + 0.6, py: 0.6, pz: 7, lx: L[0], ly: 0, lz: 0, roll: 0 }, // O held (identity dwell)
     { t: 0.31, px: L[0], py: 0.2, pz: 2.4, lx: L[0], ly: 0, lz: -6, roll: 0 }, // enter the hole
@@ -282,7 +288,7 @@ function boot(canvas: HTMLCanvasElement) {
     { t: 0.80, px: L[2] + 1, py: 0.8, pz: 9, lx: L[2], ly: 0, lz: 0, roll: 0 }, // front Y
     { t: 0.87, px: L[3] - 5, py: 0.9, pz: -6, lx: L[3], ly: 0, lz: 0, roll: -0.2 }, // swing behind X
     { t: 0.93, px: L[3] + 1, py: 0.7, pz: 9.5, lx: L[3], ly: 0, lz: 0, roll: 0 }, // front X, team reads
-    { t: 1.00, px: 0, py: 2.6, pz: 33, lx: 0, ly: 0, lz: 0, roll: 0 }, // pull back
+    { t: 1.00, px: 0, py: 2.5, pz: 32, lx: 0, ly: 0, lz: 0, roll: 0 }, // pull back (bookends the overview)
   ];
   const evalKF = (p: number) => {
     let a = KEYS[0], b = KEYS[KEYS.length - 1];
