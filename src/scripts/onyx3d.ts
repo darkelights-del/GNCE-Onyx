@@ -439,6 +439,13 @@ function boot(canvas: HTMLCanvasElement) {
       const inside = scrollP >= DWELL[i].a && scrollP <= DWELL[i].b;
       if (inside && !flowState[i]) { flowState[i] = true; flowIn(i); }
       else if (!inside && flowState[i]) { flowState[i] = false; flowOut(i); }
+      // Safety net: a fast scroll can skip the flow-out; never let a letter's
+      // copy linger well outside its window (guards the transit beats).
+      else if (!inside && !flowState[i] && (scrollP < DWELL[i].a - 0.07 || scrollP > DWELL[i].b + 0.07)
+        && groupsEl[i].style.visibility !== 'hidden') {
+        gsap.set(groupsEl[i], { visibility: 'hidden' });
+        gsap.set(gsap.utils.toArray<HTMLElement>('.flow-line', groupsEl[i]), { clipPath: HID_BELOW });
+      }
     }
 
     // Camera from the keyframe path, with roll and a little cursor parallax.
