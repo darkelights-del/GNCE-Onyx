@@ -377,7 +377,7 @@ function boot(canvas: HTMLCanvasElement) {
   };
   const flowOut = (i: number) => {
     const ln = gsap.utils.toArray<HTMLElement>('.flow-line', groupsEl[i]);
-    gsap.to(ln, { clipPath: HID_ABOVE, x: FLOW[i].ox, y: FLOW[i].oy, ease: 'power2.in', duration: 0.5, stagger: 0.04, overwrite: true,
+    gsap.to(ln, { clipPath: HID_ABOVE, x: FLOW[i].ox, y: FLOW[i].oy, ease: 'power2.in', duration: 0.4, stagger: 0.025, overwrite: true,
       onComplete: () => { if (!flowState[i]) gsap.set(groupsEl[i], { visibility: 'hidden' }); } });
   };
 
