@@ -1,16 +1,16 @@
 ---
 /**
- * Home — one continuous cinematic take. The ONYX word is a big, crisp 3D
- * object that the camera tracks across left to right; as each letter fills
- * the frame, its content is born from inside the letter and runs around it
- * (motion.ts, initJourney). The word is the vehicle; the words are the point.
- * Without JS / under reduced motion it degrades to a stacked static page.
+ * Home — a real WebGL take. The ONYX word is four extruded-geometry letters
+ * (onyx3d.ts) the camera tracks across; each letter's content is born from
+ * the frame as it fills the view. Crisp at every distance, real depth.
+ *
+ * Without WebGL / under reduced motion it degrades to a static, readable
+ * stacked page (html.no3d): a CSS wordmark and the same content in sections.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
-const letters = ['O', 'N', 'Y', 'X'];
 const numbers = ['22489', '26112', '26413', '26111'];
 const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo Li · Nicholas Colli · Raymond Liu';
 ---
@@ -19,29 +19,14 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
   title="Home"
   description="GNCE Onyx is a rookie FIRST Tech Challenge team at Weston High School, built by championship veterans, competing in the 2026-2027 BIOBUZZ season."
 >
-  <section class="journey" data-journey aria-label="GNCE Onyx">
-    <div class="journey-stage scene-3d">
-      <!-- 3D wordmark: rendered large, the camera only ever scales it down -->
-      <div class="journey-world preserve-3d" data-world aria-hidden="true">
-        {
-          letters.map((letter) => (
-            <div class="station-letter preserve-3d">
-              {Array.from({ length: 8 }).map((_, d) => (
-                <span
-                  class="letter-face"
-                  style={`transform:translateZ(${-(d + 1) * 5}px);color:color-mix(in srgb, var(--color-surface) ${94 - d * 9}%, var(--color-bg))`}
-                >
-                  {letter}
-                </span>
-              ))}
-              <span class="letter-front">{letter}</span>
-            </div>
-          ))
-        }
-      </div>
+  <section class="onyx3d" data-onyx3d aria-label="GNCE Onyx">
+    <div class="onyx3d-stage">
+      <canvas class="onyx3d-canvas" data-onyx-canvas aria-hidden="true"></canvas>
 
-      <!-- Content, born from each letter as the camera arrives -->
-      <div class="journey-overlay">
+      <!-- Static wordmark for the no-WebGL / reduced-motion page -->
+      <p class="onyx3d-wordmark type-display" aria-hidden="true">ONYX</p>
+
+      <div class="onyx3d-overlay">
         <!-- O: who we are -->
         <div class="flow" data-flow="0">
           <div class="flow-inner">
@@ -89,67 +74,62 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
         </div>
       </div>
 
-      <!-- Scroll cue, fades once you move -->
-      <p class="journey-cue type-label text-muted" data-journey-cue>Scroll</p>
+      <p class="onyx3d-cue type-label text-muted" data-onyx-cue>Scroll</p>
     </div>
   </section>
 </BaseLayout>
 
+<script>
+  import '../scripts/onyx3d';
+</script>
+
 <style>
-  .journey {
+  .onyx3d {
     position: relative;
   }
 
-  .journey-stage {
+  .onyx3d-stage {
     position: relative;
     height: 100svh;
     overflow: clip;
-    perspective: 1400px;
   }
 
-  /* The word lives at natural (large) size; the camera scales it DOWN to the
-     overview and up to at most 1:1 on a letter, so text never upscales. */
-  .journey-world {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: max-content;
-    display: flex;
-    align-items: center;
-    gap: 0.1em;
-    transform-origin: 0 0;
-    font-family: var(--font-display);
-    font-size: 132vh;
-    line-height: 1;
-  }
-
-  .station-letter {
-    position: relative;
-    display: inline-block;
-    will-change: transform;
-    backface-visibility: hidden;
-  }
-
-  /* Front face: a quiet outline. The letter frames the words; it never
-     competes with them, so it reads as a vehicle, not the headline. */
-  .letter-front {
-    position: relative;
-    z-index: 2;
-    color: transparent;
-    -webkit-text-stroke: 0.006em color-mix(in srgb, var(--color-ink) 50%, transparent);
-  }
-
-  /* Extrusion body: solid dark steps that read as a tunnel the words rise out of. */
-  .letter-face {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  /* Content overlay — screen space, always crisp, centered on the framed letter. */
-  .journey-overlay {
+  .onyx3d-canvas {
+    display: none;
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  :global(html.onyx-live) .onyx3d-canvas {
+    display: block;
+  }
+
+  /* Static CSS wordmark: shown until the 3D scene takes over. */
+  .onyx3d-wordmark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    font-size: clamp(4rem, 22vw, 16rem);
+    letter-spacing: 0.04em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-ink) 55%, transparent);
+    pointer-events: none;
+  }
+
+  :global(html.onyx-live) .onyx3d-wordmark {
+    display: none;
+  }
+
+  .onyx3d-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
     display: grid;
     place-items: center;
     pointer-events: none;
@@ -161,7 +141,6 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
     pointer-events: none;
   }
 
-  /* Nudge some blocks off dead-center so they sit in the letter's open space. */
   .flow-right {
     justify-self: end;
     width: min(80vw, 40rem);
@@ -229,15 +208,16 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
     text-decoration-color: var(--color-accent);
   }
 
-  .journey-cue {
+  .onyx3d-cue {
     position: absolute;
     left: 50%;
     bottom: clamp(1.5rem, 4vh, 2.5rem);
+    z-index: 1;
     transform: translateX(-50%);
     pointer-events: none;
   }
 
-  .journey-cue::after {
+  .onyx3d-cue::after {
     content: '';
     display: block;
     width: 1px;
@@ -246,40 +226,53 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
     background: var(--color-line);
   }
 
-  /* ---- No-JS / reduced motion: a readable stacked page ---------- */
-  :global(html:not(.gsap)) .journey-stage {
+  /* Loading splash: JS is present but the scene hasn't taken over yet.
+     Show just the centered wordmark so the swap to the canvas is seamless
+     (no flash of the stacked fallback). */
+  :global(html.js:not(.onyx-live):not(.no3d)) .flow {
+    visibility: hidden;
+  }
+
+  /* ---- Static fallback (no WebGL / reduced motion / no JS) ----------
+     Lay the content out as a normal stacked, readable page. */
+  :global(html.no-js) .onyx3d-stage,
+  :global(html.no3d) .onyx3d-stage {
     height: auto;
     overflow: visible;
-    perspective: none;
+    padding-bottom: 2rem;
   }
 
-  :global(html:not(.gsap)) .journey-world {
+  :global(html.no-js) .onyx3d-wordmark,
+  :global(html.no3d) .onyx3d-wordmark {
     position: relative;
-    width: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    font-size: clamp(4rem, 16vw, 10rem);
-    padding: 8rem 1.25rem 2rem;
-    transform: none !important;
+    inset: auto;
+    height: 58svh;
+    min-height: 20rem;
   }
 
-  :global(html:not(.gsap)) .journey-overlay {
+  :global(html.no-js) .onyx3d-overlay,
+  :global(html.no3d) .onyx3d-overlay {
     position: static;
     display: block;
   }
 
-  :global(html:not(.gsap)) .flow {
+  :global(html.no-js) .flow,
+  :global(html.no3d) .flow {
+    visibility: visible;
     width: auto;
     max-width: 44rem;
     margin: 0 auto;
     padding: 3rem clamp(1.25rem, 6vw, 6rem);
+    border-top: 1px solid var(--color-line);
   }
 
-  :global(html:not(.gsap)) .flow-right {
+  :global(html.no-js) .flow-right,
+  :global(html.no3d) .flow-right {
     justify-self: auto;
   }
 
-  :global(html:not(.gsap)) .journey-cue {
+  :global(html.no-js) .onyx3d-cue,
+  :global(html.no3d) .onyx3d-cue {
     display: none;
   }
 </style>
