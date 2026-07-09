@@ -16,7 +16,6 @@
  */
 import * as THREE from 'three';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { GLYPHS } from '../data/onyx-glyphs';
@@ -68,43 +67,58 @@ function boot(canvas: HTMLCanvasElement) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.66;
+  renderer.toneMappingExposure = 1.45;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 500);
 
-  // Faint image-based lighting for a subtle sheen (not a chrome mirror).
+  // Custom onyx environment: a dark room lit only by palette-colored panels,
+  // so the polished metal reflects crimson / purple / off-white glints — not
+  // the neutral studio gray of RoomEnvironment (which read as cheap chrome).
+  const envScene = new THREE.Scene();
+  const panel = (color: number, intensity: number, x: number, y: number, z: number, w: number, h: number) => {
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color }));
+    (mesh.material as THREE.MeshBasicMaterial).color.multiplyScalar(intensity);
+    mesh.position.set(x, y, z);
+    mesh.lookAt(0, 0, 0);
+    envScene.add(mesh);
+  };
+  panel(0xe8e2dc, 3.6, -9, 8, 7, 18, 18); // off-white key, upper-left
+  panel(0xc21a3c, 4.2, 12, 1, 5, 12, 14); // crimson, right
+  panel(0x5a3578, 2.4, -6, -5, -9, 13, 13); // purple, lower-back
+  panel(0x8a8088, 1.4, 0, 1, 13, 24, 24); // soft silver fill, front (metallic body sheen)
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
+  scene.environment = pmrem.fromScene(envScene, 0.05).texture;
 
-  // Onyx: deep-purple body, low-ish gloss, almost no reflection. Character
-  // comes from the raking colored lights.
+  // Real polished onyx: a near-black metal. With metalness this high there is
+  // almost no diffuse — the look is all reflection + sharp specular glint.
   const material = new THREE.MeshStandardMaterial({
-    color: 0x1c1228,
-    metalness: 0.22,
-    roughness: 0.56,
-    envMapIntensity: 0.05,
+    color: 0x4a4450, // dark gunmetal-purple: reflections read as silver, not black
+    metalness: 0.9,
+    roughness: 0.34,
+    envMapIntensity: 1.25,
   });
 
-  // Grazing key so the flat faces stay dark (text reads over them) while the
-  // bevels catch off-white / crimson / purple.
-  scene.add(new THREE.AmbientLight(0x140a18, 0.22));
-  const key = new THREE.DirectionalLight(0xd8cfc8, 0.46); key.position.set(-14, 10, 4); scene.add(key);
-  const rim = new THREE.DirectionalLight(0xb01636, 3.2); rim.position.set(12, 1, 5); scene.add(rim);
-  const rim2 = new THREE.DirectionalLight(0x5a2f7a, 2.0); rim2.position.set(-11, 3, 2); scene.add(rim2);
-  const back = new THREE.DirectionalLight(0x6e0d25, 2.6); back.position.set(8, -2, -10); scene.add(back);
-  const fill = new THREE.DirectionalLight(0x241531, 0.7); fill.position.set(2, -12, 6); scene.add(fill);
+  // Direct lights add sharp glints over the environment reflection.
+  scene.add(new THREE.AmbientLight(0x140a18, 0.1));
+  const key = new THREE.DirectionalLight(0xf1ece4, 1.5); key.position.set(-12, 11, 8); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xc21a3c, 2.6); rim.position.set(13, 1, 4); scene.add(rim);
+  const rim2 = new THREE.DirectionalLight(0x6a3f8f, 1.5); rim2.position.set(-10, 3, -6); scene.add(rim2);
+  const fill = new THREE.DirectionalLight(0x241531, 0.6); fill.position.set(2, -12, 6); scene.add(fill);
 
   // ---- Build the letters from the Uncial outlines --------------------
+  // Small bevel: a fat bevel self-intersects on the tight concave corners of
+  // N / X / Y and z-fights into visible seams. Keep it tight and smooth.
   function buildGeometry(d: string) {
     const parsed = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg"><path d="${d}"/></svg>`);
     const shapes: THREE.Shape[] = [];
     for (const p of parsed.paths) shapes.push(...SVGLoader.createShapes(p));
     const geo = new THREE.ExtrudeGeometry(shapes, {
-      depth: 240, bevelEnabled: true, bevelThickness: 34, bevelSize: 20, bevelSegments: 5, curveSegments: 14,
+      depth: 240, bevelEnabled: true, bevelThickness: 18, bevelSize: 9, bevelSegments: 4, curveSegments: 12,
     });
     geo.scale(GLYPH_SCALE, -GLYPH_SCALE, GLYPH_SCALE); // flip y (glyph is y-down) -> upright
     geo.center();
+    geo.computeVertexNormals();
     return geo;
   }
 
