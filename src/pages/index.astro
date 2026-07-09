@@ -73,8 +73,6 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
           </div>
         </div>
       </div>
-
-      <p class="onyx3d-cue type-label text-muted" data-onyx-cue>Scroll</p>
     </div>
   </section>
 </BaseLayout>
@@ -218,24 +216,6 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
     text-decoration-color: var(--color-accent);
   }
 
-  .onyx3d-cue {
-    position: absolute;
-    left: 50%;
-    bottom: clamp(1.5rem, 4vh, 2.5rem);
-    z-index: 1;
-    transform: translateX(-50%);
-    pointer-events: none;
-  }
-
-  .onyx3d-cue::after {
-    content: '';
-    display: block;
-    width: 1px;
-    height: 2.2rem;
-    margin: 0.6rem auto 0;
-    background: var(--color-line);
-  }
-
   /* Loading splash: JS is present but the scene hasn't taken over yet.
      Show just the centered wordmark so the swap to the canvas is seamless
      (no flash of the stacked fallback). */
@@ -279,10 +259,5 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
   :global(html.no-js) .flow-right,
   :global(html.no3d) .flow-right {
     justify-self: auto;
-  }
-
-  :global(html.no-js) .onyx3d-cue,
-  :global(html.no3d) .onyx3d-cue {
-    display: none;
   }
 </style>

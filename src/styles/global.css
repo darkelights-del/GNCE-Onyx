@@ -240,63 +240,6 @@ html.will-animate .station-letter {
 }
 
 /* ==================================================================
-   CUSTOM CURSOR — crimson dot snaps, off-white ring trails. Only shown
-   when JS enables it (html.cursor-on), fine pointers, motion allowed.
-   ================================================================== */
-.cursor {
-  display: none;
-}
-
-html.cursor-on .cursor {
-  display: block;
-}
-
-html.cursor-on,
-html.cursor-on * {
-  cursor: none !important;
-}
-
-.cursor-dot,
-.cursor-ring {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  border-radius: 50%;
-  pointer-events: none;
-  will-change: transform;
-}
-
-.cursor-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--color-accent);
-}
-
-.cursor-ring {
-  width: 34px;
-  height: 34px;
-  border: 1.5px solid color-mix(in srgb, var(--color-ink) 55%, transparent);
-  transition:
-    width 240ms var(--ease-out-strong),
-    height 240ms var(--ease-out-strong),
-    border-color 240ms ease,
-    background-color 240ms ease;
-}
-
-.cursor-ring.is-hover {
-  width: 54px;
-  height: 54px;
-  border-color: var(--color-accent);
-  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-}
-
-.cursor-ring.is-down {
-  width: 26px;
-  height: 26px;
-}
-
-/* ==================================================================
    BUTTONS — tactile press (emil), crimson fill for legibility on coal.
    Hover draws a border in, no glow.
    ================================================================== */

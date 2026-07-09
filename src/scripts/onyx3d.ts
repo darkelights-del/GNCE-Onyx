@@ -74,7 +74,6 @@ function boot(canvas: HTMLCanvasElement) {
   const section = document.querySelector<HTMLElement>('[data-onyx3d]')!;
   const stage = section.querySelector<HTMLElement>('.onyx3d-stage')!;
   const groupsEl = gsap.utils.toArray<HTMLElement>('[data-flow]');
-  const cue = document.querySelector<HTMLElement>('[data-onyx-cue]');
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, LOWPERF ? 1 : 2));
@@ -434,7 +433,6 @@ function boot(canvas: HTMLCanvasElement) {
       targetP = self.progress;
       leanK = 1 - Math.min(1, self.progress / 0.05);
       scrollVel = Math.min(3, Math.abs(self.getVelocity()) / 1400);
-      if (cue) cue.style.opacity = String(Math.max(0, 1 - self.progress / 0.04));
     },
   });
 
