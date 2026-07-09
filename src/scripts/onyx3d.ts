@@ -96,10 +96,11 @@ function boot(canvas: HTMLCanvasElement) {
     mesh.lookAt(0, 0, 0);
     envScene.add(mesh);
   };
-  panel(0xe8e2dc, 4.4, -9, 8, 7, 18, 18); // off-white key, upper-left
+  panel(0xe8e2dc, 4.8, -9, 8, 7, 18, 18); // off-white key, upper-left
   panel(0x7a0f26, 2.6, 12, 1, 5, 12, 14); // deep crimson, right (wine, not hot pink)
-  panel(0x4a2c64, 2.4, -6, -5, -9, 13, 13); // purple, lower-back
-  panel(0x9a9098, 2.0, 0, 1, 13, 24, 24); // soft silver fill, front (clearcoat sheen)
+  panel(0x4a2c64, 2.6, -6, -5, -9, 13, 13); // purple, lower-back
+  panel(0xb4aab2, 2.6, 0, 1, 13, 30, 30); // soft silver fill, front (clearcoat sheen)
+  panel(0x8a8490, 1.7, 9, 2, -11, 20, 20); // silver back-fill so orbits never void to black
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(envScene, 0.05).texture;
 
@@ -107,18 +108,18 @@ function boot(canvas: HTMLCanvasElement) {
   // metal reflection stays dark (onyx), the clearcoat adds the white/silver
   // sheen on top — a metallic body with white/silver, done for real.
   const material = new THREE.MeshPhysicalMaterial({
-    color: 0x17121c,
-    metalness: 0.9,
-    roughness: 0.3,
-    envMapIntensity: 1.35,
+    color: 0x231b2b,
+    metalness: 0.86,
+    roughness: 0.34,
+    envMapIntensity: 1.55,
     clearcoat: 0.7,
-    clearcoatRoughness: 0.16,
+    clearcoatRoughness: 0.22,
   });
 
   // One shadow-casting key (warm), a cool purple back-rim, a crimson rim, a
   // hemisphere fill, and a low ambient so faces never fall to pure black when
   // the camera swings behind a letter.
-  scene.add(new THREE.AmbientLight(0x2a2036, 0.32));
+  scene.add(new THREE.AmbientLight(0x2a2036, 0.42));
   const key = new THREE.SpotLight(0xfff4e8, 340, 60, Math.PI / 6, 0.45, 2);
   key.position.set(-7, 13, 10);
   key.castShadow = !LOWPERF;
@@ -130,7 +131,7 @@ function boot(canvas: HTMLCanvasElement) {
   scene.add(key);
   const backRim = new THREE.DirectionalLight(0x5a3a86, 2.0); backRim.position.set(6, 4, -8); scene.add(backRim);
   const crimsonRim = new THREE.DirectionalLight(0x6e0d25, 2.2); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
-  const hemi = new THREE.HemisphereLight(0x3a2846, 0x0a0908, 0.5); scene.add(hemi);
+  const hemi = new THREE.HemisphereLight(0x4a3856, 0x0a0908, 0.68); scene.add(hemi);
 
   // Shadow catcher: a plane below the letters so the cast shadow reads over
   // coal without an off-brand bright floor.
@@ -183,7 +184,7 @@ function boot(canvas: HTMLCanvasElement) {
     const shapes: THREE.Shape[] = [];
     for (const p of parsed.paths) shapes.push(...SVGLoader.createShapes(p));
     const geo = new THREE.ExtrudeGeometry(shapes, {
-      depth: 240, bevelEnabled: true, bevelThickness: 10, bevelSize: 6, bevelOffset: 0, bevelSegments: 3, curveSegments: 10,
+      depth: 168, bevelEnabled: true, bevelThickness: 8, bevelSize: 5, bevelOffset: 0, bevelSegments: 3, curveSegments: 10,
     });
     geo.scale(GLYPH_SCALE, -GLYPH_SCALE, GLYPH_SCALE); // flip y (glyph is y-down) -> upright
     geo.center();
@@ -237,32 +238,32 @@ function boot(canvas: HTMLCanvasElement) {
     tx.sync();
     woven.push({ mesh: tx, a, b });
   };
-  // Windows fade the word out BEFORE its readable HTML dwell, so it flows
+  // Windows fade each word out BEFORE its readable HTML dwell, so it flows
   // through / around the letter during the transit and never stacks on the
-  // content. The crimson X flourish is the exception: it rides the dwell.
+  // content that follows.
   addWoven('veterans', uncialUrl, 1.4, 0xe8e2dc, L[0], 0, -6.5, 0.31, 0.41); // flashes through the O hole
   addWoven('our roots', cardoUrl, 1.6, 0xe8e2dc, L[1], -0.4, -2.6, 0.37, 0.50); // N strokes cut across it
   addWoven('the robot', cardoUrl, 1.5, 0xe8e2dc, L[2], -1.6, 3.4, 0.61, 0.74); // sweeps in front of Y
-  addWoven('the crew', greyUrl, 2.6, 0xc21a3c, L[3], 1.4, 2.8, 0.86, 1.0); // crimson flourish around X
+  addWoven('our team', greyUrl, 2.6, 0xc21a3c, L[3], 1.4, 2.8, 0.80, 0.89); // crimson flourish sweeps around X
 
   // ---- Camera journey: a keyframe path threaded through the letters ---
   type KF = { t: number; px: number; py: number; pz: number; lx: number; ly: number; lz: number; roll: number };
   const KEYS: KF[] = [
-    { t: 0.00, px: 0, py: 2.4, pz: 27, lx: 0, ly: 0, lz: 0, roll: 0 }, // overview
-    { t: 0.09, px: 0, py: 2.1, pz: 23, lx: 0, ly: 0, lz: 0, roll: 0 },
+    { t: 0.00, px: 0, py: 2.6, pz: 34, lx: 0, ly: 0, lz: 0, roll: 0 }, // overview (zoomed out for legibility)
+    { t: 0.09, px: 0, py: 2.3, pz: 29, lx: 0, ly: 0, lz: 0, roll: 0 },
     { t: 0.14, px: L[0] - 1, py: 1.0, pz: 10, lx: L[0], ly: 0, lz: 0, roll: 0 }, // approach O, framed
     { t: 0.22, px: L[0] + 0.6, py: 0.6, pz: 7, lx: L[0], ly: 0, lz: 0, roll: 0 }, // O held (identity dwell)
     { t: 0.31, px: L[0], py: 0.2, pz: 2.4, lx: L[0], ly: 0, lz: -6, roll: 0 }, // enter the hole
     { t: 0.37, px: L[0], py: 0, pz: -1, lx: L[0], ly: 0, lz: -6.5, roll: 0 }, // through the hole (word flashes)
-    { t: 0.42, px: L[1] - 4.5, py: 0.9, pz: -6.5, lx: L[1], ly: 0, lz: -0.5, roll: 0.16 }, // swing behind N
-    { t: 0.49, px: L[1] - 6, py: 0.7, pz: -1.2, lx: L[1], ly: 0, lz: 0, roll: 0.32 }, // orbit N
-    { t: 0.57, px: L[1], py: 0.8, pz: 8.5, lx: L[1], ly: 0, lz: 0, roll: 0 }, // front N
-    { t: 0.66, px: L[2] - 3.5, py: 0.8, pz: -6.5, lx: L[2], ly: 0, lz: 0, roll: -0.2 }, // around Y
-    { t: 0.72, px: L[2] + 5.5, py: 0.7, pz: -1.5, lx: L[2], ly: 0, lz: 0, roll: -0.34 }, // orbit Y
-    { t: 0.80, px: L[2] + 1, py: 0.8, pz: 8.5, lx: L[2], ly: 0, lz: 0, roll: 0 }, // front Y
-    { t: 0.87, px: L[3] - 4.5, py: 0.8, pz: -5, lx: L[3], ly: 0, lz: 0, roll: -0.2 }, // swing behind X
-    { t: 0.93, px: L[3] + 1, py: 0.7, pz: 9, lx: L[3], ly: 0, lz: 0, roll: 0 }, // front X, crew reads
-    { t: 1.00, px: 0, py: 2.4, pz: 26, lx: 0, ly: 0, lz: 0, roll: 0 }, // pull back
+    { t: 0.42, px: L[1] - 5, py: 1.0, pz: -6.8, lx: L[1], ly: 0, lz: -0.5, roll: 0.16 }, // swing behind N
+    { t: 0.49, px: L[1] - 6.6, py: 0.9, pz: -3.0, lx: L[1], ly: 0, lz: 0, roll: 0.3 }, // orbit N (clear of depth band)
+    { t: 0.57, px: L[1], py: 0.8, pz: 9, lx: L[1], ly: 0, lz: 0, roll: 0 }, // front N
+    { t: 0.66, px: L[2] - 4, py: 0.9, pz: -6.8, lx: L[2], ly: 0, lz: 0, roll: -0.2 }, // around Y
+    { t: 0.72, px: L[2] + 6.2, py: 0.9, pz: -3.2, lx: L[2], ly: 0, lz: 0, roll: -0.32 }, // orbit Y (clear of depth band)
+    { t: 0.80, px: L[2] + 1, py: 0.8, pz: 9, lx: L[2], ly: 0, lz: 0, roll: 0 }, // front Y
+    { t: 0.87, px: L[3] - 5, py: 0.9, pz: -6, lx: L[3], ly: 0, lz: 0, roll: -0.2 }, // swing behind X
+    { t: 0.93, px: L[3] + 1, py: 0.7, pz: 9.5, lx: L[3], ly: 0, lz: 0, roll: 0 }, // front X, team reads
+    { t: 1.00, px: 0, py: 2.6, pz: 33, lx: 0, ly: 0, lz: 0, roll: 0 }, // pull back
   ];
   const evalKF = (p: number) => {
     let a = KEYS[0], b = KEYS[KEYS.length - 1];
