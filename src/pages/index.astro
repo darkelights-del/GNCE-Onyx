@@ -164,6 +164,14 @@ const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo L
     will-change: transform, clip-path;
   }
 
+  /* Legibility scrim: a soft coal halo per line so copy stays readable where it
+     crosses a lit letter, without a visible gradient box. Only in the 3D view. */
+  :global(html.onyx-live) .flow-line {
+    text-shadow:
+      0 1px 22px rgba(10, 9, 8, 0.72),
+      0 0 6px rgba(10, 9, 8, 0.6);
+  }
+
   .flow-eyebrow {
     margin-bottom: 0.2rem;
   }

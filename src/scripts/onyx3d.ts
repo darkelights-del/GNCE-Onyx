@@ -83,6 +83,9 @@ function boot(canvas: HTMLCanvasElement) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
+  // Purple depth-haze: distant geometry recedes into onyx-violet instead of a
+  // flat black void, and the letters emerge from atmosphere on approach.
+  scene.fog = new THREE.FogExp2(0x100a16, 0.016);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 100);
 
   // Custom onyx environment: a dark room lit only by palette-colored panels,
@@ -98,11 +101,13 @@ function boot(canvas: HTMLCanvasElement) {
   };
   // Palette only: the metal reflects off-white (the "white/silver" sheen),
   // crimson and purple — never a neutral gray.
-  panel(0xe8e2dc, 3.8, -9, 8, 7, 18, 18); // off-white key, upper-left
-  panel(0x6e0d25, 2.2, 12, 1, 5, 12, 14); // crimson rim, right
-  panel(0x2b1b2f, 2.8, -6, -5, -9, 14, 14); // purple, lower-back
-  panel(0xe8e2dc, 2.3, 0, 1, 13, 26, 26); // off-white front fill (clearcoat sheen)
-  panel(0x2b1b2f, 2.1, 9, 2, -11, 20, 20); // purple back-fill so orbits never void to pure black
+  // Purple + crimson dominate the reflections so the metal reads as violet
+  // onyx; off-white is a COMPACT specular key (a glint), never a broad wash.
+  panel(0xe8e2dc, 3.2, -8, 9, 8, 8, 8); // compact off-white specular key
+  panel(0x6e0d25, 3.4, 12, 1, 5, 15, 16); // crimson, right — the onyx catches wine-red
+  panel(0x2b1b2f, 3.6, -6, -4, -9, 16, 16); // purple fill, lower-back
+  panel(0x1a0f20, 2.8, 0, 0, 12, 26, 26); // deep-purple front fill (purple, not white — keeps faces violet)
+  panel(0x6e0d25, 1.8, 9, 2, -11, 18, 18); // crimson back-fill so orbits read wine, never gray
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(envScene, 0.05).texture;
 
@@ -110,12 +115,14 @@ function boot(canvas: HTMLCanvasElement) {
   // metal reflection stays dark (onyx), the clearcoat adds the white/silver
   // sheen on top — a metallic body with white/silver, done for real.
   const material = new THREE.MeshPhysicalMaterial({
-    color: 0x2b1b2f, // palette panel purple — the lit onyx body reads violet, not black
-    metalness: 0.62, // lower, so the diffuse purple shows and faces never void to black
-    roughness: 0.4,
-    envMapIntensity: 1.35,
-    clearcoat: 0.6, // the off-white clearcoat sheen (the "white/silver") sits on top
-    clearcoatRoughness: 0.28,
+    color: 0x2b1b2f, // palette panel purple — the lit onyx body reads violet, not gray
+    metalness: 0.5, // lower: violet diffuse reads instead of a gray mirror
+    roughness: 0.3, // tighter, wetter specular for polished stone
+    envMapIntensity: 1.25,
+    clearcoat: 0.7, // off-white clearcoat glint on top
+    clearcoatRoughness: 0.2,
+    emissive: 0x160a18, // faint purple floor so faces never fall to gray/black
+    emissiveIntensity: 0.55,
     side: THREE.DoubleSide, // never cull a face to reveal the hollow interior
   });
 
@@ -132,9 +139,9 @@ function boot(canvas: HTMLCanvasElement) {
   key.shadow.camera.near = 1;
   key.shadow.camera.far = 46;
   scene.add(key);
-  const backRim = new THREE.DirectionalLight(0x5a3a86, 2.0); backRim.position.set(6, 4, -8); scene.add(backRim);
+  const backRim = new THREE.DirectionalLight(0x5a2440, 1.9); backRim.position.set(6, 4, -8); scene.add(backRim); // purple-crimson (no blue fringe)
   const crimsonRim = new THREE.DirectionalLight(0x6e0d25, 2.2); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
-  const hemi = new THREE.HemisphereLight(0x4a3856, 0x0a0908, 0.85); scene.add(hemi);
+  const hemi = new THREE.HemisphereLight(0x3a2440, 0x0a0908, 0.8); scene.add(hemi); // purple sky, coal ground
 
   // Shadow catcher: a plane below the letters so the cast shadow reads over
   // coal without an off-brand bright floor.
@@ -166,15 +173,16 @@ function boot(canvas: HTMLCanvasElement) {
     emberPos[i * 3] = (Math.random() - 0.5) * 42;
     emberPos[i * 3 + 1] = (Math.random() - 0.5) * 32;
     emberPos[i * 3 + 2] = (Math.random() - 0.5) * 26 - 4;
-    if (Math.random() < 0.72) { emberCol[i * 3] = 0.78; emberCol[i * 3 + 1] = 0.1; emberCol[i * 3 + 2] = 0.18; }
+    // Mostly off-white dust motes with a crimson minority — atmosphere, not noise.
+    if (Math.random() < 0.28) { emberCol[i * 3] = 0.55; emberCol[i * 3 + 1] = 0.05; emberCol[i * 3 + 2] = 0.12; }
     else { emberCol[i * 3] = 0.91; emberCol[i * 3 + 1] = 0.886; emberCol[i * 3 + 2] = 0.86; }
-    emberData.push({ sx: (Math.random() - 0.5) * 0.6, sy: 0.3 + Math.random() * 0.7, sz: (Math.random() - 0.5) * 0.5, sway: 0.5 + Math.random() * 1.5, swayR: 0.08 + Math.random() * 0.22, phase: Math.random() * Math.PI * 2 });
+    emberData.push({ sx: (Math.random() - 0.5) * 0.4, sy: 0.12 + Math.random() * 0.4, sz: (Math.random() - 0.5) * 0.35, sway: 0.4 + Math.random() * 1.2, swayR: 0.06 + Math.random() * 0.16, phase: Math.random() * Math.PI * 2 });
   }
   const emberGeo = new THREE.BufferGeometry();
   emberGeo.setAttribute('position', new THREE.BufferAttribute(emberPos, 3));
   emberGeo.setAttribute('color', new THREE.BufferAttribute(emberCol, 3));
   const embers = new THREE.Points(emberGeo, new THREE.PointsMaterial({
-    size: 0.085, vertexColors: true, transparent: true, opacity: 0.8,
+    size: 0.07, vertexColors: true, transparent: true, opacity: 0.5,
     blending: THREE.AdditiveBlending, depthWrite: false, map: emberTexture(),
   }));
   scene.add(embers);
@@ -237,8 +245,9 @@ function boot(canvas: HTMLCanvasElement) {
     tx.color = color;
     tx.anchorX = 'center';
     tx.anchorY = 'middle';
-    tx.outlineWidth = size * 0.04;
+    tx.outlineWidth = size * 0.012;
     tx.outlineColor = 0x0a0908;
+    tx.outlineBlur = size * 0.14; // soft coal halo for legibility, not a hard stroke
     tx.material.transparent = true;
     tx.position.set(x, y, z);
     tx.rotation.y = ry;
@@ -352,10 +361,12 @@ function boot(canvas: HTMLCanvasElement) {
 
   // ---- Render loop ---------------------------------------------------
   const render = () => {
+    const _t0 = (window as any).__onyxFrame ? performance.now() : 0; // perf probe (test only)
     const dt = Math.min(clock.getDelta(), 0.05);
     elapsed += dt;
     const t = elapsed;
     scrollP += (targetP - scrollP) * 0.16;
+    (window as any).__onyxP = scrollP; // progress read-back (harmless; used by capture harness)
     const idleK = 1 - Math.min(1, scrollP / 0.06);
 
     if (alive) {
@@ -398,6 +409,7 @@ function boot(canvas: HTMLCanvasElement) {
         const e = exit * exit; // ease-in the launch
         w.mesh.position.set(w.bx + w.fly.x * e, w.by + w.fly.y * e, w.bz + w.fly.z * e);
       }
+      if (k > 0.001) w.mesh.quaternion.copy(camera.quaternion); // billboard: always reads forward, never mirrored
     }
 
     // Content HTML reveals during its dwell window.
@@ -414,6 +426,7 @@ function boot(canvas: HTMLCanvasElement) {
     camera.position.set(s.px - px * 1.4, s.py + py * 0.9, s.pz);
     camera.lookAt(s.lx + px * 0.5, s.ly - py * 0.35, s.lz);
     composer.render();
+    if (_t0) (window as any).__onyxFrame(performance.now() - _t0); // per-frame work cost (ms)
   };
   gsap.ticker.add(render);
 
