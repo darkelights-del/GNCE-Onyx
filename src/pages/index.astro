@@ -1,24 +1,18 @@
 ---
 /**
- * Home — one immersive journey. The ONYX wordmark is a 3D object; the
- * camera flies from the whole word into each letter (O -> N -> Y -> X),
- * and each letter frames a segment of content (motion.ts, initJourney).
+ * Home — one continuous cinematic take. The ONYX word is a big, crisp 3D
+ * object that the camera tracks across left to right; as each letter fills
+ * the frame, its content is born from inside the letter and runs around it
+ * (motion.ts, initJourney). The word is the vehicle; the words are the point.
  * Without JS / under reduced motion it degrades to a stacked static page.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
-const stations = [
-  { letter: 'O', key: 'onyx' },
-  { letter: 'N', key: 'roots' },
-  { letter: 'Y', key: 'robot' },
-  { letter: 'X', key: 'crew' },
-];
-
+const letters = ['O', 'N', 'Y', 'X'];
 const numbers = ['22489', '26112', '26413', '26111'];
-const roster = ['Ethan Zhang', 'Ethan Zhuang', 'Anson Su', 'Adrian Chang', 'Leo Li', 'Nicholas Colli', 'Raymond Liu'];
-const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
+const roster = 'Ethan Zhang · Ethan Zhuang · Anson Su · Adrian Chang · Leo Li · Nicholas Colli · Raymond Liu';
 ---
 
 <BaseLayout
@@ -27,72 +21,76 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
 >
   <section class="journey" data-journey aria-label="GNCE Onyx">
     <div class="journey-stage scene-3d">
-      <!-- 3D wordmark: the camera flies through these letters -->
+      <!-- 3D wordmark: rendered large, the camera only ever scales it down -->
       <div class="journey-world preserve-3d" data-world aria-hidden="true">
         {
-          stations.map((s) => (
+          letters.map((letter) => (
             <div class="station-letter preserve-3d">
               {Array.from({ length: 8 }).map((_, d) => (
                 <span
                   class="letter-face"
-                  style={`transform:translateZ(${-(d + 1) * 4}px);color:color-mix(in srgb, var(--color-surface) ${92 - d * 9}%, var(--color-bg))`}
+                  style={`transform:translateZ(${-(d + 1) * 5}px);color:color-mix(in srgb, var(--color-surface) ${94 - d * 9}%, var(--color-bg))`}
                 >
-                  {s.letter}
+                  {letter}
                 </span>
               ))}
-              <span class="letter-front">{s.letter}</span>
+              <span class="letter-front">{letter}</span>
             </div>
           ))
         }
       </div>
 
-      <!-- Content, synced to each letter -->
+      <!-- Content, born from each letter as the camera arrives -->
       <div class="journey-overlay">
-        <!-- O: identity -->
-        <div class="panel" data-panel="0">
-          <p class="type-label text-muted">FIRST Tech Challenge · Weston, MA</p>
-          <p class="type-script panel-script">GNCE Onyx</p>
-          <p class="panel-sub">
-            A rookie robotics team of championship veterans, built for the
-            2026-2027 BIOBUZZ season.
-          </p>
-          <p class="panel-cta">
-            <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
-            <a href={`${base}/season/`} class="panel-link">Our first season</a>
-          </p>
+        <!-- O: who we are -->
+        <div class="flow" data-flow="0">
+          <div class="flow-inner">
+            <p class="flow-line flow-eyebrow type-label text-muted">First Tech Challenge · Weston, MA</p>
+            <p class="flow-line flow-script type-script">GNCE Onyx</p>
+            <h1 class="flow-line flow-hero type-display">A rookie team of championship veterans.</h1>
+            <p class="flow-line flow-support">Built for the 2026-2027 BIOBUZZ season, presented by RTX.</p>
+            <p class="flow-line flow-cta">
+              <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
+              <a href={`${base}/season/`} class="flow-link">Our first season</a>
+            </p>
+          </div>
         </div>
 
-        <!-- N: roots (brief, not highlighted) -->
-        <div class="panel" data-panel="1">
-          <h2 class="type-display panel-head">Where we come from</h2>
-          <p class="panel-sub">
-            Four of our seven are veterans of four GNCE teams, with world
-            championship and international records.
-          </p>
-          <p class="panel-numbers type-label text-muted">{numbers.join('  ·  ')}</p>
+        <!-- N: where we come from -->
+        <div class="flow flow-right" data-flow="1">
+          <div class="flow-inner">
+            <p class="flow-line flow-eyebrow type-label text-muted">Where we come from</p>
+            <h2 class="flow-line flow-hero type-display">Four of our seven are GNCE veterans.</h2>
+            <p class="flow-line flow-support">World championship and international records behind them.</p>
+            <p class="flow-line flow-meta type-label text-muted">{numbers.join('  ·  ')}</p>
+          </div>
         </div>
 
         <!-- Y: our robot -->
-        <div class="panel" data-panel="2">
-          <h2 class="type-display panel-head">Our robot</h2>
-          <p class="panel-sub">
-            Proven designs we can fix in the pit and trust on the field. The
-            build starts at kickoff.
-          </p>
-          <ul class="panel-specs">
-            {specs.map((s) => <li><span class="text-muted">{s}</span><span class="stub" title="Set at kickoff">TBD</span></li>)}
-          </ul>
+        <div class="flow" data-flow="2">
+          <div class="flow-inner">
+            <p class="flow-line flow-eyebrow type-label text-muted">Our robot</p>
+            <h2 class="flow-line flow-hero type-display">Designs we can fix in the pit and trust on the field.</h2>
+            <p class="flow-line flow-support">Proven where it counts. The build starts at kickoff.</p>
+            <p class="flow-line flow-meta type-label text-muted">Size, weight, drivetrain <span class="stub" title="Set at kickoff">TBD</span></p>
+          </div>
         </div>
 
-        <!-- X: crew + close -->
-        <div class="panel" data-panel="3">
-          <h2 class="type-display panel-head">The crew</h2>
-          <p class="panel-roster">{roster.join(' · ')}. Two or three more, joining soon.</p>
-          <p class="panel-cta">
-            <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Back the build</a>
-          </p>
+        <!-- X: the crew + close -->
+        <div class="flow flow-right" data-flow="3">
+          <div class="flow-inner">
+            <p class="flow-line flow-eyebrow type-label text-muted">The crew</p>
+            <h2 class="flow-line flow-hero type-display flow-hero-sm">{roster}</h2>
+            <p class="flow-line flow-support">Two or three more, joining soon.</p>
+            <p class="flow-line flow-cta">
+              <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Back the build</a>
+            </p>
+          </div>
         </div>
       </div>
+
+      <!-- Scroll cue, fades once you move -->
+      <p class="journey-cue type-label text-muted" data-journey-cue>Scroll</p>
     </div>
   </section>
 </BaseLayout>
@@ -106,21 +104,23 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
     position: relative;
     height: 100svh;
     overflow: clip;
-    perspective: 1200px;
+    perspective: 1400px;
   }
 
+  /* The word lives at natural (large) size; the camera scales it DOWN to the
+     overview and up to at most 1:1 on a letter, so text never upscales. */
   .journey-world {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: max-content;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.12em;
+    gap: 0.1em;
     transform-origin: 0 0;
     font-family: var(--font-display);
-    font-size: clamp(5rem, 20vw, 16rem);
+    font-size: 132vh;
     line-height: 1;
-    will-change: transform;
   }
 
   .station-letter {
@@ -130,63 +130,95 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
     backface-visibility: hidden;
   }
 
-  /* Front face: a bright outline that reads as a wordmark. */
+  /* Front face: a quiet outline. The letter frames the words; it never
+     competes with them, so it reads as a vehicle, not the headline. */
   .letter-front {
     position: relative;
     z-index: 2;
     color: transparent;
-    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-ink) 78%, transparent);
+    -webkit-text-stroke: 0.006em color-mix(in srgb, var(--color-ink) 50%, transparent);
   }
 
-  /* Extrusion body: solid dark purple steps behind the outline. */
+  /* Extrusion body: solid dark steps that read as a tunnel the words rise out of. */
   .letter-face {
     position: absolute;
     top: 0;
     left: 0;
   }
 
-  /* Content overlay (screen space, crisp) */
+  /* Content overlay — screen space, always crisp, centered on the framed letter. */
   .journey-overlay {
     position: absolute;
     inset: 0;
+    display: grid;
+    place-items: center;
     pointer-events: none;
   }
 
-  .panel {
-    position: absolute;
-    left: clamp(1.25rem, 6vw, 6rem);
-    bottom: clamp(3rem, 12vh, 8rem);
-    width: min(90vw, 34rem);
-    pointer-events: auto;
+  .flow {
+    grid-area: 1 / 1;
+    width: min(88vw, 44rem);
+    pointer-events: none;
   }
 
-  .panel > * + * {
-    margin-top: 1.25rem;
+  /* Nudge some blocks off dead-center so they sit in the letter's open space. */
+  .flow-right {
+    justify-self: end;
+    width: min(80vw, 40rem);
   }
 
-  .panel-head {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    line-height: 1;
+  .flow-inner {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.7rem, 1.7vw, 1.2rem);
   }
 
-  .panel-script {
-    font-size: clamp(1.75rem, 5vw, 3rem);
+  .flow-line {
+    will-change: transform, clip-path;
+  }
+
+  .flow-eyebrow {
+    margin-bottom: 0.2rem;
+  }
+
+  .flow-script {
+    font-size: clamp(2rem, 6vw, 3.6rem);
     color: var(--color-accent);
+    line-height: 0.9;
   }
 
-  .panel-sub {
-    max-width: 32rem;
+  .flow-hero {
+    font-size: clamp(2.1rem, 5.2vw, 3.9rem);
+    line-height: 1.03;
+    max-width: 18ch;
+  }
+
+  .flow-hero-sm {
+    font-size: clamp(1.4rem, 3vw, 2.1rem);
+    line-height: 1.25;
+    max-width: 26ch;
+  }
+
+  .flow-support {
+    max-width: 34ch;
     color: var(--color-muted);
+    font-size: 1.0625rem;
   }
 
-  .panel-cta {
+  .flow-meta {
+    letter-spacing: 0.16em;
+  }
+
+  .flow-cta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 1.5rem;
+    pointer-events: auto;
+    margin-top: 0.6rem;
   }
 
-  .panel-link {
+  .flow-link {
     color: var(--color-ink);
     font-weight: 700;
     font-size: 0.9375rem;
@@ -197,29 +229,21 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
     text-decoration-color: var(--color-accent);
   }
 
-  .panel-numbers {
-    letter-spacing: 0.18em;
+  .journey-cue {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1.5rem, 4vh, 2.5rem);
+    transform: translateX(-50%);
+    pointer-events: none;
   }
 
-  .panel-specs {
-    columns: 2;
-    column-gap: 2.5rem;
-    max-width: 30rem;
-  }
-
-  .panel-specs li {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    border-top: 1px solid var(--color-line);
-    padding: 0.5rem 0;
-    break-inside: avoid;
-  }
-
-  .panel-roster {
-    max-width: 34rem;
-    color: var(--color-ink);
-    line-height: 1.6;
+  .journey-cue::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 2.2rem;
+    margin: 0.6rem auto 0;
+    background: var(--color-line);
   }
 
   /* ---- No-JS / reduced motion: a readable stacked page ---------- */
@@ -231,8 +255,9 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
 
   :global(html:not(.gsap)) .journey-world {
     position: relative;
-    inset: auto;
+    width: auto;
     flex-wrap: wrap;
+    justify-content: center;
     font-size: clamp(4rem, 16vw, 10rem);
     padding: 8rem 1.25rem 2rem;
     transform: none !important;
@@ -240,12 +265,21 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
 
   :global(html:not(.gsap)) .journey-overlay {
     position: static;
+    display: block;
   }
 
-  :global(html:not(.gsap)) .panel {
-    position: static;
+  :global(html:not(.gsap)) .flow {
     width: auto;
-    max-width: 42rem;
+    max-width: 44rem;
+    margin: 0 auto;
     padding: 3rem clamp(1.25rem, 6vw, 6rem);
+  }
+
+  :global(html:not(.gsap)) .flow-right {
+    justify-self: auto;
+  }
+
+  :global(html:not(.gsap)) .journey-cue {
+    display: none;
   }
 </style>
