@@ -96,11 +96,13 @@ function boot(canvas: HTMLCanvasElement) {
     mesh.lookAt(0, 0, 0);
     envScene.add(mesh);
   };
-  panel(0xe8e2dc, 4.8, -9, 8, 7, 18, 18); // off-white key, upper-left
-  panel(0x7a0f26, 2.6, 12, 1, 5, 12, 14); // deep crimson, right (wine, not hot pink)
-  panel(0x4a2c64, 2.6, -6, -5, -9, 13, 13); // purple, lower-back
-  panel(0xb4aab2, 2.6, 0, 1, 13, 30, 30); // soft silver fill, front (clearcoat sheen)
-  panel(0x8a8490, 1.7, 9, 2, -11, 20, 20); // silver back-fill so orbits never void to black
+  // Palette only: the metal reflects off-white (the "white/silver" sheen),
+  // crimson and purple — never a neutral gray.
+  panel(0xe8e2dc, 3.8, -9, 8, 7, 18, 18); // off-white key, upper-left
+  panel(0x6e0d25, 2.2, 12, 1, 5, 12, 14); // crimson rim, right
+  panel(0x2b1b2f, 2.8, -6, -5, -9, 14, 14); // purple, lower-back
+  panel(0xe8e2dc, 2.3, 0, 1, 13, 26, 26); // off-white front fill (clearcoat sheen)
+  panel(0x2b1b2f, 2.1, 9, 2, -11, 20, 20); // purple back-fill so orbits never void to pure black
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(envScene, 0.05).texture;
 
@@ -108,18 +110,19 @@ function boot(canvas: HTMLCanvasElement) {
   // metal reflection stays dark (onyx), the clearcoat adds the white/silver
   // sheen on top — a metallic body with white/silver, done for real.
   const material = new THREE.MeshPhysicalMaterial({
-    color: 0x231b2b,
-    metalness: 0.86,
-    roughness: 0.34,
-    envMapIntensity: 1.55,
-    clearcoat: 0.7,
-    clearcoatRoughness: 0.22,
+    color: 0x2b1b2f, // palette panel purple — the lit onyx body reads violet, not black
+    metalness: 0.62, // lower, so the diffuse purple shows and faces never void to black
+    roughness: 0.4,
+    envMapIntensity: 1.35,
+    clearcoat: 0.6, // the off-white clearcoat sheen (the "white/silver") sits on top
+    clearcoatRoughness: 0.28,
+    side: THREE.DoubleSide, // never cull a face to reveal the hollow interior
   });
 
   // One shadow-casting key (warm), a cool purple back-rim, a crimson rim, a
   // hemisphere fill, and a low ambient so faces never fall to pure black when
   // the camera swings behind a letter.
-  scene.add(new THREE.AmbientLight(0x2a2036, 0.42));
+  scene.add(new THREE.AmbientLight(0x2a2036, 0.5));
   const key = new THREE.SpotLight(0xfff4e8, 340, 60, Math.PI / 6, 0.45, 2);
   key.position.set(-7, 13, 10);
   key.castShadow = !LOWPERF;
@@ -131,7 +134,7 @@ function boot(canvas: HTMLCanvasElement) {
   scene.add(key);
   const backRim = new THREE.DirectionalLight(0x5a3a86, 2.0); backRim.position.set(6, 4, -8); scene.add(backRim);
   const crimsonRim = new THREE.DirectionalLight(0x6e0d25, 2.2); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
-  const hemi = new THREE.HemisphereLight(0x4a3856, 0x0a0908, 0.68); scene.add(hemi);
+  const hemi = new THREE.HemisphereLight(0x4a3856, 0x0a0908, 0.85); scene.add(hemi);
 
   // Shadow catcher: a plane below the letters so the cast shadow reads over
   // coal without an off-brand bright floor.
@@ -184,13 +187,18 @@ function boot(canvas: HTMLCanvasElement) {
     const shapes: THREE.Shape[] = [];
     for (const p of parsed.paths) shapes.push(...SVGLoader.createShapes(p));
     const geo = new THREE.ExtrudeGeometry(shapes, {
-      depth: 168, bevelEnabled: true, bevelThickness: 8, bevelSize: 5, bevelOffset: 0, bevelSegments: 3, curveSegments: 10,
+      depth: 150, bevelEnabled: true, bevelThickness: 7, bevelSize: 5, bevelOffset: 0, bevelSegments: 2, curveSegments: 14,
     });
     geo.scale(GLYPH_SCALE, -GLYPH_SCALE, GLYPH_SCALE); // flip y (glyph is y-down) -> upright
     geo.center();
-    const welded = mergeVertices(geo, 1e-4); // weld coincident verts -> kills normal-flip seams
-    welded.computeVertexNormals();
-    return welded;
+    // Crisp, hard-edged shading: keep the geometry non-indexed (ExtrudeGeometry
+    // is) and compute FLAT per-face normals. Welding + smoothing was averaging
+    // normals across the cap/wall/bevel edges, smearing them into one another so
+    // the front, sides and back never read as separate planes. Double-sided
+    // material makes the flip introduced by the y-mirror irrelevant.
+    const g = geo.toNonIndexed();
+    g.computeVertexNormals();
+    return g;
   }
 
   const group = new THREE.Group();
@@ -238,13 +246,13 @@ function boot(canvas: HTMLCanvasElement) {
     tx.sync();
     woven.push({ mesh: tx, a, b });
   };
-  // Windows fade each word out BEFORE its readable HTML dwell, so it flows
-  // through / around the letter during the transit and never stacks on the
-  // content that follows.
+  // Off-white words flow through / around their letter during the transit.
+  // The crimson script on X is the signature: it settles in front, lower-left,
+  // as the camera faces X head-on and the roster reads on the right.
   addWoven('veterans', uncialUrl, 1.4, 0xe8e2dc, L[0], 0, -6.5, 0.31, 0.41); // flashes through the O hole
   addWoven('our roots', cardoUrl, 1.6, 0xe8e2dc, L[1], -0.4, -2.6, 0.37, 0.50); // N strokes cut across it
   addWoven('the robot', cardoUrl, 1.5, 0xe8e2dc, L[2], -1.6, 3.4, 0.61, 0.74); // sweeps in front of Y
-  addWoven('our team', greyUrl, 2.6, 0xc21a3c, L[3], 1.4, 2.8, 0.80, 0.89); // crimson flourish sweeps around X
+  addWoven('our team', greyUrl, 2.4, 0x6e0d25, L[3] - 2.1, -2.7, 3.4, 0.88, 1.02); // crimson script signature on X
 
   // ---- Camera journey: a keyframe path threaded through the letters ---
   type KF = { t: number; px: number; py: number; pz: number; lx: number; ly: number; lz: number; roll: number };
