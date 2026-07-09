@@ -75,6 +75,10 @@ function boot() {
       initJourney();
       initHorizontalReveal();
       initHScroll();
+      initScreens();
+      initDriftCols();
+      initMarquee();
+      if (FINE) initTilt();
       initFlip();
       initTierLadder();
       initProgress();
@@ -220,6 +224,12 @@ function initReveals() {
     } else if (v === 'scale') {
       from.clipPath = 'inset(100% 0 0 0)';
       from.scale = 0.94;
+    } else if (v === 'diag') {
+      // Corner wipe: opens from the top-left, drifting in from the same
+      // corner so the wipe origin and the motion origin agree.
+      from.clipPath = 'inset(0 100% 100% 0)';
+      from.x = -22;
+      from.y = -22;
     }
     gsap.set(el, from);
     const delay = (parseFloat(el.dataset.revealDelay || '0') || 0) / 1000;
@@ -566,24 +576,126 @@ function initHorizontalReveal() {
   });
 }
 
-/* SCENE: horizontal scroll-hijack (season build log). [data-hscroll]   */
-/* pins and pans its [data-hscroll-track] sideways. */
+/* SCENE: build-log drift (season). [data-hscroll] pins and pans its      */
+/* [data-hscroll-track] on a shallow DIAGONAL — the log climbs as the     */
+/* season advances — while panels counter-drift vertically in alternation */
+/* (a cross-current inside the pan) and the whole track skews with scroll */
+/* velocity, springing straight as it settles. */
 function initHScroll() {
   const wrap = document.querySelector<HTMLElement>('[data-hscroll]');
   const track = wrap?.querySelector<HTMLElement>('[data-hscroll-track]');
   if (!wrap || !track) return;
   const distance = () => track.scrollWidth - window.innerWidth;
-  gsap.to(track, {
-    x: () => -distance(),
-    ease: 'none',
-    scrollTrigger: {
-      trigger: wrap,
-      start: 'top top',
-      end: () => `+=${distance()}`,
-      pin: true,
-      scrub: 0.6,
-      invalidateOnRefresh: true,
-    },
+  const skewTo = gsap.quickTo(track, 'skewX', { duration: 0.45, ease: 'power2.out' });
+  gsap.fromTo(track,
+    { y: () => window.innerHeight * 0.055 },
+    {
+      x: () => -distance(),
+      y: () => -window.innerHeight * 0.055,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: wrap,
+        start: 'top top',
+        end: () => `+=${distance()}`,
+        pin: true,
+        scrub: 0.6,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => skewTo(gsap.utils.clamp(-3.5, 3.5, self.getVelocity() / 260)),
+      },
+    });
+  // The cross-current: odd panels ride up while even panels sink, so
+  // neighbours pass each other mid-pan.
+  gsap.utils.toArray<HTMLElement>('.hscroll-panel', track).forEach((panel, i) => {
+    gsap.fromTo(panel, { y: i % 2 ? -42 : 42 }, {
+      y: i % 2 ? 42 : -42,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: wrap,
+        start: 'top top',
+        end: () => `+=${distance()}`,
+        scrub: 0.9,
+        invalidateOnRefresh: true,
+      },
+    });
+  });
+}
+
+/* SCENE: screen-on (season highlight match). [data-screen] opens like a  */
+/* cinema screen: the letterbox bars part from the centre, locked to      */
+/* scroll, so the match slot literally powers on as it enters. */
+function initScreens() {
+  gsap.utils.toArray<HTMLElement>('[data-screen]').forEach((el) => {
+    gsap.fromTo(
+      el,
+      { clipPath: 'inset(50% 0% 50% 0%)', opacity: 1 },
+      {
+        clipPath: 'inset(0% 0% 0% 0%)',
+        ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 38%', scrub: 0.5 },
+      }
+    );
+  });
+}
+
+/* SCENE: gallery cross-drift (season). Sibling [data-drift="±px"]        */
+/* columns scrub in opposite directions, so the photo grid shears and     */
+/* crosses as it passes — depth without cards. */
+function initDriftCols() {
+  gsap.utils.toArray<HTMLElement>('[data-drift]').forEach((col) => {
+    const d = parseFloat(col.dataset.drift || '40');
+    gsap.fromTo(col, { y: d }, {
+      y: -d,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: col.parentElement,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true,
+      },
+    });
+  });
+}
+
+/* SCENE: outreach ticker. [data-marquee] loops its duplicated            */
+/* [data-marquee-track], geared to the scroll: it turns when the page     */
+/* turns (backwards when you scroll back up), coasts briefly on released  */
+/* momentum, and RESTS when the reader rests — motion is never idle.      */
+function initMarquee() {
+  const wrap = document.querySelector<HTMLElement>('[data-marquee]');
+  const trk = wrap?.querySelector<HTMLElement>('[data-marquee-track]');
+  if (!wrap || !trk) return;
+  let x = 0;
+  let momentum = 0;
+  (window as any).__motion?.lenis?.on('scroll', (e: { velocity?: number }) => {
+    momentum = gsap.utils.clamp(-320, 320, (e.velocity || 0) * -9);
+  });
+  gsap.ticker.add((_t, dms) => {
+    if (Math.abs(momentum) < 0.5) return; // at rest: no work, no motion
+    const dt = Math.min(dms, 80) / 1000;
+    x += momentum * dt;
+    momentum *= Math.pow(0.12, dt); // coast to a stop within ~a second
+    const h = trk.scrollWidth / 2;
+    if (h > 0) x = -((-x % h) + h) % h;
+    gsap.set(trk, { x });
+  });
+}
+
+/* [data-tilt] — glass panels lean toward the cursor (contact). The one   */
+/* pointer-depth effect outside the hero. Pointer-fine only. */
+function initTilt() {
+  document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((el) => {
+    gsap.set(el, { transformPerspective: 900 });
+    const rx = gsap.quickTo(el, 'rotationX', { duration: 0.5, ease: 'power3.out' });
+    const ry = gsap.quickTo(el, 'rotationY', { duration: 0.5, ease: 'power3.out' });
+    el.addEventListener('pointermove', (e) => {
+      const r = el.getBoundingClientRect();
+      rx(((e.clientY - r.top) / r.height - 0.5) * -6);
+      ry(((e.clientX - r.left) / r.width - 0.5) * 6);
+    });
+    el.addEventListener('pointerleave', () => {
+      rx(0);
+      ry(0);
+    });
   });
 }
 
