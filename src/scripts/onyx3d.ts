@@ -237,20 +237,23 @@ function boot(canvas: HTMLCanvasElement) {
     tx.sync();
     woven.push({ mesh: tx, a, b });
   };
-  addWoven('veterans', uncialUrl, 1.5, 0xe8e2dc, L[0], 0, -6, 0.14, 0.38); // seen through the O hole
-  addWoven('our roots', cardoUrl, 1.7, 0xe8e2dc, L[1], -0.4, -2.6, 0.40, 0.62); // N strokes cut across it
-  addWoven('the robot', cardoUrl, 1.5, 0xe8e2dc, L[2], -1.6, 3.4, 0.63, 0.83); // in front of Y
-  addWoven('the crew', greyUrl, 2.6, 0xc21a3c, L[3], 1.4, 2.8, 0.84, 1.0); // crimson flourish around X
+  // Windows fade the word out BEFORE its readable HTML dwell, so it flows
+  // through / around the letter during the transit and never stacks on the
+  // content. The crimson X flourish is the exception: it rides the dwell.
+  addWoven('veterans', uncialUrl, 1.4, 0xe8e2dc, L[0], 0, -6.5, 0.31, 0.41); // flashes through the O hole
+  addWoven('our roots', cardoUrl, 1.6, 0xe8e2dc, L[1], -0.4, -2.6, 0.37, 0.50); // N strokes cut across it
+  addWoven('the robot', cardoUrl, 1.5, 0xe8e2dc, L[2], -1.6, 3.4, 0.61, 0.74); // sweeps in front of Y
+  addWoven('the crew', greyUrl, 2.6, 0xc21a3c, L[3], 1.4, 2.8, 0.86, 1.0); // crimson flourish around X
 
   // ---- Camera journey: a keyframe path threaded through the letters ---
   type KF = { t: number; px: number; py: number; pz: number; lx: number; ly: number; lz: number; roll: number };
   const KEYS: KF[] = [
     { t: 0.00, px: 0, py: 2.4, pz: 27, lx: 0, ly: 0, lz: 0, roll: 0 }, // overview
     { t: 0.09, px: 0, py: 2.1, pz: 23, lx: 0, ly: 0, lz: 0, roll: 0 },
-    { t: 0.16, px: L[0], py: 1.1, pz: 9, lx: L[0], ly: 0, lz: -1, roll: 0 }, // approach O
-    { t: 0.21, px: L[0], py: 0.3, pz: 3, lx: L[0], ly: 0, lz: -6, roll: 0 }, // at the hole
-    { t: 0.26, px: L[0], py: 0, pz: 0, lx: L[0], ly: 0, lz: -6, roll: 0 }, // inside the ring
-    { t: 0.33, px: L[0], py: 0, pz: -3.4, lx: L[0], ly: 0, lz: -6.5, roll: 0 }, // exit, word framed by ring
+    { t: 0.14, px: L[0] - 1, py: 1.0, pz: 10, lx: L[0], ly: 0, lz: 0, roll: 0 }, // approach O, framed
+    { t: 0.22, px: L[0] + 0.6, py: 0.6, pz: 7, lx: L[0], ly: 0, lz: 0, roll: 0 }, // O held (identity dwell)
+    { t: 0.31, px: L[0], py: 0.2, pz: 2.4, lx: L[0], ly: 0, lz: -6, roll: 0 }, // enter the hole
+    { t: 0.37, px: L[0], py: 0, pz: -1, lx: L[0], ly: 0, lz: -6.5, roll: 0 }, // through the hole (word flashes)
     { t: 0.42, px: L[1] - 4.5, py: 0.9, pz: -6.5, lx: L[1], ly: 0, lz: -0.5, roll: 0.16 }, // swing behind N
     { t: 0.49, px: L[1] - 6, py: 0.7, pz: -1.2, lx: L[1], ly: 0, lz: 0, roll: 0.32 }, // orbit N
     { t: 0.57, px: L[1], py: 0.8, pz: 8.5, lx: L[1], ly: 0, lz: 0, roll: 0 }, // front N
@@ -276,7 +279,7 @@ function boot(canvas: HTMLCanvasElement) {
   // Content dwell windows: the readable HTML for each letter reveals while the
   // camera holds on it (O framed through the hole; N/Y/X front; X close).
   const DWELL = [
-    { a: 0.22, b: 0.37 },
+    { a: 0.17, b: 0.29 },
     { a: 0.53, b: 0.63 },
     { a: 0.76, b: 0.83 },
     { a: 0.89, b: 1.01 },
