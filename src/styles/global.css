@@ -230,7 +230,8 @@ html.gsap [data-reveal] {
 html.will-animate [data-split],
 html.will-animate [data-reveal-scrub],
 html.will-animate [data-count],
-html.will-animate .panel {
+html.will-animate .panel,
+html.will-animate .station-letter {
   opacity: 0;
 }
 

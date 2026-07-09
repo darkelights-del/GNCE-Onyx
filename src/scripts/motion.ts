@@ -363,26 +363,116 @@ function initHoverPreview() {
 /* whole wordmark into each letter (O -> N -> Y -> X); each letter's    */
 /* content panel wipes in when the camera arrives.                      */
 /* ================================================================== */
+/**
+ * Each letter has a personality: how it flies in to assemble the wordmark,
+ * how it breathes while idle, and how hard it leans toward the cursor.
+ *   in*  — scattered start for the assemble (offset from its slot)
+ *   idle — gentle infinite float (property -> amplitude); rz/rx are degrees
+ *   depth/tilt — cursor parallax strength (px of shift, deg of turn)
+ */
+type LetterProfile = {
+  inx: number; iny: number; inz: number; iry: number; irz: number; irx: number; isc: number;
+  y: number; rz: number; rx: number; z: number; dur: number;
+  depth: number; tilt: number;
+};
+
 function initJourney() {
   const journey = document.querySelector<HTMLElement>('.journey');
+  const stage = journey?.querySelector<HTMLElement>('.journey-stage');
   const world = document.querySelector<HTMLElement>('[data-world]');
-  if (!journey || !world) return;
+  if (!journey || !stage || !world) return;
   const letters = gsap.utils.toArray<HTMLElement>('.station-letter', world);
   const panels = gsap.utils.toArray<HTMLElement>('.panel');
   if (!letters.length) return;
 
   const S = 2.7; // zoom factor when a letter fills the frame
+  const iw = window.innerWidth;
+  const ih = window.innerHeight;
+
   gsap.set(world, { transformOrigin: '0 0', x: 0, y: 0, scale: 1, force3D: true });
   gsap.set(panels, { clipPath: 'inset(0 0 100% 0)', opacity: 1 });
+  gsap.set(letters, { opacity: 1 }); // inline beats html.will-animate pre-hide
 
-  // Camera target to center letter i, measured from its untransformed
-  // layout position (transform-origin 0 0 => screen = translate + scale*pos).
+  // O hinges in from the left; N drops from the ceiling; Y launches up and
+  // tumbles; X streaks in from the right and spins to rest.
+  const P: LetterProfile[] = [
+    { inx: -iw * 0.55, iny: -30, inz: -500, iry: 130, irz: -20, irx: 0, isc: 0.5,
+      y: -12, rz: 2.6, rx: 0, z: 38, dur: 5.4, depth: 26, tilt: 9 },
+    { inx: 0, iny: -ih * 0.78, inz: -260, iry: 0, irz: 0, irx: -85, isc: 0.6,
+      y: 10, rz: 0, rx: 4.5, z: 26, dur: 4.7, depth: 16, tilt: 7 },
+    { inx: 0, iny: ih * 0.72, inz: -560, iry: 0, irz: 95, irx: 0, isc: 0.5,
+      y: -14, rz: -3.2, rx: 0, z: 52, dur: 6.1, depth: 20, tilt: 8 },
+    { inx: iw * 0.55, iny: 36, inz: -820, iry: -130, irz: 28, irx: 0, isc: 0.5,
+      y: 9, rz: 3.6, rx: 3.4, z: 30, dur: 5.0, depth: 30, tilt: 11 },
+  ];
+
+  let calm = 0; // 0 while idle at the top, -> 1 as the fly-through takes over
+  let alive = false; // idle floats + cursor lean run only after the assemble
+
+  // Center letter i, measured from its untransformed layout box
+  // (transform-origin 0 0 => screen = translate + scale*pos). The per-letter
+  // float/lean transforms don't move offsetLeft, so this stays exact.
   const camFor = (i: number) => {
     const L = letters[i];
     const cx = L.offsetLeft + L.offsetWidth / 2;
     const cy = L.offsetTop + L.offsetHeight / 2;
     return { x: window.innerWidth / 2 - S * cx, y: window.innerHeight / 2 - S * cy };
   };
+
+  // Idle float: a few desynced sine oscillations so no letter mirrors another.
+  // y/rz/rx/z are the letter's own props; cursor owns x + rotationY (no clash).
+  const startIdle = (L: HTMLElement, p: LetterProfile, i: number) => {
+    const f = (prop: string, amp: number, mult: number) =>
+      gsap.to(L, { [prop]: amp, duration: p.dur * mult, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: i * 0.18 });
+    if (p.y) f('y', p.y, 1);
+    if (p.rz) f('rotationZ', p.rz, 1.35);
+    if (p.rx) f('rotationX', p.rx, 1.1);
+    if (p.z) f('z', p.z, 0.85);
+  };
+
+  const startAlive = () => {
+    if (alive) return;
+    alive = true;
+    letters.forEach((L, i) => startIdle(L, P[i], i));
+  };
+
+  // Assemble: the four letters fly in from their scattered starts and lock
+  // into the wordmark. Only at the very top; a mid-page reload skips it.
+  if (window.scrollY < 12) {
+    const intro = gsap.timeline({ delay: 0.15, onComplete: startAlive });
+    letters.forEach((L, i) => {
+      const p = P[i];
+      intro.from(
+        L,
+        { opacity: 0, x: p.inx, y: p.iny, z: p.inz, rotationY: p.iry, rotationZ: p.irz, rotationX: p.irx, scale: p.isc, ease: 'expo.out', duration: 1.5 },
+        i * 0.13
+      );
+    });
+  } else {
+    startAlive();
+  }
+
+  // Cursor lean: each letter turns and slides toward the pointer by its own
+  // depth, fading out (k = 1 - calm) as the fly-through begins so the framed
+  // letter settles dead center. Pointer-fine only.
+  if (FINE) {
+    let px = 0;
+    const setX = letters.map((L) => gsap.quickTo(L, 'x', { duration: 0.7, ease: 'power3.out' }));
+    const setRY = letters.map((L) => gsap.quickTo(L, 'rotationY', { duration: 0.7, ease: 'power3.out' }));
+    stage.addEventListener('pointermove', (e) => {
+      const r = stage.getBoundingClientRect();
+      px = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    });
+    stage.addEventListener('pointerleave', () => (px = 0));
+    gsap.ticker.add(() => {
+      if (!alive) return;
+      const k = 1 - calm;
+      for (let i = 0; i < letters.length; i++) {
+        setX[i](px * P[i].depth * k);
+        setRY[i](px * P[i].tilt * k);
+      }
+    });
+  }
 
   const tl = gsap.timeline({
     scrollTrigger: {
@@ -393,6 +483,7 @@ function initJourney() {
       scrub: 0.8,
       anticipatePin: 1,
       invalidateOnRefresh: true,
+      onUpdate: (self) => (calm = Math.min(1, self.progress / 0.06)),
     },
   });
 

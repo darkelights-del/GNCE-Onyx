@@ -126,6 +126,8 @@ const specs = ['Size', 'Mass', 'Drivetrain', 'TeleOp', 'Auto', 'Solo score'];
   .station-letter {
     position: relative;
     display: inline-block;
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   /* Front face: a bright outline that reads as a wordmark. */
