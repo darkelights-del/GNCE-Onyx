@@ -48,16 +48,11 @@ function boot() {
   gsap.ticker.lagSmoothing(0);
   (window as any).__motion = { lenis, ScrollTrigger, gsap };
 
-  const loading = root.classList.contains('loading');
-  const startDelay = loading ? 950 : 60;
-  if (loading) {
-    try {
-      sessionStorage.setItem('intro-seen', '1');
-    } catch (e) {
-      /* storage blocked */
-    }
-    setTimeout(() => root.classList.remove('loading'), 900);
-  }
+  // The intro load meter (BaseLayout) owns the cover: it counts up with
+  // real font loading, then lifts it and fires `intro:done`. When it is
+  // active we sync the hero entrance to that lift instead of a fixed timer.
+  const introActive = root.classList.contains('loading');
+  const startDelay = introActive ? 120 : 60;
 
   const run = () => {
     try {
@@ -98,11 +93,19 @@ function boot() {
     started = true;
     setTimeout(run, startDelay);
   };
-  fontsReady.then(kick);
-  setTimeout(kick, 1400);
+  if (introActive) {
+    // Enter as the cover lifts. Fall back if the meter never signals.
+    if ((window as any).__introDone) kick();
+    else document.addEventListener('intro:done', kick, { once: true });
+    setTimeout(kick, 4600);
+  } else {
+    fontsReady.then(kick);
+    setTimeout(kick, 1400);
+  }
+  const revealFailsafe = introActive ? 6800 : startDelay + 2800;
   setTimeout(() => {
     if (!root.classList.contains('motion-booted')) showEverything();
-  }, startDelay + 2800);
+  }, revealFailsafe);
 
   // Re-split headings on width change so masked lines stay correct.
   let rz: number | undefined;

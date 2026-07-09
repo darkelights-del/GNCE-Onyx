@@ -47,12 +47,20 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
           setTimeout(function () {
             document.documentElement.classList.remove('will-animate');
           }, 2600);
-          // Intro cover: once per session.
+          // Intro cover: once per session. The load meter (just below
+          // <body>) counts up with real font loading and lifts the cover
+          // itself; this timeout is only a last resort so the cover can
+          // never get stuck if that script fails to run.
           if (!sessionStorage.getItem('intro-seen')) {
             document.documentElement.classList.add('loading');
             setTimeout(function () {
               document.documentElement.classList.remove('loading');
-            }, 2000);
+              try {
+                sessionStorage.setItem('intro-seen', '1');
+              } catch (e) {
+                /* storage blocked */
+              }
+            }, 4500);
           }
         }
       } catch (e) {
@@ -63,13 +71,103 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
   <body class="min-h-svh bg-bg text-ink antialiased">
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <!-- Intro cover: the wordmark is struck once, then the cover lifts
-         into the hero's entrance. Skipped after first view. -->
+    <!-- Intro cover: a load meter counts up in time with the fonts, then
+         the cover lifts into the hero's entrance. Skipped after first view. -->
     <div class="intro" data-intro aria-hidden="true">
-      <p class="intro-mark type-display">
-        <span class="intro-line">GNCE Onyx</span>
-      </p>
+      <div class="intro-loader">
+        <p class="intro-count">
+          <span class="intro-num" data-intro-num>0</span><span class="intro-pct">%</span>
+        </p>
+        <div class="intro-gauge"><span class="intro-gauge-fill" data-intro-fill></span></div>
+      </div>
     </div>
+
+    <!-- Drives the load meter from real font loading (the "text"). Inline
+         so counting starts during parse, before the motion module loads,
+         and still runs if that module fails. Only active while the cover
+         is up (html.loading), so reduced-motion / repeat visits skip it. -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        if (!root.classList.contains('loading')) return;
+        var numEl = document.querySelector('[data-intro-num]');
+        var fillEl = document.querySelector('[data-intro-fill]');
+        if (!numEl || !fillEl) return;
+
+        // Real progress: the fraction of the site's font faces that have
+        // loaded. document.fonts.ready is the definitive "text is ready".
+        var target = 0;
+        var fonts = document.fonts;
+        if (fonts && fonts.load) {
+          var specs = [
+            '1em "Uncial Antiqua"',
+            '1em "Grey Qo"',
+            '1em "Cardo"',
+            '700 1em "Cardo"',
+            'italic 1em "Cardo"',
+          ];
+          var loaded = 0;
+          var step = function () {
+            loaded++;
+            target = Math.max(target, loaded / specs.length);
+          };
+          specs.forEach(function (s) {
+            fonts.load(s).then(step, step);
+          });
+          fonts.ready.then(
+            function () {
+              target = 1;
+            },
+            function () {
+              target = 1;
+            }
+          );
+        } else {
+          target = 1;
+        }
+
+        var start = performance.now();
+        var MIN = 900; // a real screen, never a flash, even from cache
+        var MAX = 3400; // never hang
+        var shown = 0;
+        var done = false;
+
+        function lift() {
+          if (done) return;
+          done = true;
+          try {
+            sessionStorage.setItem('intro-seen', '1');
+          } catch (e) {
+            /* storage blocked */
+          }
+          setTimeout(function () {
+            window.__introDone = true;
+            root.classList.remove('loading');
+            document.dispatchEvent(new Event('intro:done'));
+          }, 160); // a beat on 100 before the cover lifts
+        }
+
+        function frame(now) {
+          var elapsed = now - start;
+          // Track real loading, but never outrun the time floor, and force
+          // it home past MAX. goal only ever rises, so the count is monotonic.
+          var goal = elapsed >= MAX ? 1 : Math.min(target, elapsed / MIN);
+          shown += (goal - shown) * 0.16;
+          if (goal - shown < 0.004) shown = goal;
+          if (shown < 0) shown = 0;
+          if (shown >= 1) {
+            numEl.textContent = '100';
+            fillEl.style.transform = 'scaleX(1)';
+            lift();
+            return;
+          }
+          numEl.textContent = String(Math.max(0, Math.round(shown * 100)));
+          fillEl.style.transform = 'scaleX(' + shown.toFixed(4) + ')';
+          requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      })();
+    </script>
 
     <!-- Heat rail: fills with scroll like a gauge. Scroll-driven CSS;
          browsers without support simply never show it. -->
@@ -114,22 +212,66 @@ const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
         display: none;
       }
 
-      .intro-mark {
-        overflow: clip;
-        font-size: clamp(2.5rem, 8vw, 5rem);
-        color: var(--color-ink);
+      .intro-loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.4rem;
       }
 
-      .intro-line {
-        display: block;
+      /* Tabular Cardo so the digits hold their box while the number climbs. */
+      .intro-count {
+        overflow: clip;
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        font-family: var(--font-text);
+        font-weight: 700;
+        line-height: 0.9;
+        color: var(--color-ink);
+        font-variant-numeric: tabular-nums lining-nums;
+        font-feature-settings: 'tnum' 1, 'lnum' 1;
+      }
+
+      .intro-num {
+        display: inline-block;
+        min-width: 3ch;
+        text-align: right;
+        font-size: clamp(3rem, 11vw, 7rem);
         transform: translateY(115%);
       }
 
-      :global(html.loading) .intro-line {
-        animation: intro-strike 620ms var(--ease-out-strong) 120ms both;
+      .intro-pct {
+        margin-left: 0.12em;
+        font-size: clamp(1.25rem, 4vw, 2.25rem);
+        color: var(--color-muted);
+        transform: translateY(115%);
       }
 
-      @keyframes intro-strike {
+      /* Masked rise on appear (no fade), matching the split-text language. */
+      :global(html.loading) .intro-num,
+      :global(html.loading) .intro-pct {
+        animation: intro-rise 620ms var(--ease-out-strong) 120ms both;
+      }
+
+      /* Hairline gauge; the crimson fill is driven by the meter script. */
+      .intro-gauge {
+        width: clamp(180px, 30vw, 340px);
+        height: 2px;
+        background: var(--color-line);
+      }
+
+      .intro-gauge-fill {
+        display: block;
+        height: 100%;
+        width: 100%;
+        background: var(--color-accent);
+        transform: scaleX(0);
+        transform-origin: 0 50%;
+        will-change: transform;
+      }
+
+      @keyframes intro-rise {
         to {
           transform: translateY(0);
         }
