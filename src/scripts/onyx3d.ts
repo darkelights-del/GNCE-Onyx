@@ -78,7 +78,7 @@ function boot(canvas: HTMLCanvasElement) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, LOWPERF ? 1 : 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.65;
+  renderer.toneMappingExposure = 1.8; // a touch brighter overall, letters read easier
   renderer.shadowMap.enabled = !LOWPERF;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -99,10 +99,8 @@ function boot(canvas: HTMLCanvasElement) {
     mesh.lookAt(0, 0, 0);
     envScene.add(mesh);
   };
-  // Palette only: the metal reflects off-white (the "white/silver" sheen),
-  // crimson and purple — never a neutral gray.
-  // Purple + crimson dominate the reflections so the metal reads as violet
-  // onyx; off-white is a COMPACT specular key (a glint), never a broad wash.
+  // Palette only: purple + crimson dominate the reflections so the metal reads
+  // as violet onyx; off-white is a COMPACT specular key (a glint), never a wash.
   panel(0xe8e2dc, 3.2, -8, 9, 8, 8, 8); // compact off-white specular key
   panel(0x6e0d25, 2.6, 12, 1, 5, 15, 16); // crimson, right — deep wine, kept below the hot-pink blowout
   panel(0x2b1b2f, 3.6, -6, -4, -9, 16, 16); // purple fill, lower-back
@@ -111,14 +109,14 @@ function boot(canvas: HTMLCanvasElement) {
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(envScene, 0.05).texture;
 
-  // Real polished onyx: a near-black metal body with a clearcoat lacquer. The
+  // Real polished onyx: a dark violet metal body with a clearcoat lacquer. The
   // metal reflection stays dark (onyx), the clearcoat adds the white/silver
   // sheen on top — a metallic body with white/silver, done for real.
   const material = new THREE.MeshPhysicalMaterial({
     color: 0x2b1b2f, // palette panel purple — the lit onyx body reads violet, not gray
     metalness: 0.5, // lower: violet diffuse reads instead of a gray mirror
     roughness: 0.36, // softens the specular so highlights read as sheen, not chrome
-    envMapIntensity: 1.25,
+    envMapIntensity: 1.45, // more reflection presence -> reads as real polished stone
     clearcoat: 0.7, // off-white clearcoat glint on top
     clearcoatRoughness: 0.2,
     emissive: 0x160a18, // faint purple floor so faces never fall to gray/black
@@ -126,11 +124,11 @@ function boot(canvas: HTMLCanvasElement) {
     side: THREE.DoubleSide, // never cull a face to reveal the hollow interior
   });
 
-  // One shadow-casting key (warm), a cool purple back-rim, a crimson rim, a
-  // hemisphere fill, and a low ambient so faces never fall to pure black when
-  // the camera swings behind a letter.
-  scene.add(new THREE.AmbientLight(0x2a2036, 0.5));
-  const key = new THREE.SpotLight(0xf3e4cc, 320, 60, Math.PI / 6, 0.45, 2); // warm off-white key: sheen reads cream, not neutral silver
+  // One shadow-casting key (warm), a purple back-rim, a crimson rim, a
+  // hemisphere fill, a violet front-fill, and a low ambient so faces never fall
+  // to pure black when the camera swings behind a letter.
+  scene.add(new THREE.AmbientLight(0x2a2036, 0.6));
+  const key = new THREE.SpotLight(0xf3e4cc, 430, 60, Math.PI / 5.4, 0.6, 2); // warm key, stronger + softer falloff -> realistic modelling
   key.position.set(-7, 13, 10);
   key.castShadow = !LOWPERF;
   key.shadow.mapSize.set(2048, 2048);
@@ -141,8 +139,8 @@ function boot(canvas: HTMLCanvasElement) {
   scene.add(key);
   const backRim = new THREE.DirectionalLight(0x5a2440, 1.9); backRim.position.set(6, 4, -8); scene.add(backRim); // purple-crimson (no blue fringe)
   const crimsonRim = new THREE.DirectionalLight(0x6e0d25, 1.8); crimsonRim.position.set(-4, -2, -6); scene.add(crimsonRim);
-  const hemi = new THREE.HemisphereLight(0x3a2440, 0x0a0908, 0.8); scene.add(hemi); // purple sky, coal ground
-  const fill = new THREE.DirectionalLight(0x4a2c50, 0.8); fill.position.set(0, 2, 16); scene.add(fill); // gentle violet front-fill so faces read at the wide overview
+  const hemi = new THREE.HemisphereLight(0x3a2440, 0x0a0908, 0.95); scene.add(hemi); // purple sky, coal ground
+  const fill = new THREE.DirectionalLight(0x4a2c50, 1.05); fill.position.set(0, 2, 16); scene.add(fill); // violet front-fill so faces read cleanly
 
   // Shadow catcher: a plane below the letters so the cast shadow reads over
   // coal without an off-brand bright floor.
@@ -152,8 +150,7 @@ function boot(canvas: HTMLCanvasElement) {
   catcher.receiveShadow = true;
   scene.add(catcher);
 
-  // ---- Embers: additive points drifting up through the scene ----------
-  // Crimson + off-white, rising, turbulence scaling with scroll velocity.
+  // ---- Dust motes: additive points drifting up through the scene ----------
   function emberTexture() {
     const c = document.createElement('canvas');
     c.width = c.height = 32;
@@ -189,8 +186,6 @@ function boot(canvas: HTMLCanvasElement) {
   scene.add(embers);
 
   // ---- Build the letters from the Uncial outlines --------------------
-  // Small bevel: a fat bevel self-intersects on the tight concave corners of
-  // N / X / Y and z-fights into visible seams. Keep it tight and smooth.
   function buildGeometry(d: string) {
     const parsed = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg"><path d="${d}"/></svg>`);
     const shapes: THREE.Shape[] = [];
@@ -200,11 +195,8 @@ function boot(canvas: HTMLCanvasElement) {
     });
     geo.scale(GLYPH_SCALE, -GLYPH_SCALE, GLYPH_SCALE); // flip y (glyph is y-down) -> upright
     geo.center();
-    // Crisp, hard-edged shading: keep the geometry non-indexed (ExtrudeGeometry
-    // is) and compute FLAT per-face normals. Welding + smoothing was averaging
-    // normals across the cap/wall/bevel edges, smearing them into one another so
-    // the front, sides and back never read as separate planes. Double-sided
-    // material makes the flip introduced by the y-mirror irrelevant.
+    // Crisp, hard-edged shading: keep the geometry non-indexed and compute FLAT
+    // per-face normals, so the front, sides and bevel read as distinct planes.
     const g = geo.toNonIndexed();
     g.computeVertexNormals();
     return g;
@@ -234,7 +226,6 @@ function boot(canvas: HTMLCanvasElement) {
   // Crepuscular light shafts raking behind the word (from the key-light
   // direction). They sit deep in the haze, so the letters occlude them and the
   // light streams PAST the ONYX silhouettes, with dust drifting through it.
-  // Additive + soft-edged, so they read as light in fog, not glowing orbs.
   function shaftTexture() {
     const c = document.createElement('canvas');
     c.width = 64; c.height = 256;
@@ -272,7 +263,8 @@ function boot(canvas: HTMLCanvasElement) {
 
   // ---- Depth-woven words: real troika text that shares the depth buffer,
   // so the letters occlude it — it goes behind, in front, and through the O
-  // hole. One short word per letter, faded in as the camera reaches it.
+  // hole (reading backwards / upside-down when the camera is behind it, which
+  // is the intended kinetic-type effect). One short word per letter.
   const woven: { mesh: TroikaText; a: number; b: number; bx: number; by: number; bz: number; fly?: { x: number; y: number; z: number } }[] = [];
   const addWoven = (
     str: string, font: string, size: number, color: number,
@@ -297,45 +289,59 @@ function boot(canvas: HTMLCanvasElement) {
     tx.sync();
     woven.push({ mesh: tx, a, b, bx: x, by: y, bz: z, fly });
   };
-  // All behind-the-letter words share one style: off-white Cardo, whispered
-  // context the letters occlude as the camera passes. The X word rides along
-  // the letter (seen on the flip), then flies out as the roster appears.
-  // Each word appears and flies clear BEFORE its letter's info text reads.
+  // All behind-the-letter words share one off-white style. Each word appears
+  // and flies clear BEFORE its letter's info text reads.
   addWoven('veterans', cardoUrl, 1.5, 0xe8e2dc, L[0], 0.4, 3, 0.10, 0.18, 0, { x: 0, y: 3, z: 6 }); // on approach, before the O identity
   addWoven('our roots', cardoUrl, 1.6, 0xe8e2dc, L[1], -0.4, -2.6, 0.37, 0.50); // behind N, before the N info
   addWoven('the robot', cardoUrl, 1.5, 0xe8e2dc, L[2], -1.6, 3.4, 0.61, 0.74); // in front of Y, before the Y info
-  addWoven('our team', cardoUrl, 1.7, 0xe8e2dc, L[3], 0.2, -2.4, 0.81, 0.90, 0, { x: 0, y: 2.8, z: 7 }); // along X on the flip, flies clear before the roster
+  addWoven('our team', cardoUrl, 1.7, 0xe8e2dc, L[3], 0.2, -2.4, 0.81, 0.90, 0, { x: -1.2, y: 1.4, z: -8 }); // along X on the flip, then recedes back into the haze (never toward/through the X)
 
   // ---- Camera journey: a keyframe path threaded through the letters ---
   type KF = { t: number; px: number; py: number; pz: number; lx: number; ly: number; lz: number; roll: number };
   const KEYS: KF[] = [
     { t: 0.00, px: 0, py: 2.5, pz: 32, lx: 0, ly: 0, lz: 0, roll: 0 }, // overview (zoomed out, whole word)
     { t: 0.09, px: 0, py: 2.3, pz: 28, lx: 0, ly: 0, lz: 0, roll: 0 },
-    { t: 0.14, px: L[0] - 1, py: 1.0, pz: 10, lx: L[0], ly: 0, lz: 0, roll: 0 }, // approach O, framed
-    { t: 0.22, px: L[0] + 0.6, py: 0.6, pz: 7, lx: L[0], ly: 0, lz: 0, roll: 0 }, // O held (identity dwell)
+    { t: 0.14, px: L[0] - 1, py: 1.0, pz: 11, lx: L[0], ly: 0, lz: 0, roll: 0 }, // approach O (pulled back a touch)
+    { t: 0.22, px: L[0] + 0.6, py: 0.6, pz: 7.8, lx: L[0], ly: 0, lz: 0, roll: 0 }, // O held (identity dwell)
     { t: 0.31, px: L[0], py: 0.2, pz: 2.4, lx: L[0], ly: 0, lz: -6, roll: 0 }, // enter the hole
-    { t: 0.37, px: L[0], py: 0, pz: -1, lx: L[0], ly: 0, lz: -6.5, roll: 0 }, // through the hole (word flashes)
+    { t: 0.37, px: L[0], py: 0, pz: -1, lx: L[0], ly: 0, lz: -6.5, roll: 0 }, // through the hole
     { t: 0.42, px: L[1] - 5, py: 1.0, pz: -6.8, lx: L[1], ly: 0, lz: -0.5, roll: 0.16 }, // swing behind N
-    { t: 0.49, px: L[1] - 6.6, py: 0.9, pz: -3.0, lx: L[1], ly: 0, lz: 0, roll: 0.3 }, // orbit N (clear of depth band)
-    { t: 0.57, px: L[1], py: 0.8, pz: 9, lx: L[1], ly: 0, lz: 0, roll: 0 }, // front N
+    { t: 0.49, px: L[1] - 6.6, py: 0.9, pz: -3.5, lx: L[1], ly: 0, lz: 0, roll: 0.3 }, // orbit N
+    { t: 0.57, px: L[1], py: 0.8, pz: 10, lx: L[1], ly: 0, lz: 0, roll: 0 }, // front N (pulled back a touch)
     { t: 0.66, px: L[2] - 4, py: 0.9, pz: -6.8, lx: L[2], ly: 0, lz: 0, roll: -0.2 }, // around Y
-    { t: 0.72, px: L[2] + 6.2, py: 0.9, pz: -3.2, lx: L[2], ly: 0, lz: 0, roll: -0.32 }, // orbit Y (clear of depth band)
-    { t: 0.80, px: L[2] + 1, py: 0.8, pz: 9, lx: L[2], ly: 0, lz: 0, roll: 0 }, // front Y
+    { t: 0.72, px: L[2] + 6.2, py: 0.9, pz: -3.7, lx: L[2], ly: 0, lz: 0, roll: -0.32 }, // orbit Y
+    { t: 0.80, px: L[2] + 1, py: 0.8, pz: 10, lx: L[2], ly: 0, lz: 0, roll: 0 }, // front Y (pulled back a touch)
     { t: 0.87, px: L[3] - 5, py: 0.9, pz: -6, lx: L[3], ly: 0, lz: 0, roll: -0.2 }, // swing behind X
-    { t: 0.93, px: L[3] + 1, py: 0.7, pz: 9.5, lx: L[3], ly: 0, lz: 0, roll: 0 }, // front X, team reads
+    { t: 0.93, px: L[3] + 1, py: 0.7, pz: 10.5, lx: L[3], ly: 0, lz: 0, roll: 0 }, // front X, team reads (pulled back a touch)
     { t: 1.00, px: 0, py: 2.5, pz: 32, lx: 0, ly: 0, lz: 0, roll: 0 }, // pull back (bookends the overview)
   ];
+  // Smooth, continuous camera path. A Catmull-Rom spline (finite-difference
+  // tangents on the non-uniform keyframe times) so the camera FLOWS through the
+  // waypoints with continuous velocity, instead of easing to a dead stop at each
+  // one — the stop/accelerate at every keyframe was the "square", segmented feel.
   const evalKF = (p: number) => {
-    let a = KEYS[0], b = KEYS[KEYS.length - 1];
-    for (let i = 0; i < KEYS.length - 1; i++) {
-      if (p >= KEYS[i].t && p <= KEYS[i + 1].t) { a = KEYS[i]; b = KEYS[i + 1]; break; }
-    }
-    let u = (p - a.t) / (b.t - a.t || 1);
-    u = u < 0 ? 0 : u > 1 ? 1 : u;
-    u = u * u * (3 - 2 * u); // smoothstep
-    const lp = (x: number, y: number) => x + (y - x) * u;
-    return { px: lp(a.px, b.px), py: lp(a.py, b.py), pz: lp(a.pz, b.pz), lx: lp(a.lx, b.lx), ly: lp(a.ly, b.ly), lz: lp(a.lz, b.lz), roll: lp(a.roll, b.roll) };
+    const n = KEYS.length;
+    let i = 0;
+    for (; i < n - 1; i++) if (p <= KEYS[i + 1].t) break;
+    i = Math.min(i, n - 2);
+    const k0 = KEYS[Math.max(0, i - 1)], k1 = KEYS[i], k2 = KEYS[i + 1], k3 = KEYS[Math.min(n - 1, i + 2)];
+    const h = (k2.t - k1.t) || 1;
+    let s = (p - k1.t) / h; s = s < 0 ? 0 : s > 1 ? 1 : s;
+    const s2 = s * s, s3 = s2 * s;
+    const h00 = 2 * s3 - 3 * s2 + 1, h10 = s3 - 2 * s2 + s, h01 = -2 * s3 + 3 * s2, h11 = s3 - s2;
+    const TENSION = 0.9; // slightly relax tangents so the spline never overshoots into a letter
+    const ch = (a: number, b: number, c: number, d: number) => {
+      const m1 = TENSION * (c - a) / ((k2.t - k0.t) || 1) * h; // Catmull-Rom tangent, scaled to the local segment
+      const m2 = TENSION * (d - b) / ((k3.t - k1.t) || 1) * h;
+      return h00 * b + h10 * m1 + h01 * c + h11 * m2;
+    };
+    return {
+      px: ch(k0.px, k1.px, k2.px, k3.px), py: ch(k0.py, k1.py, k2.py, k3.py), pz: ch(k0.pz, k1.pz, k2.pz, k3.pz),
+      lx: ch(k0.lx, k1.lx, k2.lx, k3.lx), ly: ch(k0.ly, k1.ly, k2.ly, k3.ly), lz: ch(k0.lz, k1.lz, k2.lz, k3.lz),
+      roll: ch(k0.roll, k1.roll, k2.roll, k3.roll),
+    };
   };
+  (window as any).__onyxEval = evalKF; // deterministic path read-back (velocity-profile analysis)
 
   // Content dwell windows: the readable HTML for each letter reveals while the
   // camera holds on it (O framed through the hole; N/Y/X front; X close).
@@ -349,13 +355,13 @@ function boot(canvas: HTMLCanvasElement) {
 
   let pointerX = 0, pointerY = 0; // -1..1
   let leanK = 1; // cursor-lean, fades once the journey starts
-  let scrollVel = 0; // |scroll velocity|, drives ember turbulence
+  let scrollVel = 0; // |scroll velocity|, drives dust turbulence
   let targetP = 0, scrollP = 0; // scroll progress, smoothed
   const clock = new THREE.Clock();
   let elapsed = 0;
   let alive = false; // idle breathing runs only after the assemble
 
-  // Post: a low, tight bloom so only the brightest speculars and embers glow
+  // Post: a low, tight bloom so only the brightest speculars and dust glow
   // (cinematic, not a wash). OutputPass applies tone mapping + colour space.
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
@@ -392,11 +398,11 @@ function boot(canvas: HTMLCanvasElement) {
     const ln = gsap.utils.toArray<HTMLElement>('.flow-line', groupsEl[i]);
     gsap.set(groupsEl[i], { visibility: 'visible' });
     gsap.fromTo(ln, { clipPath: HID_BELOW, x: FLOW[i].ix, y: FLOW[i].iy },
-      { clipPath: SHOWN, x: 0, y: 0, ease: 'power3.out', duration: 0.85, stagger: 0.08, overwrite: true });
+      { clipPath: SHOWN, x: 0, y: 0, ease: 'expo.out', duration: 1.15, stagger: 0.11, overwrite: true }); // slower, softer settle
   };
   const flowOut = (i: number) => {
     const ln = gsap.utils.toArray<HTMLElement>('.flow-line', groupsEl[i]);
-    gsap.to(ln, { clipPath: HID_ABOVE, x: FLOW[i].ox, y: FLOW[i].oy, ease: 'power2.in', duration: 0.4, stagger: 0.025, overwrite: true,
+    gsap.to(ln, { clipPath: HID_ABOVE, x: FLOW[i].ox, y: FLOW[i].oy, ease: 'power2.inOut', duration: 0.6, stagger: 0.04, overwrite: true,
       onComplete: () => { if (!flowState[i]) gsap.set(groupsEl[i], { visibility: 'hidden' }); } });
   };
 
@@ -406,7 +412,7 @@ function boot(canvas: HTMLCanvasElement) {
     const dt = Math.min(clock.getDelta(), 0.05);
     elapsed += dt;
     const t = elapsed;
-    scrollP += (targetP - scrollP) * 0.16;
+    scrollP += (targetP - scrollP) * 0.12; // gentler follow -> floatier, more satisfying motion
     (window as any).__onyxP = scrollP; // progress read-back (harmless; used by capture harness)
     const idleK = 1 - Math.min(1, scrollP / 0.06);
 
@@ -420,7 +426,7 @@ function boot(canvas: HTMLCanvasElement) {
       }
     }
 
-    // Embers rise; sway and speed swell with scroll velocity.
+    // Dust motes rise; sway and speed swell with scroll velocity.
     const speedMul = 1 + scrollVel * 6;
     for (let i = 0; i < EMBERS; i++) {
       const d = emberData[i], idx = i * 3;
@@ -437,15 +443,14 @@ function boot(canvas: HTMLCanvasElement) {
 
     // Light shafts breathe slowly (living light in the haze) and brighten a
     // touch with scroll velocity, so moving through the letters stirs the light.
-    for (const s of shafts) {
-      (s.mesh.material as THREE.MeshBasicMaterial).opacity =
-        s.base * (0.72 + 0.28 * Math.sin(t * 0.35 + s.phase)) * (1 + Math.min(0.9, scrollVel * 0.8));
+    for (const sh of shafts) {
+      (sh.mesh.material as THREE.MeshBasicMaterial).opacity =
+        sh.base * (0.72 + 0.28 * Math.sin(t * 0.35 + sh.phase)) * (1 + Math.min(0.9, scrollVel * 0.8));
     }
     scrollVel *= 0.9;
 
     // Woven words fade in near their letter (triangle window, smoothed). A word
-    // with a fly vector also drifts outward on its exit side, clearing the frame
-    // as the letter's HTML takes over.
+    // with a fly vector also drifts on its exit side, clearing the frame.
     for (const w of woven) {
       const mid = (w.a + w.b) / 2, half = (w.b - w.a) / 2 || 1;
       let k = Math.max(0, 1 - Math.abs(scrollP - mid) / half);
@@ -473,8 +478,9 @@ function boot(canvas: HTMLCanvasElement) {
       }
     }
 
-    // Camera from the keyframe path, with roll and a little cursor parallax.
+    // Camera from the smooth keyframe path, with roll and a little cursor parallax.
     const s = evalKF(scrollP);
+    (window as any).__onyxCam = { p: scrollP, x: s.px, y: s.py, z: s.pz }; // camera path read-back (velocity analysis)
     const px = pointerX * leanK, py = pointerY * leanK;
     camera.up.set(Math.sin(s.roll), Math.cos(s.roll), 0);
     camera.position.set(s.px - px * 1.4, s.py + py * 0.9, s.pz);
@@ -500,9 +506,9 @@ function boot(canvas: HTMLCanvasElement) {
     const intro = gsap.timeline({ delay: 0.2, onComplete: startAlive });
     meshes.forEach((m, i) => {
       const dir = i % 2 ? 1 : -1;
-      intro.from(m.position, { x: m.position.x + dir * 9, y: (i - 1.5) * 4, z: -40, ease: 'expo.out', duration: 1.5 }, i * 0.12);
-      intro.from(m.rotation, { y: dir * 1.4, x: 0.6, z: dir * 0.4, ease: 'expo.out', duration: 1.5 }, i * 0.12);
-      intro.from(m.scale, { x: 0.4, y: 0.4, z: 0.4, ease: 'expo.out', duration: 1.5 }, i * 0.12);
+      intro.from(m.position, { x: m.position.x + dir * 9, y: (i - 1.5) * 4, z: -40, ease: 'expo.out', duration: 1.7 }, i * 0.13);
+      intro.from(m.rotation, { y: dir * 1.4, x: 0.6, z: dir * 0.4, ease: 'expo.out', duration: 1.7 }, i * 0.13);
+      intro.from(m.scale, { x: 0.4, y: 0.4, z: 0.4, ease: 'expo.out', duration: 1.7 }, i * 0.13);
     });
   } else {
     startAlive();
@@ -512,9 +518,9 @@ function boot(canvas: HTMLCanvasElement) {
   ScrollTrigger.create({
     trigger: section,
     start: 'top top',
-    end: '+=900%',
+    end: '+=1200%', // longer travel -> each beat is slower and more deliberate
     pin: stage,
-    scrub: 0.25,
+    scrub: 0.4, // a touch floatier
     anticipatePin: 1,
     invalidateOnRefresh: true,
     onUpdate: (self) => {
