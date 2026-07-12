@@ -37,10 +37,13 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
   `src/scripts/motion.ts` (GSAP + ScrollTrigger + Lenis): generic
   primitives (`[data-split]` masked lines, `[data-reveal]`/
   `[data-reveal-scrub]` clip wipes, `[data-parallax]`, `[data-count]`,
-  `[data-magnetic]`, `[data-hover-preview]`) plus named scenes (the 3D
-  `.onyx-spine`, `[data-hero]`, `[data-stack]` card stack, `[data-hscroll]`
-  horizontal pan, `[data-coverflow]` Swiper, `[data-flip]`, `[data-ladder]`,
+  `[data-magnetic]`, `[data-hover-preview]`) plus named scenes
+  (`[data-stack]` card stack, `[data-hscroll]` horizontal pan,
+  `[data-coverflow]` Swiper, `[data-flip]`, `[data-ladder]`,
   `[data-progress]`). All reduced-motion safe. No opacity cross-fades.
+- The WebGL ONYX word (`src/scripts/onyx3d.ts` + `src/data/onyx-glyphs.ts`)
+  is parked on the unlinked page `/lab/onyx/`. Keep it building and usable;
+  don't link it from nav/footer or re-import it on other pages.
 - Navigation is `src/components/GearNav.astro` (orbital gear hub). Page list
   changes go in its `links` array AND `Footer.astro`.
 - Design tokens live in the `@theme` block of `src/styles/global.css`;

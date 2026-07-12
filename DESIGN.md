@@ -61,8 +61,10 @@ Under reduced motion the module bows out and static CSS stands in.
   (image beside cursor, needs `[data-preview-root]` + `[data-preview-img]`).
 
 **Scenes** (named, run only when their element exists):
-- `.onyx-spine` — the 3D extruded wordmark behind Home; letters hand off
-  O → N → Y → X as you scroll (`initOnyxSpine`).
+- The WebGL ONYX journey (`src/scripts/onyx3d.ts` + `src/data/onyx-glyphs.ts`)
+  is parked, fully working, on the unlinked page `/lab/onyx/`
+  (`src/pages/lab/onyx.astro`). Home no longer uses it; keep it building,
+  don't link it.
 - `[data-hero]` — hero wordmark assembles, then tips into depth.
 - `[data-stack]` / `[data-stack-card]` — pinned card stack (lineage).
 - `[data-hscroll]` / `[data-hscroll-track]` — diagonal scroll-hijack
@@ -86,9 +88,10 @@ scroll behaviour.
 
 ## Per-page specialties
 
-- **Home**: 3D ONYX spine · hero wordmark · pinned lineage card stack ·
-  masked mission line · scroll-reveal robot specs · coverflow roster ·
-  magnetic sponsor CTA.
+- **Home**: type-first lander: split hero headline · count-up squad
+  numbers · diagonal-wipe robot panel · roster rows wiping in from
+  alternating sides · magnetic sponsor CTA close. (The old WebGL ONYX
+  journey lives at `/lab/onyx/`, unlinked.)
 - **Season**: kinetic header · diagonal build log (velocity skew,
   cross-drift panels) · screen-on highlight match · flip-card awards ·
   cross-drift gallery columns.
