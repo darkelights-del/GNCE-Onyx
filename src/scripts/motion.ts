@@ -73,6 +73,7 @@ function boot() {
       initScreens();
       initDriftCols();
       initMarquee();
+      initFloatCards();
       if (FINE) initTilt();
       initFlip();
       initTierLadder();
@@ -185,11 +186,25 @@ function buildSplit(el: HTMLElement) {
   const chars = splitToLines(el);
   el.style.opacity = '1';
   gsap.set(chars, { yPercent: 115 });
+
+  // Above-the-fold headings (data-split="intro") cascade once on load, timed
+  // to land as the intro cover lifts. Everything else is scrubbed to scroll.
+  if (el.dataset.split === 'intro') {
+    gsap.to(chars, {
+      yPercent: 0,
+      ease: 'expo.out',
+      duration: 1.15,
+      delay: 0.12,
+      stagger: { each: 0.03, from: 'start' },
+    });
+    return;
+  }
+
   const tween = gsap.to(chars, {
     yPercent: 0,
     ease: 'power4.out',
-    stagger: { each: 0.02, from: 'start' },
-    scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 48%', scrub: 0.5 },
+    stagger: { each: 0.018, from: 'start' },
+    scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 50%', scrub: 0.6 },
   });
   (el as any)._st = tween.scrollTrigger;
 }
@@ -217,22 +232,23 @@ function initReveals() {
     const from: gsap.TweenVars = { opacity: 1 };
     if (v === 'up') {
       from.clipPath = 'inset(100% 0 0 0)';
-      from.y = 22;
+      from.y = 30;
+      from.scale = 0.985;
     } else if (v === 'left') {
       from.clipPath = 'inset(0 100% 0 0)';
-      from.x = -26;
+      from.x = -34;
     } else if (v === 'right') {
       from.clipPath = 'inset(0 0 0 100%)';
-      from.x = 26;
+      from.x = 34;
     } else if (v === 'scale') {
       from.clipPath = 'inset(100% 0 0 0)';
-      from.scale = 0.94;
+      from.scale = 0.92;
     } else if (v === 'diag') {
       // Corner wipe: opens from the top-left, drifting in from the same
       // corner so the wipe origin and the motion origin agree.
       from.clipPath = 'inset(0 100% 100% 0)';
-      from.x = -22;
-      from.y = -22;
+      from.x = -28;
+      from.y = -28;
     }
     gsap.set(el, from);
     const delay = (parseFloat(el.dataset.revealDelay || '0') || 0) / 1000;
@@ -246,9 +262,9 @@ function initReveals() {
           x: 0,
           y: 0,
           scale: 1,
-          duration: 0.9,
+          duration: 1.05,
           delay,
-          ease: 'power3.out',
+          ease: 'expo.out',
           overwrite: 'auto',
         }),
     });
@@ -669,14 +685,14 @@ function initMarquee() {
   if (!wrap || !trk) return;
   let x = 0;
   let momentum = 0;
+  const BASE = 42; // px/sec steady leftward crawl: a real running ticker
   (window as any).__motion?.lenis?.on('scroll', (e: { velocity?: number }) => {
-    momentum = gsap.utils.clamp(-320, 320, (e.velocity || 0) * -9);
+    momentum = gsap.utils.clamp(-360, 360, (e.velocity || 0) * -9);
   });
   gsap.ticker.add((_t, dms) => {
-    if (Math.abs(momentum) < 0.5) return; // at rest: no work, no motion
     const dt = Math.min(dms, 80) / 1000;
-    x += momentum * dt;
-    momentum *= Math.pow(0.12, dt); // coast to a stop within ~a second
+    x += (-BASE + momentum) * dt; // always drifting, scroll gives it a shove
+    momentum *= Math.pow(0.12, dt); // the shove coasts off within ~a second
     const h = trk.scrollWidth / 2;
     if (h > 0) x = -((-x % h) + h) % h;
     gsap.set(trk, { x });
@@ -685,6 +701,84 @@ function initMarquee() {
 
 /* [data-tilt] — glass panels lean toward the cursor (contact). The one   */
 /* pointer-depth effect outside the hero. Pointer-fine only. */
+/* -------------------------------------------------------------------- */
+/* SCENE: floating cards. [data-float] tracks the pointer; each          */
+/* [data-float-card] drifts by its own depth and tilts toward the        */
+/* cursor, over a slow idle bob. Masked rise on entry, then the clip is  */
+/* released so the tilt is never cropped. Reduced motion skips all of it */
+/* (this whole module bows out); coarse pointers keep just the idle bob. */
+function initFloatCards() {
+  const wrap = document.querySelector<HTMLElement>('[data-float]');
+  if (!wrap) return;
+  const cards = gsap.utils.toArray<HTMLElement>('[data-float-card]', wrap);
+  if (!cards.length) return;
+
+  // Masked rise on entry, staggered; release the clip once open so the
+  // pointer tilt below can push a card past its box without being cropped.
+  gsap.set(cards, { clipPath: 'inset(100% 0 0 0)', y: 28 });
+  ScrollTrigger.create({
+    trigger: wrap,
+    start: 'top 82%',
+    once: true,
+    onEnter: () =>
+      gsap.to(cards, {
+        clipPath: 'inset(0% 0 0% 0)',
+        y: 0,
+        duration: 1.05,
+        ease: 'expo.out',
+        stagger: 0.09,
+        onComplete: () => gsap.set(cards, { clipPath: 'none' }),
+      }),
+  });
+
+  // Slow idle bob on an inner wrapper (kept off the pointer transforms).
+  cards.forEach((card, i) => {
+    const inner = card.querySelector<HTMLElement>('.float-inner') ?? card;
+    gsap.to(inner, {
+      y: '+=9',
+      duration: 3.2 + i * 0.5,
+      ease: 'sine.inOut',
+      repeat: -1,
+      yoyo: true,
+      delay: i * 0.3,
+    });
+  });
+
+  if (!FINE) return;
+
+  gsap.set(cards, { transformPerspective: 950, transformOrigin: 'center' });
+  const rig = cards.map((card) => ({
+    depth: parseFloat(card.dataset.depth || '20'),
+    x: gsap.quickTo(card, 'x', { duration: 0.8, ease: 'power3.out' }),
+    y: gsap.quickTo(card, 'y', { duration: 0.8, ease: 'power3.out' }),
+    rx: gsap.quickTo(card, 'rotationX', { duration: 0.6, ease: 'power3.out' }),
+    ry: gsap.quickTo(card, 'rotationY', { duration: 0.6, ease: 'power3.out' }),
+    card,
+  }));
+
+  // Pointer position over the whole group drifts every card by its depth.
+  wrap.addEventListener('pointermove', (e) => {
+    const r = wrap.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    rig.forEach((c) => {
+      c.x(px * c.depth);
+      c.y(py * c.depth);
+    });
+  });
+  wrap.addEventListener('pointerleave', () => rig.forEach((c) => (c.x(0), c.y(0))));
+
+  // Hovering a single card tilts it toward the cursor.
+  rig.forEach((c) => {
+    c.card.addEventListener('pointermove', (e) => {
+      const r = c.card.getBoundingClientRect();
+      c.rx(((e.clientY - r.top) / r.height - 0.5) * -11);
+      c.ry(((e.clientX - r.left) / r.width - 0.5) * 11);
+    });
+    c.card.addEventListener('pointerleave', () => (c.rx(0), c.ry(0)));
+  });
+}
+
 function initTilt() {
   document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((el) => {
     gsap.set(el, { transformPerspective: 900 });

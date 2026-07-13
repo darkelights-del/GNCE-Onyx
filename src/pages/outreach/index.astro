@@ -21,13 +21,16 @@ const fmt = (d: Date) =>
 >
   <!-- HEADER -->
   <header class="mx-auto max-w-5xl px-5 pt-40 pb-20 sm:px-8 sm:pt-48">
-    <h1 class="type-display text-[clamp(3rem,12vw,9rem)]" data-split>Outreach</h1>
+    <h1 class="type-display text-[clamp(3rem,12vw,9rem)]" data-split="intro">Outreach</h1>
     <Reveal variant="up" class="mt-8 max-w-prose">
       <p class="text-muted">
         Competing is half the mission. The other half is getting younger
         students in and around Weston building, coding, and hooked enough to
         stay. Every event we run gets a post here.
       </p>
+    </Reveal>
+    <Reveal variant="up" delay={90} class="mt-6 max-w-prose">
+      <p class="seat-line">Anyone who shows up gets a seat. Every event we run is open.</p>
     </Reveal>
   </header>
 
@@ -98,6 +101,12 @@ const fmt = (d: Date) =>
     line-height: 1.1;
     color: transparent;
     -webkit-text-stroke: 1px color-mix(in srgb, var(--color-ink) 38%, transparent);
+  }
+
+  .seat-line {
+    font-size: 1.125rem;
+    color: var(--color-ink);
+    font-weight: 700;
   }
 
   .post-row {
