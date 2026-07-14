@@ -180,8 +180,10 @@ html.js [data-reveal] {
   opacity: 0;
 }
 
+/* Stay hidden until motion.ts clips each reveal in initReveals (which sets
+   opacity 1 + clip-path together). Flipping to opacity 1 here, at boot, made
+   reveals flash fully visible for the ~second before initReveals ran. */
 html.gsap [data-reveal] {
-  opacity: 1; /* motion.ts owns visibility via clip-path */
   transition: none !important;
 }
 

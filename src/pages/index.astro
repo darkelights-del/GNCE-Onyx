@@ -69,29 +69,32 @@ const roster = [
     </div>
   </section>
 
-  <!-- LINEAGE: the veterans' numbers count up, credentials underneath. -->
-  <section class="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32">
-    <h2 class="type-display text-[clamp(1.75rem,4vw,3rem)]" data-split>Four of our seven are GNCE veterans.</h2>
-    <div class="mt-14 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4" data-reveal-group>
-      {
-        veterans.map((v) => (
-          <Reveal variant="up">
-            <div class="stat hairline border-t pt-4">
-              <p class="stat-num" data-count={v.num}>
-                {v.num}
-              </p>
-              <p class="stat-cred type-label text-muted mt-2">
-                <span class="stub" title="Confirm this team's exact result">{v.cred}</span>
-              </p>
-            </div>
-          </Reveal>
-        ))
-      }
+  <!-- LINEAGE: purple band. Numbers count up, credentials underneath. -->
+  <section class="section-alt">
+    <div class="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32">
+      <h2 class="type-display text-[clamp(1.75rem,4vw,3rem)]" data-split>Four of our seven are GNCE veterans.</h2>
+      <div class="mt-14 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4" data-reveal-group>
+        {
+          veterans.map((v) => (
+            <Reveal variant="up">
+              <div class="stat hairline border-t pt-4">
+                <p class="stat-num" data-count={v.num}>
+                  {v.num}
+                </p>
+                <p class="stat-cred type-label text-muted mt-2">
+                  <span class="stub" title="Confirm this team's exact result">{v.cred}</span>
+                </p>
+              </div>
+            </Reveal>
+          ))
+        }
+      </div>
     </div>
   </section>
 
-  <!-- ROBOT: design values, then specs as pointer-reactive floating cards. -->
+  <!-- ROBOT: coal, crimson mark. Values, then pointer-reactive spec cards. -->
   <section class="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32">
+    <span class="mark" aria-hidden="true"></span>
     <h2 class="type-display text-[clamp(1.75rem,4vw,3rem)]" data-split>How we build</h2>
     <ul class="values mt-10 max-w-2xl" data-reveal-group>
       {
@@ -119,43 +122,59 @@ const roster = [
     </div>
   </section>
 
-  <!-- TEAM: seven names, wiping in from alternating sides. -->
-  <section class="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32">
-    <h2 class="type-display text-[clamp(1.75rem,4vw,3rem)]" data-split>Our team</h2>
-    <ul class="mt-12" data-reveal-group>
-      {
-        roster.map((name, i) => (
-          <li>
-            <Reveal variant={i % 2 ? 'left' : 'right'} class="hairline border-t">
-              <p class="roster-name py-4">{name}</p>
-            </Reveal>
-          </li>
-        ))
-      }
-    </ul>
+  <!-- TEAM: purple band. Seven names, wiping in from alternating sides. -->
+  <section class="section-alt">
+    <div class="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32">
+      <h2 class="type-display text-[clamp(1.75rem,4vw,3rem)]" data-split>Our team</h2>
+      <ul class="mt-12" data-reveal-group>
+        {
+          roster.map((name, i) => (
+            <li>
+              <Reveal variant={i % 2 ? 'left' : 'right'} class="hairline border-t">
+                <p class="roster-name py-4">{name}</p>
+              </Reveal>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </section>
 
-  <!-- CLOSE -->
-  <section class="mx-auto max-w-5xl px-5 pb-36 pt-10 sm:px-8">
-    <div class="hairline border-t pt-16">
-      <h2 class="type-display text-[clamp(2.25rem,7vw,5rem)]" data-split>Back the build.</h2>
-      <Reveal variant="up" class="mt-8 max-w-prose">
-        <p class="text-muted">
-          We are a rookie team funding a first season from scratch. Every dollar
-          goes to parts, registration, and time on the practice field. Sponsors
-          ride on the robot and stand with us in the pit.
-        </p>
-      </Reveal>
-      <Reveal variant="up" class="mt-10">
-        <p>
-          <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
-        </p>
-      </Reveal>
-    </div>
+  <!-- CLOSE: coal, crimson mark. -->
+  <section class="mx-auto max-w-5xl px-5 pb-36 pt-24 sm:px-8 sm:pt-32">
+    <span class="mark" aria-hidden="true"></span>
+    <h2 class="type-display text-[clamp(2.25rem,7vw,5rem)]" data-split>Back the build.</h2>
+    <Reveal variant="up" class="mt-8 max-w-prose">
+      <p class="text-muted">
+        We are a rookie team funding a first season from scratch. Every dollar
+        goes to parts, registration, and time on the practice field. Sponsors
+        ride on the robot and stand with us in the pit.
+      </p>
+    </Reveal>
+    <Reveal variant="up" class="mt-10">
+      <p>
+        <a href={`${base}/contact/`} class="btn btn-solid" data-magnetic="0.4">Sponsor the team</a>
+      </p>
+    </Reveal>
   </section>
 </BaseLayout>
 
 <style>
+  /* Section variety within the locked palette: full-bleed purple band
+     (darker step) with a hard machined edge, no gradient. */
+  .section-alt {
+    background: var(--color-surface);
+  }
+
+  /* Crimson accent mark above coal-section headings (structural, not decor). */
+  .mark {
+    display: block;
+    width: 2.75rem;
+    height: 3px;
+    margin-bottom: 1.75rem;
+    background: var(--color-accent);
+  }
+
   .hero {
     display: flex;
     align-items: center;

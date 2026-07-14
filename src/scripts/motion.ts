@@ -25,8 +25,12 @@ const FINE = matchMedia('(hover: hover) and (pointer: fine)').matches;
 function showEverything() {
   root.classList.remove('will-animate');
   document
-    .querySelectorAll<HTMLElement>('[data-split],[data-reveal-scrub],[data-count]')
-    .forEach((el) => (el.style.opacity = '1'));
+    .querySelectorAll<HTMLElement>('[data-split],[data-reveal],[data-reveal-scrub],[data-count]')
+    .forEach((el) => {
+      el.style.opacity = '1';
+      el.style.clipPath = 'none';
+      el.style.filter = 'none';
+    });
 }
 
 if (REDUCED) {
@@ -192,10 +196,10 @@ function buildSplit(el: HTMLElement) {
   if (el.dataset.split === 'intro') {
     gsap.to(chars, {
       yPercent: 0,
-      ease: 'expo.out',
-      duration: 1.15,
+      ease: 'power3.out',
+      duration: 1.25,
       delay: 0.12,
-      stagger: { each: 0.03, from: 'start' },
+      stagger: { each: 0.035, from: 'start' },
     });
     return;
   }
@@ -226,47 +230,88 @@ function resplitAll() {
 /* ================================================================== */
 /* [data-reveal] — crisp clip-path wipes, opacity held at 1.          */
 /* ================================================================== */
+/** Pre-reveal state for a variant: clipped, offset, and softly blurred (a
+ *  focus-in, not an opacity cross-fade). opacity stays 1 throughout. */
+function revealFrom(v: string): gsap.TweenVars {
+  const from: gsap.TweenVars = {
+    opacity: 1,
+    filter: 'blur(9px)',
+    willChange: 'clip-path, transform, filter',
+  };
+  if (v === 'left') {
+    from.clipPath = 'inset(0 100% 0 0)';
+    from.x = -42;
+  } else if (v === 'right') {
+    from.clipPath = 'inset(0 0 0 100%)';
+    from.x = 42;
+  } else if (v === 'scale') {
+    from.clipPath = 'inset(100% 0 0 0)';
+    from.scale = 0.9;
+    from.y = 26;
+  } else if (v === 'diag') {
+    // Corner wipe: opens from the top-left, drifting in from the same corner.
+    from.clipPath = 'inset(0 100% 100% 0)';
+    from.x = -30;
+    from.y = -30;
+  } else {
+    // up (default)
+    from.clipPath = 'inset(100% 0 0 0)';
+    from.y = 36;
+    from.scale = 0.99;
+  }
+  return from;
+}
+
+/** The buttery settle: clip opens, offset resolves, blur clears over a long
+ *  gentle decel (SkiperUI-style), never a snap. */
+function revealIn(el: HTMLElement, delay: number) {
+  gsap.to(el, {
+    clipPath: 'inset(0% 0 0% 0)',
+    x: 0,
+    y: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    duration: 1.15,
+    delay,
+    ease: 'power2.out',
+    overwrite: 'auto',
+    onComplete: () => {
+      el.style.filter = '';
+      el.style.willChange = '';
+    },
+  });
+}
+
 function initReveals() {
+  const bound = new WeakSet<HTMLElement>();
+
+  // Grouped reveals cascade off the GROUP's trigger, so siblings stagger as
+  // one wave instead of each racing its own trigger (which reads as a flash).
+  document.querySelectorAll<HTMLElement>('[data-reveal-group]').forEach((group) => {
+    const items = gsap.utils.toArray<HTMLElement>('[data-reveal]', group);
+    if (!items.length) return;
+    items.forEach((el) => {
+      gsap.set(el, revealFrom(el.getAttribute('data-reveal') || 'up'));
+      bound.add(el);
+    });
+    ScrollTrigger.create({
+      trigger: group,
+      start: 'top 80%',
+      once: true,
+      onEnter: () => items.forEach((el, i) => revealIn(el, i * 0.09)),
+    });
+  });
+
+  // Standalone reveals.
   gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
-    const v = el.getAttribute('data-reveal') || 'up';
-    const from: gsap.TweenVars = { opacity: 1 };
-    if (v === 'up') {
-      from.clipPath = 'inset(100% 0 0 0)';
-      from.y = 30;
-      from.scale = 0.985;
-    } else if (v === 'left') {
-      from.clipPath = 'inset(0 100% 0 0)';
-      from.x = -34;
-    } else if (v === 'right') {
-      from.clipPath = 'inset(0 0 0 100%)';
-      from.x = 34;
-    } else if (v === 'scale') {
-      from.clipPath = 'inset(100% 0 0 0)';
-      from.scale = 0.92;
-    } else if (v === 'diag') {
-      // Corner wipe: opens from the top-left, drifting in from the same
-      // corner so the wipe origin and the motion origin agree.
-      from.clipPath = 'inset(0 100% 100% 0)';
-      from.x = -28;
-      from.y = -28;
-    }
-    gsap.set(el, from);
+    if (bound.has(el)) return;
+    gsap.set(el, revealFrom(el.getAttribute('data-reveal') || 'up'));
     const delay = (parseFloat(el.dataset.revealDelay || '0') || 0) / 1000;
     ScrollTrigger.create({
       trigger: el,
       start: 'top 86%',
       once: true,
-      onEnter: () =>
-        gsap.to(el, {
-          clipPath: 'inset(0% 0 0% 0)',
-          x: 0,
-          y: 0,
-          scale: 1,
-          duration: 1.05,
-          delay,
-          ease: 'expo.out',
-          overwrite: 'auto',
-        }),
+      onEnter: () => revealIn(el, delay),
     });
   });
 }
